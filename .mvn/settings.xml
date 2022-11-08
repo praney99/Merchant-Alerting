@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 http://maven.apache.org/xsd/settings-1.2.0.xsd" xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <servers>
+        <server>
+            <id>central</id>
+            <username>${ARTIFACTORY_USER}</username>
+            <password>${ARTIFACTORY_TOKEN}</password>
+        </server>
+        <server>
+            <id>snapshots</id>
+            <username>${ARTIFACTORY_USER}</username>
+            <password>${ARTIFACTORY_TOKEN}</password>
+        </server>
+    </servers>
+    <proxies>
+        <proxy>
+            <active>true</active>
+            <protocol>http</protocol>
+            <host>thd-svr-proxy-qa.homedepot.com </host>
+            <port>7070</port>
+            <nonProxyHosts>*.homedepot.com</nonProxyHosts>
+        </proxy>
+    </proxies>
+</settings>
