@@ -1,0 +1,41 @@
+{
+  "versioning": {
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  },
+
+  "projectInfo": {
+    "name": "merchant-alerting",
+    "applicationName": "merchant-alerting",
+    "fmsNumber": "IT-08105",
+    "cdTemplate": "CD0000000",
+    "language": "java",
+    "versionStrategy": "manual"
+  },
+
+  "artifact": {
+    "artifactoryDomain": "https://maven.artifactory.homedepot.com/artifactory",
+    "artifactoryRepoKey": "libs-release",
+    "artifactoryRepoKeySnapshot": "libs-snapshot",
+    "artifactoryGroup": "com/homedepot/mm/pc/merchantalerting",
+    "artifactType": "proto"
+  },
+
+  "github": {
+    "org": "one-thd",
+    "repo": "merchant-alerting",
+    "URL": "https://api.github.com/repos"
+  },
+
+  "environments": {
+    "development": {
+      "artifactCategory": "snapshot",
+      "associatedBranchName": "dev"
+    },
+    "production": {
+      "artifactCategory": "release",
+      "associatedBranchName": "master"
+    }
+  }
+}
