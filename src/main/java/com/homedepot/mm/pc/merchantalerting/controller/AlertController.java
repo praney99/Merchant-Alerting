@@ -1,6 +1,5 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
-import com.homedepot.mm.pc.merchantalerting.configuration.AppInfo;
 import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,10 +29,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
         @Operation(summary = "Create alerts by LDAP")
         @PostMapping(value = "/create", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
         @ResponseBody
-        public ResponseEntity<String> getUniqueId(@RequestBody CreateAlertRequest createAlertRequest) {
+        public ResponseEntity<String> generateAlertByLdap(@RequestBody CreateAlertRequest createAlertRequest) {
 
             return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
-                    .body(alertService.getIdDetails(createAlertRequest));
+                    .body(alertService.createAlertByUser(createAlertRequest));
         }
     }
 

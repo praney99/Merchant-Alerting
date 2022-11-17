@@ -22,7 +22,7 @@ public class AlertInfoDAO {
         String results;
         try {
             CreateAlertRequest rsExtractorId = new CreateAlertRequest();
-            results = AlertService.getIdDetails(rsExtractorId);
+            results = AlertService.createAlertByUser(rsExtractorId);
             return results;
         } catch (EmptyResultDataAccessException erdae) {
             log.error(NO_RECORDS_FOR_GIVEN_INPUT);

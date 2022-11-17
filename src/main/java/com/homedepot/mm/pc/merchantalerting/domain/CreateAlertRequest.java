@@ -1,75 +1,33 @@
 package com.homedepot.mm.pc.merchantalerting.domain;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.tomcat.util.json.JSONParser;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.springframework.expression.ParseException;
 
+import java.util.HashMap;
+
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CreateAlertRequest {
 
-        @Builder
-        @Data
-        @NoArgsConstructor
-        @AllArgsConstructor
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        public static class AlertRequest {
+        private String systemSource;
+        private String type;
+        private String templateName;
+        private String templateBody;
+        private String expirationDate;
+        private String keyIdentifiers;
 
-                private String systemSource;
-                private String type;
-                private String keyIdentifiers;
-                private String templateName;
-                private String templateBody;
-                private String expirationDate;
-
-                public String getSystemSource() {
-                        return systemSource;
+        public static void main(final String[] args) throws JSONException {
+                JSONObject key = new JSONObject();
+                key.put("sku", "123456");
+                key.put("cpi", "0.98");
+                System.out.println(key.toString());
                 }
-
-                public void setSystemSource(String systemSource) {
-                        this.systemSource = systemSource;
-                }
-
-                public String getType() {
-                        return type;
-                }
-
-                public void setType(String type) {
-                        this.type = type;
-                }
-
-                public String getKeyIdentifiers() {
-                        return keyIdentifiers;
-                }
-
-                public void setKeyIdentifiers(String keyIdentifiers) {
-                        this.keyIdentifiers = keyIdentifiers;
-                }
-
-                public String getTemplateName() {
-                        return templateName;
-                }
-
-                public void setTemplateName(String templateName) {
-                        this.templateName = templateName;
-                }
-
-                public String getTemplateBody() {
-                        return templateBody;
-                }
-
-                public void setTemplateBody(String templateBody) {
-                        this.templateBody = templateBody;
-                }
-
-                public String getExpirationDate() {
-                        return expirationDate;
-                }
-
-                public void setExpirationDate(String expirationDate) {
-                        this.expirationDate = expirationDate;
-                }
-
-
         }
-}
