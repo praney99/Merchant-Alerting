@@ -21,11 +21,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
         @Autowired
         AlertService alertService;
 
-        @GetMapping("/")
-        public AppInfo home() {
-            return AppInfo.of();
-        }
-
         @ApiResponses(value = {
                 @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
                 @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content),
