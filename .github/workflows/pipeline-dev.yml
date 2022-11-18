@@ -77,30 +77,9 @@ jobs:
       version: ${{ steps.get-version.outputs.version }}
       sem_ver: ${{ steps.get-version.outputs.sem_ver }}
 
-  Testing:
-    runs-on: [one-thd-onprem-np]
-    needs: [Artifactory_Token]
-    container:
-      image: docker.artifactory.homedepot.com/flow/java11:latest
-      credentials:
-        username: ${{ secrets.ARTIFACTORY_USER }}
-        password: ${{ needs.Artifactory_Token.outputs.docker_token }}
-      env:
-        ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
-        ARTIFACTORY_TOKEN: ${{ needs.Artifactory_Token.outputs.maven_token }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Build
-        run: ./scripts/compile.sh
-      - name: Unit Tests
-        run: ./scripts/unit_test.sh
-      - name: API Tests
-        run: ./scripts/api_test.sh
-
   Dockerize:
     runs-on: [ one-thd-onprem-np ]
-    needs: [ Artifactory_Token, VersionAndTag, Testing ]
+    needs: [ Artifactory_Token, VersionAndTag]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
