@@ -10,7 +10,7 @@ import com.homedepot.mm.pc.merchantalerting.dao.AlertInfoDAO;
 @Slf4j
 public class AlertService {
 
-    private static AlertInfoDAO alertInfoDAO;
+    private AlertInfoDAO alertInfoDAO;
 
     @Autowired
     public AlertService(AlertInfoDAO alertInfoDAO) {
@@ -18,7 +18,7 @@ public class AlertService {
 
     }
 
-    public static String createAlertByUser(CreateAlertRequest createAlertRequest) {
+    public String createAlertByUser(CreateAlertRequest createAlertRequest) {
         String uuid = alertInfoDAO.getAlertInfo(createAlertRequest);
         log.info("createAlertRequest: {}", createAlertRequest);
 

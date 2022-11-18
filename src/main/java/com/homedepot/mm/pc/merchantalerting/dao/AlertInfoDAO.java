@@ -12,7 +12,13 @@ import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.*;
 @Slf4j
 public class AlertInfoDAO {
 
-    public static String rsExtractorId() {
+    private AlertService alertService;
+    public AlertInfoDAO(AlertService alertService)
+    {
+            this.alertService=alertService;
+    }
+
+    public String rsExtractorId() {
 
         String results = null;
         return results;
@@ -22,7 +28,7 @@ public class AlertInfoDAO {
         String results;
         try {
             CreateAlertRequest rsExtractorId = new CreateAlertRequest();
-            results = AlertService.createAlertByUser(rsExtractorId);
+            results = alertService.createAlertByUser(rsExtractorId);
             return results;
         } catch (EmptyResultDataAccessException erdae) {
             log.error(NO_RECORDS_FOR_GIVEN_INPUT);

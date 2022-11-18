@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(AlertController.class)
-class AlertControllerTest {
+class AlertControllerTest2 {
 
     @Autowired
     private MockMvc mockMvc;

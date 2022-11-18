@@ -1,4 +1,4 @@
-package com.homedepot.mm.pc.merchantalerting;
+package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -81,62 +81,19 @@ public class AlertControllerTest {
         System.out.println("mockResponse");
         System.out.println(mockResponse);
 
-        //when(alertService.createAlertByUser(Mockito.any(CreateAlertRequest.class))).thenReturn(mockResponse);
-        //when(alertService.createAlertByUser(input).compareTo(String.valueOf(mockResponse)));
+        when(alertService.createAlertByUser(Mockito.any(CreateAlertRequest.class))).thenReturn(String.valueOf(mockResponse));
 
         when(alertService.createAlertByUser(any())).thenReturn(responseString);
 
-        //UserSearchRequest userSearchRequest = UserSearchRequest.builder().userId("test").build();
-        //List<UserSearchResponse.UserSearch> actualUsersSearchResponse = infoProcessor.searchUserInfo(userSearchRequest);
-
         Assertions.assertNotNull(responseString);
         Assertions.assertTrue(responseString.length() > 0);
-        //verify(alertService.createAlertByUser).searchUserInfo(any());
 
-        /*Gson gson = new GsonBuilder().create();
+        Gson gson = new GsonBuilder().create();
         this.mvc.perform(
                         post("/create")
                                 .content(gson.toJson(input)).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(200));
-                }*/
+                }
 
-
-
-    /*@Before
-    public void setup() {
     }
 
-
-    @Test
-    public void generateAlertByLdap() throws Exception {
-
-        CreateAlertRequest input = new CreateAlertRequest();
-        input.setSystemSource("My Assortment");
-        input.setType("Regional Assortment");
-
-        JSONObject key = new JSONObject();
-        key.put("sku", "123456");
-        key.put("cpi", "0.98");
-
-        input.setKeyIdentifiers(key.toString());
-        input.setTemplateName("default");
-
-        JSONObject template = new JSONObject();
-        template.put("title", "test1");
-        template.put("titleDescription", "test2");
-        template.put("primaryText1", "test3");
-        template.put("primaryLink", "test4");
-
-        input.setTemplateBody(template.toString());
-        input.setExpirationDate("2023-09-30");
-
-        final ResponseEntity<String> response = alertController.generateAlertByLdap(input);
-        // "c0533e1f-f452-4747-8293-a43cf168ad3f";
-
-        assertThat(response).isNotNull();
-        assertThat(response.getHeaders()).isNotNull();
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-    }*/
-    }
-}
