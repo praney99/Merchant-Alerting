@@ -77,9 +77,30 @@ jobs:
       version: ${{ steps.get-version.outputs.version }}
       sem_ver: ${{ steps.get-version.outputs.sem_ver }}
 
+  Testing:
+    runs-on: [one-thd-onprem-np]
+    needs: [Artifactory_Token]
+    container:
+      image: docker.artifactory.homedepot.com/flow/java11:latest
+      credentials:
+        username: ${{ secrets.ARTIFACTORY_USER }}
+        password: ${{ needs.Artifactory_Token.outputs.docker_token }}
+      env:
+        ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+        ARTIFACTORY_TOKEN: ${{ needs.Artifactory_Token.outputs.maven_token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build
+        run: ./scripts/compile.sh
+      - name: Unit Tests
+        run: ./scripts/unit_test.sh
+      - name: API Tests
+        run: ./scripts/api_test.sh
+
   Dockerize:
     runs-on: [ one-thd-onprem-np ]
-    needs: [ Artifactory_Token, VersionAndTag]
+    needs: [ Artifactory_Token, VersionAndTag, Testing ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -103,6 +124,7 @@ jobs:
         id: build-image-path
         run: |
             echo "imagePath=${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ needs.VersionAndTag.outputs.sem_ver }}" >> $GITHUB_OUTPUT
+            echo "gcrImagePath=${{ env.GCR_REGISTRY }}/${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ needs.VersionAndTag.outputs.sem_ver }}" >> $GITHUB_OUTPUT
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
@@ -111,6 +133,7 @@ jobs:
           tags: ${{ env.ARTIFACTORY_REGISTRY }}/${{ steps.build-image-path.outputs.imagePath }}
     outputs:
       imagePath: ${{ steps.build-image-path.outputs.imagePath }}
+      gcrImagePath: ${{ steps.build-image-path.outputs.gcrImagePath }}
 
   Deploy:
     runs-on: [ one-thd-onprem-np ]
@@ -127,6 +150,7 @@ jobs:
         patch: ${{ needs.VersionAndTag.outputs.patch }}
         repoName: ${{ github.event.repository.name }}
         imagePath: ${{ needs.Dockerize.outputs.imagePath }}
+        gcrImagePath: ${{ needs.Dockerize.outputs.gcrImagePath }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -136,7 +160,7 @@ jobs:
         id: template-yaml
         run: |
           echo 'deploymentYaml<<EOF' >> $GITHUB_OUTPUT
-          cat deployment.template.yaml | envsubst '$version $major $minor $patch $repoName $imagePath' | sed "s/'/\"'\"/g" >> $GITHUB_OUTPUT
+          cat deployment.template.yaml | envsubst '$version $major $minor $patch $repoName $gcrImagePath' | sed "s/'/\"'\"/g" >> $GITHUB_OUTPUT
           echo >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
       - name: Base64 encode deployment yaml
