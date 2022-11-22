@@ -14,23 +14,12 @@ import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.*;
 public class AlertInfoDAO {
 
     private AlertService alertService;
-    @Autowired
-    public AlertInfoDAO(AlertService alertService)
-    {
-        this.alertService=alertService;
-    }
-
-    public String rsExtractorId() {
-
-        String results = null;
-        return results;
-    }
-
+    
     public String getAlertInfo(CreateAlertRequest createAlertRequest) {
         String results;
         try {
             CreateAlertRequest rsExtractorId = new CreateAlertRequest();
-            results = alertService.createAlertByUser(rsExtractorId);
+            results = null;
             return results;
         } catch (EmptyResultDataAccessException erdae) {
             log.error(NO_RECORDS_FOR_GIVEN_INPUT);
