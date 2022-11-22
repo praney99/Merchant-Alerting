@@ -13,8 +13,6 @@ import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.*;
 @Slf4j
 public class AlertInfoDAO {
 
-    private AlertService alertService;
-    
     public String getAlertInfo(CreateAlertRequest createAlertRequest) {
         String results;
         try {
