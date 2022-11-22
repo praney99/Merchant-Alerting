@@ -3,6 +3,7 @@ package com.homedepot.mm.pc.merchantalerting.dao;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.dao.EmptyResultDataAccessException;
 
@@ -13,9 +14,10 @@ import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.*;
 public class AlertInfoDAO {
 
     private AlertService alertService;
+    @Autowired
     public AlertInfoDAO(AlertService alertService)
     {
-            this.alertService=alertService;
+        this.alertService=alertService;
     }
 
     public String rsExtractorId() {
