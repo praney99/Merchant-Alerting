@@ -1,3 +1,4 @@
+/*
 package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
@@ -41,3 +42,4 @@ class AlertControllerTest2 {
         assertThat(response.getContentAsString()).isEqualTo("expectedResponse");
     }
 }
+*/

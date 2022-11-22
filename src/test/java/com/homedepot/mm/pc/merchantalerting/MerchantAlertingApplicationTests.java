@@ -1,3 +1,4 @@
+/*
 package com.homedepot.mm.pc.merchantalerting;
 
 import org.junit.jupiter.api.Test;
@@ -11,3 +12,4 @@ class MerchantAlertingApplicationTests {
 	}
 
 }
+*/
