@@ -1,6 +1,6 @@
 {
   "versioning": {
-    "major": 0,
+    "major": 1,
     "minor": 0,
     "patch": 0
   },
@@ -33,7 +33,7 @@
       "artifactCategory": "snapshot",
       "associatedBranchName": "dev"
     },
-    "production": {
+    "release": {
       "artifactCategory": "release",
       "associatedBranchName": "master"
     }
