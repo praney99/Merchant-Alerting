@@ -96,14 +96,15 @@ spec:
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
+  labels:
+    app: ${repoName}
+    branch: master
+    instance: master
   name: ${repoName}
   namespace: pricing-guru
 spec:
   securityPolicy:
     name: thd-network-cloud-armor-policy
-  healthCheck:
-    requestPath: /v${major}/actuator/health
-    type: HTTP
 ---
 apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
@@ -122,6 +123,10 @@ metadata:
     kubernetes.io/ingress.class: gce
     kubernetes.io/ingress.global-static-ip-name: pricing-guru-merchant-alerting-svc
     networking.gke.io/managed-certificates: crt-pricng-guru-merchant-alerting
+  labels:
+    app: ${repoName}-ingress
+    branch: master
+    instance: master
   name: ${repoName}-ingress
   namespace: pricing-guru
 spec:
@@ -132,5 +137,3 @@ spec:
           - backend:
               serviceName: ${repoName}-${major}
               servicePort: 8080
-            path: /v${major}/*
-            pathType: ImplementationSpecific
