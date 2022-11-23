@@ -135,9 +135,7 @@ spec:
       http:
         paths:
           - backend:
-              service:
-                name: ${repoName}-${major}
-                port:
-                  number: 8080
+              serviceName: ${repoName}-${major}
+              servicePort: 8080
             path: /v${major}/*
             pathType: ImplementationSpecific
