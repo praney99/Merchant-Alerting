@@ -122,10 +122,6 @@ metadata:
     kubernetes.io/ingress.class: gce
     kubernetes.io/ingress.global-static-ip-name: pricing-guru-merchant-alerting-svc
     networking.gke.io/managed-certificates: crt-pricng-guru-merchant-alerting
-  labels:
-    app: ${repoName}
-    branch: master
-    instance: master
   name: ${repoName}-ingress
   namespace: pricing-guru
 spec:
