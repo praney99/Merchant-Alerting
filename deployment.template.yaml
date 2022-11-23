@@ -103,6 +103,10 @@ metadata:
   name: ${repoName}
   namespace: pricing-guru
 spec:
+  iap:
+    enabled: ${enableIap}
+    oauthclientCredentials:
+      secretName: guru-oauth-credentials
   securityPolicy:
     name: thd-network-cloud-armor-policy
 ---
@@ -113,7 +117,7 @@ metadata:
   namespace: pricing-guru
 spec:
   domains:
-    - merchant-alerting.${ parameters["project"] }.gcp.homedepot.com
+    - merchant-alerting.${dnsZone}.${dnsDomain}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -124,16 +128,20 @@ metadata:
     kubernetes.io/ingress.global-static-ip-name: pricing-guru-merchant-alerting-svc
     networking.gke.io/managed-certificates: crt-pricng-guru-merchant-alerting
   labels:
-    app: ${repoName}-ingress
+    app: ${repoName}
     branch: master
     instance: master
   name: ${repoName}-ingress
   namespace: pricing-guru
 spec:
   rules:
-    - host: merchant-alerting.${ parameters["project"] }.gcp.homedepot.com
+    - host: merchant-alerting.${dnsZone}.${dnsDomain}
       http:
         paths:
           - backend:
-              serviceName: ${repoName}-${major}
-              servicePort: 8080
+              service:
+                name: ${repoName}-${major}
+                port:
+                  number: 8080
+            path: /v${major}/*
+            pathType: ImplementationSpecific
