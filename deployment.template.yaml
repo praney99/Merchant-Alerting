@@ -96,15 +96,14 @@ spec:
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
-  labels:
-    app: ${repoName}
-    branch: master
-    instance: master
   name: ${repoName}
   namespace: pricing-guru
 spec:
   securityPolicy:
     name: thd-network-cloud-armor-policy
+  healthCheck:
+    requestPath: /v${major}/actuator/health
+    type: HTTP
 ---
 apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
