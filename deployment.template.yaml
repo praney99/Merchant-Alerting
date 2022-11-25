@@ -60,7 +60,7 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    beta.cloud.google.com/backend-config: '{"ports": {"http": "${repoName}"}}'
+    cloud.google.com/backend-config: '{"ports": {"http": "${repoName}"}}'
   labels:
     app: ${repoName}-${major}
     version: '${major}'
@@ -103,10 +103,6 @@ metadata:
   name: ${repoName}
   namespace: pricing-guru
 spec:
-  iap:
-    enabled: ${enableIap}
-    oauthclientCredentials:
-      secretName: guru-oauth-credentials
   securityPolicy:
     name: thd-network-cloud-armor-policy
 ---
