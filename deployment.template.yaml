@@ -117,7 +117,7 @@ metadata:
   namespace: pricing-guru
 spec:
   domains:
-    - merchant-alerting.${dnsZone}.${dnsDomain}
+    - merchant-alerting.${ parameters["project"] }.gcp.homedepot.com
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -135,7 +135,7 @@ metadata:
   namespace: pricing-guru
 spec:
   rules:
-    - host: merchant-alerting.${dnsZone}.${dnsDomain}
+    - host: merchant-alerting.${ parameters["project"] }.gcp.homedepot.com
       http:
         paths:
           - backend:
