@@ -34,7 +34,7 @@ spec:
           livenessProbe:
             failureThreshold: 12
             httpGet:
-              path: /v${major}/actuator/health
+              path: /actuator/health
               port: 8080
             periodSeconds: 10
           name: ${repoName}
@@ -43,7 +43,7 @@ spec:
           readinessProbe:
             failureThreshold: 12
             httpGet:
-              path: /v${major}/actuator/health
+              path: /actuator/health
               port: 8080
             periodSeconds: 5
           resources:
@@ -139,5 +139,5 @@ spec:
                 name: ${repoName}-${major}
                 port:
                   number: 8080
-            path: /v${major}/*
+            path: /*
             pathType: ImplementationSpecific
