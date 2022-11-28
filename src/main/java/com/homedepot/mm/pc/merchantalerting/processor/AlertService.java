@@ -15,7 +15,6 @@ public class AlertService {
     @Autowired
     public AlertService(AlertInfoDAO alertInfoDAO) {
         this.alertInfoDAO = alertInfoDAO;
-
     }
 
     public String createAlertByUser(CreateAlertRequest createAlertRequest) {
