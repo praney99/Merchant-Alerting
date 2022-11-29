@@ -4,24 +4,23 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.tomcat.util.json.JSONParser;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
-import org.springframework.expression.ParseException;
-
-import java.util.HashMap;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateAlertRequest {
+public class RetrieveAlertResponse {
 
+        private String id;
+        private String keyIdentifiers;
         private String systemSource;
         private String type;
         private String templateName;
         private String templateBody;
+        private String createdBy;
+        private String createDate;
+        private String lastUpdatedBy;
+        private String lastUpdateDate;
         private String expirationDate;
-        private String keyIdentifiers;
 
 }
