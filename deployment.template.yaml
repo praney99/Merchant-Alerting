@@ -28,7 +28,7 @@ spec:
             - name: VERSION
               value: ${version}
             - name: CONTEXT_PATH
-              value: /v${major}
+              value: /*
           image: ${gcrImagePath}
           imagePullPolicy: Always
           livenessProbe:
