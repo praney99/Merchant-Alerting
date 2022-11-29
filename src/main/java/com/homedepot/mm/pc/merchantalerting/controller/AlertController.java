@@ -1,6 +1,7 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.homedepot.mm.pc.merchantalerting.Exception.ValidationException;
+import com.homedepot.mm.pc.merchantalerting.domain.AlertResponse;
 import com.homedepot.mm.pc.merchantalerting.domain.RetrieveAlertResponse;
 import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,13 +55,15 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
         @Operation(summary = "Create alerts by LDAP")
         @PostMapping(value = "/retrieve", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
         @ResponseBody
-        public ResponseEntity<RetrieveAlertResponse> retrieveAlertByLdap(@RequestBody String userId) {
+        public ResponseEntity<AlertResponse> retrieveAlertByLdap(@RequestBody String userId) {
 
             if (null == userId || !isUserIdsInfoInputValid(userId)) {
                 throw new ValidationException("No valid input provided");
             }
-            RetrieveAlertResponse retrieveAlertResponse = RetrieveAlertResponse.builder().build();
-            return new ResponseEntity<>(retrieveAlertResponse, HttpStatus.OK);
+            List<RetrieveAlertResponse> alerts = alertService.retrieveAlertByUser(userId);
+            AlertResponse alertResponse = AlertResponse.builder().alerts(alerts).build();
+            //RetrieveAlertResponse retrieveAlertResponse = RetrieveAlertResponse.builder().id().build();
+            return new ResponseEntity<>(alertResponse, HttpStatus.OK);
         }
 
         private boolean isUserIdsInfoInputValid(String userId) {
