@@ -2,10 +2,12 @@ package com.homedepot.mm.pc.merchantalerting.processor;
 
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.domain.RetrieveAlertResponse;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.homedepot.mm.pc.merchantalerting.dao.AlertInfoDAO;
+
 
 import java.util.*;
 
@@ -20,6 +22,7 @@ public class AlertService {
         this.alertInfoDAO = alertInfoDAO;
     }
 
+
     public String createAlertByUser(CreateAlertRequest createAlertRequest)
     {
         String uuid = alertInfoDAO.createAlertDetails(createAlertRequest);
@@ -29,6 +32,7 @@ public class AlertService {
 
         return createAlertResponse;
     }
+
 
     public List<RetrieveAlertResponse> retrieveAlertByUser(String userId) {
 

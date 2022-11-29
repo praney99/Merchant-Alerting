@@ -1,6 +1,7 @@
 package com.homedepot.mm.pc.merchantalerting.dao;
 
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
+
 import com.homedepot.mm.pc.merchantalerting.domain.RetrieveAlertResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -30,6 +31,7 @@ public class AlertInfoDAO {
         } catch (EmptyResultDataAccessException erdae) {
             log.error(NO_RECORDS_FOR_GIVEN_INPUT);
         }
+
         return null;
     }
 
@@ -51,5 +53,6 @@ public class AlertInfoDAO {
                         .build());
             }
         };*/
+
     }
 }

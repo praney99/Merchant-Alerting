@@ -3,6 +3,7 @@ package com.homedepot.mm.pc.merchantalerting.controller;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.homedepot.mm.pc.merchantalerting.controller.AlertController;
+
 import com.homedepot.mm.pc.merchantalerting.domain.AlertResponse;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.domain.RetrieveAlertResponse;
@@ -97,6 +98,7 @@ public class AlertControllerTest {
                 .andExpect(status().is(200));
                 }
 
+
     @Test
     void retrieveAlertByLdap() throws Exception {
 
@@ -159,6 +161,5 @@ public class AlertControllerTest {
                                 .content(gson.toJson(requestId)).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(200));
     }
-
     }
 

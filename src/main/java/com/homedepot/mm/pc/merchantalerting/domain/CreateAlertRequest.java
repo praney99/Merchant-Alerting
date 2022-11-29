@@ -24,4 +24,6 @@ public class CreateAlertRequest {
         private String expirationDate;
         private String keyIdentifiers;
 
+
 }
+
