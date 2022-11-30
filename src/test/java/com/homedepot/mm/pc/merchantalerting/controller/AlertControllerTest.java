@@ -85,13 +85,7 @@ public class AlertControllerTest {
         input.setTemplateBody(template.toString());
         input.setExpirationDate("2023-09-30");
 
-        System.out.println("input");
-        System.out.println(input);
-
         ResponseEntity<CreateAlertRequest> mockResponse = new ResponseEntity(input, HttpStatus.OK);
-
-        System.out.println("mockResponse");
-        System.out.println(mockResponse);
 
         when(alertService.createAlertByUser(Mockito.any(CreateAlertRequest.class))).thenReturn(String.valueOf(mockResponse));
 
@@ -114,7 +108,7 @@ public class AlertControllerTest {
         final String requestId = "PXP88N3";
         Date df = new Date();
 
-        AlertResponse response = new AlertResponse();
+        AlertResponse response;
 
         RetrieveAlertResponse output = new RetrieveAlertResponse();
 
@@ -146,29 +140,25 @@ public class AlertControllerTest {
 
         output.setLastUpdateDate(df);
 
-        output.setExpirationDate("2023-09-30");
-
-        System.out.println("output");
-        System.out.println(output);
+        output.setExpirationDate(df);
 
         response=AlertResponse.builder().alerts(List.of(output)).build();
 
         ResponseEntity<String> mockResponse = new ResponseEntity(requestId, HttpStatus.OK);
 
-        System.out.println("mockResponse");
-        System.out.println(mockResponse);
-
         when(alertService.createAlertByUser(any(CreateAlertRequest.class))).thenReturn(String.valueOf(mockResponse));
 
         when(alertService.createAlertByUser(any())).thenReturn(String.valueOf(response));
 
-        Assertions.assertNotNull(response);
-        Assertions.assertTrue(response.toString().length() > 0);
-
+        System.out.println(response);
         Gson gson = new GsonBuilder().create();
         this.mvc.perform(
                         get("/alert/retrieve/requestId").content(gson.toJson(requestId)).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(200));
+
+        Assertions.assertNotNull(response);
+        Assertions.assertTrue(response.toString().length() > 0);
+        Assertions.assertEquals(response , "AlertResponse(alerts=[RetrieveAlertResponse(id=c0533e1f-f452-4747-8293-a43cf168ad3f, keyIdentifiers={\"sku\":\"123456\",\"cpi\":\"0.98\"}, systemSource=My Assortment, type=Regional Assortment, templateName=default, templateBody={\"title\":\"test1\",\"titleDescription\":\"test2\",\"primaryText1\":\"test3\",\"primaryLink\":\"test4\"}, createdBy=, createDate=Wed Nov 30 15:31:56 CST 2022, lastUpdatedBy=, lastUpdateDate=Wed Nov 30 15:31:56 CST 2022, expirationDate=Wed Nov 30 15:31:56 CST 2022)])\n");
     }
     }
 

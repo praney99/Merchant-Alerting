@@ -25,6 +25,6 @@ public class RetrieveAlertResponse {
         private Date createDate;
         private String lastUpdatedBy;
         private Date lastUpdateDate;
-        private String expirationDate;
+        private Date expirationDate;
 
 }

@@ -66,16 +66,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                 throw new ValidationException("No valid input provided");
             }
             List<RetrieveAlertResponse> alerts = alertService.retrieveAlertByUser(userId);
-            AlertResponse alertResponse = new AlertResponse();
+            AlertResponse alertResponse = new AlertResponse(alerts);
             return new ResponseEntity<>(alertResponse, HttpStatus.OK);
         }
 
         private boolean isUserIdsInfoInputValid(String userId) {
 
-            if (StringUtils.isEmpty(userId)) {
-                return false;
-            }
-            return true;
+            return !StringUtils.isEmpty(userId);
         }
 
     }
