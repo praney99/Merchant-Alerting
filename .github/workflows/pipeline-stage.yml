@@ -1,0 +1,299 @@
+name: Java GCP pipeline Stage
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+
+env:
+  DEV_SPINNAKER_WEBHOOK: product-ops-gke-dev
+  STAGE_SPINNAKER_WEBHOOK: product-ops-gke-stage
+  IMAGE_PATH: product-ops/release
+  GCR_REGISTRY: us.gcr.io/hd-pricing-stage
+  ARTIFACTORY_REGISTRY: docker.artifactory.homedepot.com
+
+jobs:
+  Artifactory_Token:
+    runs-on: [ one-thd-onprem-np ]
+    steps:
+      - name: Generate Docker Token
+        id: docker_step
+        run: |
+          echo "token=$(curl -s -X POST -d username="${{ secrets.ARTIFACTORY_USER }}" -d password="${{ secrets.ARTIFACTORY_PASSWORD }}" "https://token-generator.artifactory.homedepot.com/api/docker/generateToken" | jq -r .access_token)" >> $GITHUB_OUTPUT
+      - name: Generate Maven Token
+        id: maven_step
+        run: |
+          echo "token=$(curl -s -X POST -d username="${{ secrets.ARTIFACTORY_USER }}" -d password="${{ secrets.ARTIFACTORY_PASSWORD }}" "https://token-generator.artifactory.homedepot.com/api/maven/generateToken" | jq -r .access_token)" >> $GITHUB_OUTPUT
+    outputs:
+      docker_token: ${{ steps.docker_step.outputs.token }}
+      maven_token: ${{ steps.maven_step.outputs.token }}
+
+  VersionAndTag:
+    runs-on: [ one-thd-onprem-np ]
+    needs: Artifactory_Token
+    container:
+      image: docker.artifactory.homedepot.com/flow/java11:latest
+      credentials:
+        username: ${{ secrets.ARTIFACTORY_USER }}
+        password: ${{ needs.Artifactory_Token.outputs.docker_token }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TRACKER_TOKEN: no_token
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+        id: extract_branch
+      - name: Short branch name
+        id: short_branch
+        run: |
+          short_branch=$(echo "${{ steps.extract_branch.outputs.branch }}" | cut -c1-24 | sed 's/[^[:alnum:]-]//g' | sed 's/[^[:alnum:]]\+$//')
+          echo "branch=$short_branch" >> $GITHUB_OUTPUT
+      - name: Get Short Sha
+        id: short-sha
+        run: echo "sha_short=`echo ${{ github.sha }} | rev | cut -c1-7 | rev`" >> $GITHUB_OUTPUT
+      - name: Read Build Config
+        id: set_var
+        run: |
+          echo 'buildConfig<<EOF' >> $GITHUB_OUTPUT
+          cat ./buildConfig.json >> $GITHUB_OUTPUT
+          echo >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+      - id: get-version
+        run: |
+          echo "major=${{fromJson(steps.set_var.outputs.buildConfig).versioning.major}}" >> $GITHUB_OUTPUT
+          echo "minor=${{fromJson(steps.set_var.outputs.buildConfig).versioning.minor}}" >> $GITHUB_OUTPUT
+          echo "patch=${{fromJson(steps.set_var.outputs.buildConfig).versioning.patch}}" >> $GITHUB_OUTPUT
+          echo "version=${{fromJson(steps.set_var.outputs.buildConfig).versioning.major}}.${{fromJson(steps.set_var.outputs.buildConfig).versioning.minor}}.${{fromJson(steps.set_var.outputs.buildConfig).versioning.patch}}" >> $GITHUB_OUTPUT
+          echo "sem_ver=${{fromJson(steps.set_var.outputs.buildConfig).versioning.major}}.${{fromJson(steps.set_var.outputs.buildConfig).versioning.minor}}.${{fromJson(steps.set_var.outputs.buildConfig).versioning.patch}}" >> $GITHUB_OUTPUT
+      - name: Version and Tag
+        run: flow github -v v${{ steps.get-version.outputs.sem_ver }} version release
+    outputs:
+      branch: ${{ steps.extract_branch.outputs.branch }}
+      short_branch: ${{ steps.short_branch.outputs.branch }}
+      major: ${{ steps.get-version.outputs.major }}
+      minor: ${{ steps.get-version.outputs.minor }}
+      patch: ${{ steps.get-version.outputs.patch }}
+      version: ${{ steps.get-version.outputs.version }}
+      sem_ver: ${{ steps.get-version.outputs.sem_ver }}
+
+  Testing:
+    runs-on: [ one-thd-onprem-np ]
+    needs: [Artifactory_Token]
+    container:
+      image: docker.artifactory.homedepot.com/flow/java11:latest
+      credentials:
+        username: ${{ secrets.ARTIFACTORY_USER }}
+        password: ${{ needs.Artifactory_Token.outputs.docker_token }}
+      env:
+        ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+        ARTIFACTORY_TOKEN: ${{ needs.Artifactory_Token.outputs.maven_token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build
+        run: ./scripts/compile.sh
+      - name: Unit Tests
+        run: ./scripts/unit_test.sh
+      - name: API Tests
+        run: ./scripts/api_test.sh
+      - name: Archive test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_output
+          path: test_output
+          retention-days: 90
+
+  UploadTestResults:
+    runs-on: [ one-thd-onprem-np ]
+    needs: [Artifactory_Token, Testing, VersionAndTag]
+    container:
+      image: docker.artifactory.homedepot.com/flow/java11:latest
+      credentials:
+        username: ${{ secrets.ARTIFACTORY_USER }}
+        password: ${{ needs.Artifactory_Token.outputs.docker_token }}
+    steps:
+      - name: Pull test results
+        uses: actions/download-artifact@v2
+        with:
+          name: test_output
+          path: test_output
+      - name: Install zip package
+        run: apt-get install -y zip
+      - name: Zip test results
+        run: zip -r test_output test_output
+      - name: Upload test results zip to sqhub
+        run: |
+          curl -H 'X-Auth-Token: ${{ secrets.QUALITYHUB_TOKEN }}' \
+          -H 'X-MyApplication-API-Key: mp_financial-metrics' \
+          -H 'Content-Type: multipart/form-data' \
+          -X POST \
+          -F pipelineExecutionId=$(openssl rand -hex 16) \
+          -F jobName=Tests -F applicationName=mp_financial-metrics -F version=${{ needs.VersionAndTag.outputs.version }} \
+          -F jobSetName=Tests -F jobExecutionStatus=COMPLETED -F deploymentEnvironment=production -F testType=Tests \
+          -F 'file=@test_output.zip;type=application/zip' http://api-cipipeline.sqhub.homedepot.com/buildpipeline/publish
+
+  QualityScan:
+    runs-on: [ one-thd-onprem-np ]
+    needs: [ Artifactory_Token, VersionAndTag, Testing ]
+    container:
+      image: docker.artifactory.homedepot.com/flow/java11:latest
+      credentials:
+        username: ${{ secrets.ARTIFACTORY_USER }}
+        password: ${{ needs.Artifactory_Token.outputs.docker_token }}
+      env:
+        ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+        ARTIFACTORY_TOKEN: ${{ needs.Artifactory_Token.outputs.maven_token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build
+        run: ./scripts/compile.sh
+      - name: Pull test results
+        uses: actions/download-artifact@v2
+        with:
+          name: test_output
+          path: test_output
+      - name: Sonar Scan
+        run: flow sonar scan release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.VersionAndTag.outputs.version }}
+
+  SecurityScan:
+    runs-on: [ one-thd-onprem-np ]
+    needs: [Artifactory_Token]
+    container:
+      image: docker.artifactory.homedepot.com/flow/java11:latest
+      credentials:
+        username: ${{ secrets.ARTIFACTORY_USER }}
+        password: ${{ needs.Artifactory_Token.outputs.docker_token }}
+      env:
+        ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+        ARTIFACTORY_TOKEN: ${{ needs.Artifactory_Token.outputs.maven_token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build
+        run: ./scripts/compile.sh
+      - name: ShiftLeft scan
+        id: shiftleft-scan
+        uses: one-thd/de-actions/shiftleft-action@shiftleft-v1.0.3
+        with:
+          SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
+          SHIFTLEFT_ORG_ID: ${{ secrets.SHIFTLEFT_ORG_ID }}
+          shiftleft-team: THD-Pricing-Recommendation
+          shiftleft-group: MPulse
+          shiftleft-lang: java
+          artifact-dir: target
+          artifact-extension: .jar
+          break-the-build: false
+
+      - name: ShiftLeft results
+        run: |
+          ${GITHUB_WORKSPACE}/sl check-analysis \
+            --no-build-rules \
+            --report \
+            --app ${{ steps.shiftleft-scan.outputs.app-id }} \
+            --target scan.${{ steps.shiftleft-scan.outputs.scan-id }}
+        env:
+          SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
+
+  Dockerize:
+    runs-on: [ one-thd-onprem-np ]
+    needs: [ Artifactory_Token, VersionAndTag, Testing, QualityScan, SecurityScan ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Create Buildx Context
+        run: docker context create builders
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          endpoint: builders
+          driver-opts: |
+            image=docker.artifactory.homedepot.com/moby/buildkit:master
+      - name: Login to Docker Artifactory
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.ARTIFACTORY_REGISTRY }}
+          username: ${{ secrets.ARTIFACTORY_USER }}
+          password: ${{ needs.Artifactory_Token.outputs.docker_token }}
+      - name: Build Image Path
+        id: build-image-path
+        run: |
+          echo "imagePath=${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ needs.VersionAndTag.outputs.sem_ver }}" >> $GITHUB_OUTPUT
+          echo "gcrImagePath=${{ env.GCR_REGISTRY }}/${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ needs.VersionAndTag.outputs.sem_ver }}" >> $GITHUB_OUTPUT
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: ${{ env.ARTIFACTORY_REGISTRY }}/${{ steps.build-image-path.outputs.imagePath }}
+    outputs:
+      imagePath: ${{ steps.build-image-path.outputs.imagePath }}
+      gcrImagePath: ${{ steps.build-image-path.outputs.gcrImagePath }}
+
+  Deploy:
+    runs-on: [ one-thd-onprem-np ]
+    needs: [ Artifactory_Token, VersionAndTag, Dockerize ]
+    container:
+      image: docker.artifactory.homedepot.com/flow/java11:latest
+      credentials:
+        username: ${{ secrets.ARTIFACTORY_USER }}
+        password: ${{ needs.Artifactory_Token.outputs.docker_token }}
+      env:
+        version: ${{ needs.VersionAndTag.outputs.version }}
+        major: ${{ needs.VersionAndTag.outputs.major }}
+        minor: ${{ needs.VersionAndTag.outputs.minor }}
+        patch: ${{ needs.VersionAndTag.outputs.patch }}
+        repoName: ${{ github.event.repository.name }}
+        imagePath: ${{ needs.Dockerize.outputs.imagePath }}
+        gcrImagePath: ${{ needs.Dockerize.outputs.gcrImagePath }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install envsubst
+        run: apt-get install -y gettext-base
+      - name: Template deployment Yaml
+        id: template-yaml
+        run: |
+          echo 'deploymentYaml<<EOF' >> $GITHUB_OUTPUT
+          cat deployment.template.yaml | envsubst '$version $major $minor $patch $repoName $gcrImagePath' | sed "s/'/\"'\"/g" >> $GITHUB_OUTPUT
+          echo >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+      - name: Base64 encode deployment yaml
+        id: base64-template-yaml
+        run: |
+          echo '${{ steps.template-yaml.outputs.deploymentYaml }}'
+          echo base64DeploymentYaml=`echo '${{ steps.template-yaml.outputs.deploymentYaml }}' | base64 -w 0` >> $GITHUB_OUTPUT
+      - name: Build Spinnaker Payload
+        id: spinnaker-payload
+        run: |
+          echo 'spinnakerPayload<<EOF
+            {
+              "artifacts": [
+                {
+                  "reference": "${{ steps.base64-template-yaml.outputs.base64DeploymentYaml }}",
+                  "type": "embedded/base64",
+                  "name": "k8s manifest"
+                }
+              ],
+              "secret": "${{ secrets.SPINNAKER_SECRET }}",
+              "sourceRegistry": "${{ env.ARTIFACTORY_REGISTRY }}",
+              "targetRegistry": "${{ env.GCR_REGISTRY }}",
+              "imagePaths": "${{ needs.Dockerize.outputs.imagePath }}"
+            }"' >> $GITHUB_OUTPUT
+          echo >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+      - name: Spinnaker Deploy Dev
+        run: >
+          curl 'https://api.spinnaker.homedepot.com/webhooks/webhook/${{ env.DEV_SPINNAKER_WEBHOOK }}' -X POST -H 'Content-Type: application/json; charset=utf-8' -d '${{ steps.spinnaker-payload.outputs.spinnakerPayload }}'
+      - name: Spinnaker Deploy STAGE
+        run: >
+          curl 'https://api.spinnaker.homedepot.com/webhooks/webhook/${{ env.STAGE_SPINNAKER_WEBHOOK }}' -X POST -H 'Content-Type: application/json; charset=utf-8' -d '${{ steps.spinnaker-payload.outputs.spinnakerPayload }}'
