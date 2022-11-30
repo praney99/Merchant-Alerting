@@ -25,12 +25,21 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
+import static com.fasterxml.jackson.databind.type.LogicalType.DateTime;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LOCAL_DATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -93,7 +102,7 @@ public class AlertControllerTest {
 
         Gson gson = new GsonBuilder().create();
         this.mvc.perform(
-                        post("/create")
+                        post("/alert/create")
                                 .content(gson.toJson(input)).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(200));
                 }
@@ -103,12 +112,13 @@ public class AlertControllerTest {
     void retrieveAlertByLdap() throws Exception {
 
         final String requestId = "PXP88N3";
+        Date df = new Date();
 
         AlertResponse response = new AlertResponse();
 
         RetrieveAlertResponse output = new RetrieveAlertResponse();
 
-        output.setId("c0533e1f-f452-4747-8293-a43cf168ad3f");
+        output.setId(UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f"));
 
         JSONObject key = new JSONObject();
         key.put("sku", "123456");
@@ -130,11 +140,11 @@ public class AlertControllerTest {
 
         output.setCreatedBy("");
 
-        output.setCreateDate("2022-10-23T08:42:24+0000");
+        output.setCreateDate(df);
 
         output.setLastUpdatedBy("");
 
-        output.setLastUpdateDate("2022-11-01T19:47:34+0000");
+        output.setLastUpdateDate(df);
 
         output.setExpirationDate("2023-09-30");
 
@@ -148,7 +158,7 @@ public class AlertControllerTest {
         System.out.println("mockResponse");
         System.out.println(mockResponse);
 
-        when(alertService.createAlertByUser(Mockito.any(CreateAlertRequest.class))).thenReturn(String.valueOf(mockResponse));
+        when(alertService.createAlertByUser(any(CreateAlertRequest.class))).thenReturn(String.valueOf(mockResponse));
 
         when(alertService.createAlertByUser(any())).thenReturn(String.valueOf(response));
 
@@ -157,8 +167,7 @@ public class AlertControllerTest {
 
         Gson gson = new GsonBuilder().create();
         this.mvc.perform(
-                        post("/retrieve")
-                                .content(gson.toJson(requestId)).contentType(MediaType.APPLICATION_JSON))
+                        get("/alert/retrieve/requestId").content(gson.toJson(requestId)).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(200));
     }
     }

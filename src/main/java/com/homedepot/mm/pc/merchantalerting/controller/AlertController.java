@@ -26,7 +26,7 @@ import java.util.List;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
     @RestController
-    @RequestMapping(value = "/")
+    @RequestMapping(value = "/alert")
     public class AlertController {
         @Autowired
         AlertService alertService;
@@ -58,23 +58,22 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                 @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content),
                 @ApiResponse(responseCode = "503", description = "Service Unavailable", content = @Content)})
         @Operation(summary = "Create alerts by LDAP")
-        @PostMapping(value = "/retrieve", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+        @GetMapping(value = "/retrieve/{userId}", produces = APPLICATION_JSON_VALUE)
         @ResponseBody
-        public ResponseEntity<AlertResponse> retrieveAlertByLdap(@RequestBody String userId) {
+        public ResponseEntity<AlertResponse> retrieveAlertByLdap(@PathVariable("userId") String userId) {
 
             if (null == userId || !isUserIdsInfoInputValid(userId)) {
                 throw new ValidationException("No valid input provided");
             }
             List<RetrieveAlertResponse> alerts = alertService.retrieveAlertByUser(userId);
-            AlertResponse alertResponse = AlertResponse.builder().alerts(alerts).build();
-            //RetrieveAlertResponse retrieveAlertResponse = RetrieveAlertResponse.builder().id().build();
+            AlertResponse alertResponse = new AlertResponse();
             return new ResponseEntity<>(alertResponse, HttpStatus.OK);
         }
 
         private boolean isUserIdsInfoInputValid(String userId) {
 
             if (StringUtils.isEmpty(userId)) {
-                throw new ValidationException("LDAP should not be empty");
+                return false;
             }
             return true;
         }

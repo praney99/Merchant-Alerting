@@ -39,22 +39,5 @@ public class AlertInfoDAO {
 
     public List<RetrieveAlertResponse> retrieveAlertDetails(String userId) {
         return null;
-
-        /*(ResultSet rs) -> {
-            List<RetrieveAlertResponse> results = null;
-            while (rs.next()) {
-                results.add(RetrieveAlertResponse.builder()
-                        .id()
-                        .keyIdentifiers()
-                        .systemSource()
-                        .type()
-                        .templateName()
-                        .templateBody()
-                        .createDate()
-                        .createdBy()
-                        .build());
-            }
-        };*/
-
     }
 }
