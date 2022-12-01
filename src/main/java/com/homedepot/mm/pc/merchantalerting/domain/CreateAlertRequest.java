@@ -24,10 +24,6 @@ public class CreateAlertRequest {
         private String expirationDate;
         private String keyIdentifiers;
 
-        public static void main(final String[] args) throws JSONException {
-                JSONObject key = new JSONObject();
-                key.put("sku", "123456");
-                key.put("cpi", "0.98");
-                System.out.println(key.toString());
-                }
-        }
+
+}
+
