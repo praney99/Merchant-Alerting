@@ -158,7 +158,6 @@ public class AlertControllerTest {
 
         Assertions.assertNotNull(response);
         Assertions.assertTrue(response.toString().length() > 0);
-        Assertions.assertEquals(response , "AlertResponse(alerts=[RetrieveAlertResponse(id=c0533e1f-f452-4747-8293-a43cf168ad3f, keyIdentifiers={\"sku\":\"123456\",\"cpi\":\"0.98\"}, systemSource=My Assortment, type=Regional Assortment, templateName=default, templateBody={\"title\":\"test1\",\"titleDescription\":\"test2\",\"primaryText1\":\"test3\",\"primaryLink\":\"test4\"}, createdBy=, createDate=Wed Nov 30 15:31:56 CST 2022, lastUpdatedBy=, lastUpdateDate=Wed Nov 30 15:31:56 CST 2022, expirationDate=Wed Nov 30 15:31:56 CST 2022)])\n");
     }
-    }
+}
 
