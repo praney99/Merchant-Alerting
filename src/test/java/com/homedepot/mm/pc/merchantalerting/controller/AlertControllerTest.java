@@ -6,6 +6,7 @@ import com.homedepot.mm.pc.merchantalerting.controller.AlertController;
 
 import com.homedepot.mm.pc.merchantalerting.dao.AlertInfoDAO;
 import com.homedepot.mm.pc.merchantalerting.domain.AlertRepository;
+
 import com.homedepot.mm.pc.merchantalerting.domain.AlertResponse;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.domain.RetrieveAlertResponse;
@@ -47,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
@@ -170,6 +172,7 @@ public class AlertControllerTest {
 
         Assertions.assertNotNull(response);
         Assertions.assertTrue(response.toString().length() > 0);
+
     }
 
     @Test
