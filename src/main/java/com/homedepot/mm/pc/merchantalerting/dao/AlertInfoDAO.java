@@ -9,6 +9,7 @@ import org.springframework.dao.DataAccessException;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.dao.EmptyResultDataAccessException;
+import reactor.core.publisher.Mono;
 
 import java.sql.ResultSet;
 import java.text.MessageFormat;
@@ -38,6 +39,10 @@ public class AlertInfoDAO {
     }
 
     public List<RetrieveAlertResponse> retrieveAlertDetails(String userId) {
+        return null;
+    }
+
+    public Mono<Void> deleteAlertDetails(String userId) {
         return null;
     }
 }

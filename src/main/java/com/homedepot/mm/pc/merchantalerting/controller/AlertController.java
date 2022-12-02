@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -68,6 +69,25 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
             List<RetrieveAlertResponse> alerts = alertService.retrieveAlertByUser(userId);
             AlertResponse alertResponse = new AlertResponse(alerts);
             return new ResponseEntity<>(alertResponse, HttpStatus.OK);
+        }
+
+
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
+                @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content),
+                @ApiResponse(responseCode = "404", description = "No Data Found", content = @Content),
+                @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content),
+                @ApiResponse(responseCode = "503", description = "Service Unavailable", content = @Content)})
+        @Operation(summary = "Delete alerts by LDAP")
+        @DeleteMapping(value = "/delete/{userId}")
+        @ResponseBody
+        public ResponseEntity deleteAlertByLdap(@PathVariable("userId") String userId) {
+
+            if (!isUserIdsInfoInputValid(userId)) {
+                throw new ValidationException("No valid input provided");
+            }
+            alertService.deleteAlertByUser(userId);
+            return new ResponseEntity(HttpStatus.OK);
         }
 
         private boolean isUserIdsInfoInputValid(String userId) {
