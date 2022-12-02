@@ -27,11 +27,4 @@ public class RetrieveAlertResponse {
         private Date lastUpdateDate;
         private Date expirationDate;
 
-        public RetrieveAlertResponse(UUID id)
-        {
-                this.id=id;
-                this.templateBody=new String();
-
-        }
-
 }
