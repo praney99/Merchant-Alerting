@@ -25,4 +25,4 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
-ENTRYPOINT ["sh", "-c", "java -Xms512m -Xmx2048m -cp app:app/lib/* -Dspring.profiles.active=${ENVIRONMENT} com.homedepot.mm.pc.merchantalerting"]
+ENTRYPOINT ["sh", "-c", "java -Xms512m -Xmx2048m -cp app:app/lib/* -Dspring.profiles.active=${ENVIRONMENT} com.homedepot.mm.pc.merchantalerting.MerchantAlertingApplication"]
