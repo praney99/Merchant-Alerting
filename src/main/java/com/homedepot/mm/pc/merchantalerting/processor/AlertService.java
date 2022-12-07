@@ -50,7 +50,7 @@ public class AlertService {
         return retrieveAlertResponse;
     }
 
-    public void deleteAlertByAlertId(String alertId) {
+    public void deleteAlertByAlertId(UUID alertId) {
         try {
             if (alertId.equals("") || alertId != null) {
                 alertDAO.deleteById(alertId);

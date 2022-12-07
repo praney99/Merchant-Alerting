@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -78,9 +79,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
         @Operation(summary = "Delete alerts by alertId")
         @DeleteMapping(value = "/delete/{alertId}", produces = APPLICATION_JSON_VALUE)
         @ResponseBody
-        public void DeletingAlertsByAlertId(@PathVariable("alertId") String alertId)
+        public void DeletingAlertsByAlertId(@PathVariable("alertId") UUID alertId)
         {
-            if (null == alertId || !isUserIdsInfoInputValid(alertId)) {
+            if (null == alertId || !isAlertIdInfoInputValid(alertId)) {
                 throw new ValidationException("No valid input provided");
             }
             alertService.deleteAlertByAlertId(alertId);
@@ -90,6 +91,11 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
         private boolean isUserIdsInfoInputValid(String userId) {
 
             return !StringUtils.isEmpty(userId);
+        }
+
+        private boolean isAlertIdInfoInputValid(UUID id) {
+
+            return !StringUtils.isEmpty(String.valueOf(id));
         }
 
     }

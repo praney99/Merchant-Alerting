@@ -185,7 +185,7 @@ public class AlertControllerTest {
 
         ResponseEntity<CreateAlertRequest> mockResponse = new ResponseEntity(input, HttpStatus.OK);
         when(alertService.createAlertByUser(Mockito.any(CreateAlertRequest.class))).thenReturn(String.valueOf(mockResponse));
-        doNothing().doThrow(new RuntimeException()).when(alertService).deleteAlertByAlertId("c0533e1f-f452-4747-8293-a43cf168ad3f");
+        doNothing().doThrow(new RuntimeException()).when(alertService).deleteAlertByAlertId(UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f"));
 
         when(alertService.createAlertByUser(any())).thenReturn(responseString);
 
@@ -239,7 +239,7 @@ public class AlertControllerTest {
         Map<String,CreateAlertRequest>TestAlert=new HashMap<>();
         TestAlert=CreateAlertRandomRequest(5);
         when(alertService.createAlertByUser(Mockito.any(CreateAlertRequest.class))).thenReturn(String.valueOf(TestAlert));
-        doNothing().doThrow(new RuntimeException()).when(alertService).deleteAlertByAlertId("c0533e1f-f452-4747-8293-a43cf168ad3f");
+        doNothing().doThrow(new RuntimeException()).when(alertService).deleteAlertByAlertId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
         when(alertService.createAlertByUser(any())).thenReturn(TestAlert.toString());
 
         Gson gson = new GsonBuilder().create();
