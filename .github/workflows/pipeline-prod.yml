@@ -1,0 +1,115 @@
+name: Java GCP pipeline Prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      change_request:
+        description: 'Change Request Number for this production push'
+        required: true
+        default: 'CHG0000000'
+      version:
+        description: 'Version to deploy'
+        required: true
+        default: '0.0.0'
+
+env:
+  PROD_SPINNAKER_WEBHOOK: product-ops-gke-prod
+  IMAGE_PATH: product-ops/snapshot
+  GCR_REGISTRY: us.gcr.io/hd-pricing-prod
+  ARTIFACTORY_REGISTRY: docker.artifactory.homedepot.com
+
+jobs:
+  Artifactory_Token:
+    runs-on: [ one-thd-onprem-np ]
+    steps:
+      - name: Generate Docker Token
+        id: docker_step
+        run: |
+          echo "token=$(curl -s -X POST -d username="${{ secrets.ARTIFACTORY_USER }}" -d password="${{ secrets.ARTIFACTORY_PASSWORD }}" "https://token-generator.artifactory.homedepot.com/api/docker/generateToken" | jq -r .access_token)" >> $GITHUB_OUTPUT
+      - name: Generate Maven Token
+        id: maven_step
+        run: |
+          echo "token=$(curl -s -X POST -d username="${{ secrets.ARTIFACTORY_USER }}" -d password="${{ secrets.ARTIFACTORY_PASSWORD }}" "https://token-generator.artifactory.homedepot.com/api/maven/generateToken" | jq -r .access_token)" >> $GITHUB_OUTPUT
+    outputs:
+      docker_token: ${{ steps.docker_step.outputs.token }}
+      maven_token: ${{ steps.maven_step.outputs.token }}
+
+  CollectInputs:
+    runs-on: [ one-thd-onprem-np ]
+    steps:
+      - name: Split version
+        id: split
+        run: |
+          echo "major=`echo "${{ env.INPUT_VERSION }}" | cut -d "." -f 1`" >> $GITHUB_OUTPUT
+          echo "minor=`echo "${{ env.INPUT_VERSION }}" | cut -d "." -f 2`" >> $GITHUB_OUTPUT
+          echo "patch=`echo "${{ env.INPUT_VERSION }}" | cut -d "." -f 3`" >> $GITHUB_OUTPUT
+      - name: Build Image Path
+        id: image
+        run: |
+          echo "imagePath=${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ env.INPUT_VERSION }}" >> $GITHUB_OUTPUT
+          echo "gcrImagePath=${{ env.GCR_REGISTRY }}/${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ needs.VersionAndTag.outputs.sem_ver }}" >> $GITHUB_OUTPUT
+    outputs:
+      major: ${{ steps.split.outputs.major }}
+      minor: ${{ steps.split.outputs.minor }}
+      patch: ${{ steps.split.outputs.patch }}
+      imagePath: ${{ steps.image.outputs.imagePath }}
+      gcrImagePath: ${{ steps.image.outputs.gcrImagePath }}
+
+  Deploy:
+    runs-on: [ one-thd-onprem-np ]
+    needs: [ Artifactory_Token, Version ]
+    container:
+      image: docker.artifactory.homedepot.com/flow/java11:latest
+      credentials:
+        username: ${{ secrets.ARTIFACTORY_USER }}
+        password: ${{ needs.Artifactory_Token.outputs.docker_token }}
+      env:
+        version: ${{ env.INPUT_VERSION }}
+        major: ${{ needs.Version.outputs.major }}
+        minor: ${{ needs.Version.outputs.minor }}
+        patch: ${{ needs.Version.outputs.patch }}
+        repoName: ${{ github.event.repository.name }}
+        imagePath: ${{ needs.Version.outputs.imagePath }}
+        gcrImagePath: ${{ needs.Version.outputs.gcrImagePath }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install envsubst
+        run: apt-get install -y gettext-base
+      - name: Template deployment Yaml
+        id: template-yaml
+        run: |
+          echo 'deploymentYaml<<EOF' >> $GITHUB_OUTPUT
+          cat deployment.template.yaml | envsubst '$version $major $minor $patch $repoName $gcrImagePath' | sed "s/'/\"'\"/g" >> $GITHUB_OUTPUT
+          echo >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+      - name: Base64 encode deployment yaml
+        id: base64-template-yaml
+        run: |
+          echo '${{ steps.template-yaml.outputs.deploymentYaml }}'
+          echo base64DeploymentYaml=`echo '${{ steps.template-yaml.outputs.deploymentYaml }}' | base64 -w 0` >> $GITHUB_OUTPUT
+      - name: Build Spinnaker Payload
+        id: spinnaker-payload
+        run: |
+          echo 'spinnakerPayload<<EOF
+            {
+              "artifacts": [
+                {
+                  "reference": "${{ steps.base64-template-yaml.outputs.base64DeploymentYaml }}",
+                  "type": "embedded/base64",
+                  "name": "k8s manifest"
+                }
+              ],
+              "parameters": {
+                "Service Now Record": "${{ env.INPUT_CHANGE_REQUEST }}"
+              },
+              "secret": "${{ secrets.SPINNAKER_SECRET }}",
+              "sourceRegistry": "${{ env.ARTIFACTORY_REGISTRY }}",
+              "targetRegistry": "${{ env.GCR_REGISTRY }}",
+              "imagePaths": "${{ needs.Dockerize.outputs.imagePath }}"
+            }"' >> $GITHUB_OUTPUT
+          echo >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+      - name: Spinnaker Deploy Prod
+        run: >
+          curl 'https://api.spinnaker.homedepot.com/webhooks/webhook/${{ env.PROD_SPINNAKER_WEBHOOK }}' -X POST -H 'Content-Type: application/json; charset=utf-8' -d '${{ steps.spinnaker-payload.outputs.spinnakerPayload }}'
