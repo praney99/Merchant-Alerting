@@ -4,17 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 
-import java.text.DateFormat;
+import javax.persistence.Column;
+import javax.persistence.Entity;
 import java.util.Date;
 import java.util.UUID;
 
+@Entity
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class RetrieveAlertResponse {
 
+        @javax.persistence.Id
+        @Column(name ="Alert_Id")
         private UUID id;
         private String keyIdentifiers;
         private String systemSource;
@@ -26,5 +31,4 @@ public class RetrieveAlertResponse {
         private String lastUpdatedBy;
         private Date lastUpdateDate;
         private Date expirationDate;
-
 }

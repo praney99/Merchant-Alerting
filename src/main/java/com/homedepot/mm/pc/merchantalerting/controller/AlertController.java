@@ -69,6 +69,23 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
             AlertResponse alertResponse = new AlertResponse(alerts);
             return new ResponseEntity<>(alertResponse, HttpStatus.OK);
         }
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
+                @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content),
+                @ApiResponse(responseCode = "404", description = "No Data Found", content = @Content),
+                @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content),
+                @ApiResponse(responseCode = "503", description = "Service Unavailable", content = @Content)})
+        @Operation(summary = "Delete alerts by alertId")
+        @DeleteMapping(value = "/delete/{alertId}", produces = APPLICATION_JSON_VALUE)
+        @ResponseBody
+        public void DeletingAlertsByAlertId(@PathVariable("alertId") String alertId)
+        {
+            if (null == alertId || !isUserIdsInfoInputValid(alertId)) {
+                throw new ValidationException("No valid input provided");
+            }
+            alertService.deleteAlertByAlertId(alertId);
+            new ResponseEntity<>("The delete has been successful", HttpStatus.OK);
+        }
 
         private boolean isUserIdsInfoInputValid(String userId) {
 
