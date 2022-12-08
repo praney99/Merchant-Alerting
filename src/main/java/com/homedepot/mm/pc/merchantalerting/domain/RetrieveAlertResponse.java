@@ -19,8 +19,9 @@ import java.util.UUID;
 public class RetrieveAlertResponse {
 
         @javax.persistence.Id
-        @Column(name ="Alert_Id")
-        private UUID id;
+        @Column(name ="alertId")
+        private UUID alertId;
+
         private String keyIdentifiers;
         private String systemSource;
         private String type;

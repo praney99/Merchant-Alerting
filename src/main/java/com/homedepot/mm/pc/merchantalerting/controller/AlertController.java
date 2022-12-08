@@ -81,21 +81,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
         @ResponseBody
         public void DeletingAlertsByAlertId(@PathVariable("alertId") UUID alertId)
         {
-            if (null == alertId || !isAlertIdInfoInputValid(alertId)) {
+            if (null == alertId || alertId.equals("")) {
                 throw new ValidationException("No valid input provided");
             }
             alertService.deleteAlertByAlertId(alertId);
-            new ResponseEntity<>("The delete has been successful", HttpStatus.OK);
+            //return new ResponseEntity<>("The delete has been successful", HttpStatus.OK);
+            ResponseEntity.status(200);
         }
 
         private boolean isUserIdsInfoInputValid(String userId) {
 
             return !StringUtils.isEmpty(userId);
-        }
-
-        private boolean isAlertIdInfoInputValid(UUID id) {
-
-            return !StringUtils.isEmpty(String.valueOf(id));
         }
 
     }

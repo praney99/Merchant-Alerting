@@ -14,11 +14,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,13 +35,18 @@ import java.text.DateFormat;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.databind.type.LogicalType.DateTime;
 import static org.apache.coyote.http11.Constants.a;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LOCAL_DATE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LOCAL_DATE_TIME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -111,7 +120,7 @@ public class AlertControllerTest {
 
         RetrieveAlertResponse output = new RetrieveAlertResponse();
 
-        output.setId(UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f"));
+        output.setAlertId(UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f"));
 
 
         JSONObject key = new JSONObject();
@@ -162,90 +171,10 @@ public class AlertControllerTest {
 
     @DisplayName("DeleteByAlertId")
     @Test
-    void DeleteAlertId() throws Exception {
-
-        final String requestId = "UMQ8QTG";
-        final String responseString = "c0533e1f-f452-4747-8293-a43cf168ad3f";
-        CreateAlertRequest input = new CreateAlertRequest();
-        input.setSystemSource("My Assortment");
-        input.setType("Regional Assortment");
-        JSONObject key = new JSONObject();
-        key.put("sku", "123456");
-        key.put("cpi", "0.98");
-        input.setKeyIdentifiers(key.toString());
-        input.setTemplateName("default");
-        JSONObject template = new JSONObject();
-        template.put("title", "test1");
-        template.put("titleDescription", "test2");
-        template.put("primaryText1", "test3");
-        template.put("primaryLink", "test4");
-        input.setTemplateBody(template.toString());
-        input.setExpirationDate("2023-09-30");
-
-
-        ResponseEntity<CreateAlertRequest> mockResponse = new ResponseEntity(input, HttpStatus.OK);
-        when(alertService.createAlertByUser(Mockito.any(CreateAlertRequest.class))).thenReturn(String.valueOf(mockResponse));
-        doNothing().doThrow(new RuntimeException()).when(alertService).deleteAlertByAlertId(UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f"));
-
-        when(alertService.createAlertByUser(any())).thenReturn(responseString);
-
-
-        Gson gson = new GsonBuilder().create();
-        this.mvc.perform(
-                        delete("/alert/delete/alertId").content(gson.toJson(responseString)).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(200));
-    }
-
-    public String Randomtext(String A) {
-        char[] c = A.toCharArray();
-        String Random = "";
-        for (int x = 0; x < c.length; x++) {
-            c[x] = (char) (c[x] + (Math.random() * 10 + 1));
-            Random = Random + c[x];
-        }
-        return Random;
-    }
-
-    public Map<String,CreateAlertRequest> CreateAlertRandomRequest(int N) throws Exception {
-        int Times = 0;
-        Map<String, CreateAlertRequest> MultiMockResponse = new HashMap<>();
-        do {
-            final String requestId = Randomtext("UMQ8QTG");
-            CreateAlertRequest input = new CreateAlertRequest();
-            input.setSystemSource("My Assortment");
-            input.setType("Regional Assortment");
-            JSONObject key = new JSONObject();
-            key.put("sku", "123456");
-            key.put("cpi", "0.98");
-            input.setKeyIdentifiers(key.toString());
-            input.setTemplateName("default");
-            JSONObject template = new JSONObject();
-            template.put("title", "test1");
-            template.put("titleDescription", "test2");
-            template.put("primaryText1", "test3");
-            template.put("primaryLink", "test4");
-            input.setTemplateBody(template.toString());
-            input.setExpirationDate("2023-09-30");
-            MultiMockResponse.put(requestId, input);
-    Times++;
-        } while (Times < N); return MultiMockResponse;
-    }
-
-
-    @DisplayName("DeleteByAlertRelatedUsersbyAlertId")
-    @Test
-    void DeleteUsersById() throws Exception {
-        final String responseString = "c0533e1f-f452-4747-8293-a43cf168ad3f";
-        Map<String,CreateAlertRequest>TestAlert=new HashMap<>();
-        TestAlert=CreateAlertRandomRequest(5);
-        when(alertService.createAlertByUser(Mockito.any(CreateAlertRequest.class))).thenReturn(String.valueOf(TestAlert));
-        doNothing().doThrow(new RuntimeException()).when(alertService).deleteAlertByAlertId(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
-        when(alertService.createAlertByUser(any())).thenReturn(TestAlert.toString());
-
-        Gson gson = new GsonBuilder().create();
-        this.mvc.perform(
-                        delete("/alert/delete/alertId").content(gson.toJson(responseString)).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(200));
+    void DeletingAlertsByAlertId() throws Exception{
+        Mockito.doNothing().when(alertService).deleteAlertByAlertId(UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f"));
+        this.mvc.perform(delete("/alert/delete/{alertId}", UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f")).contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk());
     }
 
 }
