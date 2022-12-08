@@ -264,7 +264,7 @@ jobs:
         id: template-yaml
         run: |
           echo 'deploymentYaml<<EOF' >> $GITHUB_OUTPUT
-          cat deployment.template.yaml | envsubst '$version $major $minor $patch $repoName $gcrImagePath' | sed "s/'/\"'\"/g" >> $GITHUB_OUTPUT
+          cat deployment.template.yaml | envsubst '$version $major $minor $patch $repoName $gcrImagePath' | sed "s/'/'\"'\"'/g" >> $GITHUB_OUTPUT
           echo >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
       - name: Base64 encode deployment yaml
