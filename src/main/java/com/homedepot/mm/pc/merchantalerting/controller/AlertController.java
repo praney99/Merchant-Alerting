@@ -79,13 +79,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
         @Operation(summary = "Delete alerts by alertId")
         @DeleteMapping(value = "/delete/{alertId}", produces = APPLICATION_JSON_VALUE)
         @ResponseBody
-        public void DeletingAlertsByAlertId(@PathVariable("alertId") UUID alertId)
+        public void  deleteAlertsById(@PathVariable("alertId") UUID alertId)
         {
             if (null == alertId || alertId.equals("")) {
                 throw new ValidationException("No valid input provided");
             }
             alertService.deleteAlertByAlertId(alertId);
-            //return new ResponseEntity<>("The delete has been successful", HttpStatus.OK);
             ResponseEntity.status(200);
         }
 

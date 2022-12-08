@@ -169,9 +169,9 @@ public class AlertControllerTest {
         Assertions.assertTrue(response.toString().length() > 0);
     }
 
-    @DisplayName("DeleteByAlertId")
+    @DisplayName("DeleteAlertsById")
     @Test
-    void DeletingAlertsByAlertId() throws Exception{
+    void deleteAlertsById() throws Exception{
         Mockito.doNothing().when(alertService).deleteAlertByAlertId(UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f"));
         this.mvc.perform(delete("/alert/delete/{alertId}", UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f")).contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk());

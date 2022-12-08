@@ -53,7 +53,7 @@ public class AlertService {
     public void deleteAlertByAlertId(UUID alertId) {
         try {
             if (!(alertId.equals("")) || (alertId != null)) {
-                //alertDAO.deleteById(alertId);
+                alertDAO.deleteById(alertId);
             } else {
                 log.error("AlertId is null");
             }
