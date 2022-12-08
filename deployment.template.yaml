@@ -28,13 +28,13 @@ spec:
             - name: VERSION
               value: ${version}
             - name: CONTEXT_PATH
-              value: /*
+              value: /v${major}
           image: ${gcrImagePath}
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 12
             httpGet:
-              path: /actuator/health
+              path: /v${major}/actuator/health
               port: 8080
             periodSeconds: 10
           name: ${repoName}
@@ -43,7 +43,7 @@ spec:
           readinessProbe:
             failureThreshold: 12
             httpGet:
-              path: /actuator/health
+              path: /v${major}/actuator/health
               port: 8080
             periodSeconds: 5
           resources:
@@ -60,7 +60,9 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    beat.cloud.google.com/backend-config: '{"ports": {"http": "${repoName}"}}'
+    beta.cloud.google.com/backend-config:
+      ports:
+        http: ${repoName}
   labels:
     app: ${repoName}-${major}
     version: '${major}'
@@ -98,8 +100,8 @@ kind: BackendConfig
 metadata:
   labels:
     app: ${repoName}
-    branch: master
-    instance: master
+    branch: main
+    instance: main
   name: ${repoName}
   namespace: pricing-guru
 spec:
@@ -125,8 +127,8 @@ metadata:
     networking.gke.io/managed-certificates: crt-pricing-guru-merchant-alerting
   labels:
     app: ${repoName}
-    branch: master
-    instance: master
+    branch: main
+    instance: main
   name: ${repoName}-ingress
   namespace: pricing-guru
 spec:
@@ -139,5 +141,5 @@ spec:
                 name: ${repoName}-${major}
                 port:
                   number: 8080
-            path: /*
+            path: /v${major}/*
             pathType: ImplementationSpecific
