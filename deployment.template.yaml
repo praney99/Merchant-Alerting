@@ -36,6 +36,7 @@ spec:
             httpGet:
               path: /v${major}/actuator/health
               port: 8080
+            initialDelaySeconds: 20
             periodSeconds: 10
           name: ${repoName}
           ports:
@@ -45,7 +46,8 @@ spec:
             httpGet:
               path: /v${major}/actuator/health
               port: 8080
-            periodSeconds: 5
+            initialDelaySeconds: 20
+            periodSeconds: 10
           resources:
             limits:
               cpu: 900m
@@ -60,8 +62,7 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    beta.cloud.google.com/backend-config: '{"ports": {"8080": "${repoName}-neg"}}'
-    cloud.google.com/neg: '{"ingress": true}'                                        
+    beta.cloud.google.com/backend-config: '{"ports": {"http": "${repoName}"}}'
   labels:
     app: ${repoName}-${major}
     version: '${major}'
@@ -94,7 +95,7 @@ spec:
     name: ${repoName}-${major}
   targetCPUUtilizationPercentage: 50
 ---
-apiVersion: cloud.google.com/v1beta1
+apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
   labels:
