@@ -1,8 +1,8 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.homedepot.mm.pc.merchantalerting.Exception.ValidationException;
+import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.domain.AlertResponse;
-import com.homedepot.mm.pc.merchantalerting.domain.RetrieveAlertResponse;
 
 import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,10 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.util.CollectionUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,7 +67,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
             if (null == userId || !isUserIdsInfoInputValid(userId)) {
                 throw new ValidationException("No valid input provided");
             }
-            List<RetrieveAlertResponse> alerts = alertService.retrieveAlertByUser(userId);
+            List<Alert> alerts = alertService.retrieveAlertByUser(userId);
             AlertResponse alertResponse = new AlertResponse(alerts);
             return new ResponseEntity<>(alertResponse, HttpStatus.OK);
         }
@@ -77,15 +78,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
                 @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content),
                 @ApiResponse(responseCode = "503", description = "Service Unavailable", content = @Content)})
         @Operation(summary = "Delete alerts by alertId")
-        @DeleteMapping(value = "/delete/{alertId}", produces = APPLICATION_JSON_VALUE)
+        @DeleteMapping(value = "/{alertId}", produces = APPLICATION_JSON_VALUE)
+        @Transactional
         @ResponseBody
-        public void  deleteAlertsById(@PathVariable("alertId") UUID alertId)
+        public ResponseEntity<ResponseEntity>deleteAlertsById(@PathVariable("alertId") @NotNull UUID alertId)
         {
-            if (null == alertId || alertId.equals("")) {
-                throw new ValidationException("No valid input provided");
-            }
             alertService.deleteAlertByAlertId(alertId);
-            ResponseEntity.status(200);
+            return new ResponseEntity<>(HttpStatus.OK);
         }
 
         private boolean isUserIdsInfoInputValid(String userId) {

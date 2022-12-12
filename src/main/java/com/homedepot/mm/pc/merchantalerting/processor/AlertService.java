@@ -1,9 +1,9 @@
 package com.homedepot.mm.pc.merchantalerting.processor;
 
-import com.homedepot.mm.pc.merchantalerting.dao.AlertDAO;
+import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
-import com.homedepot.mm.pc.merchantalerting.domain.RetrieveAlertResponse;
 
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -20,7 +20,6 @@ import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.NO_R
 public class AlertService {
 
     private AlertInfoDAO alertInfoDAO;
-    private AlertDAO alertDAO;
 
     @Autowired
 
@@ -41,25 +40,29 @@ public class AlertService {
     }
 
 
-    public List<RetrieveAlertResponse> retrieveAlertByUser(String userId) {
+    public List<Alert> retrieveAlertByUser(String userId) {
 
-        List<RetrieveAlertResponse> retrieveAlertResponse;
+        List<Alert> retrieveAlertResponse;
         retrieveAlertResponse = alertInfoDAO.retrieveAlertDetails(userId);
         log.info("createAlertRequest: {}", userId);
 
         return retrieveAlertResponse;
     }
 
-    public void deleteAlertByAlertId(UUID alertId) {
-        try {
-            if (!(alertId.equals("")) || (alertId != null)) {
-                alertDAO.deleteById(alertId);
+    public String deleteAlertByAlertId(UUID alertId) {
+        if (!(StringUtils.isEmpty(alertId.toString()))) {
+            try {
+                alertInfoDAO.deleteById(alertId);
+                return"The AlertId: "+alertId+" has been deleted";
+                }
+                    catch (EmptyResultDataAccessException erdae)
+                    {
+                    return ("The value {}  \nIs not correct:"+ alertId);
+                    }
             } else {
-                log.error("AlertId is null");
+                return ("AlertId is null");
             }
-        } catch (EmptyResultDataAccessException erdae) {
-            log.error(NO_RECORDS_FOR_GIVEN_INPUT);
-        }
+
     }
 
 }

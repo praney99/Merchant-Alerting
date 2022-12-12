@@ -2,24 +2,22 @@ package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.homedepot.mm.pc.merchantalerting.controller.AlertController;
 
+import com.homedepot.mm.pc.merchantalerting.dao.AlertInfoDAO;
+import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.domain.AlertResponse;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
-import com.homedepot.mm.pc.merchantalerting.domain.RetrieveAlertResponse;
 import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
-import org.checkerframework.checker.units.qual.A;
-import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,20 +29,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.text.DateFormat;
-import java.text.FieldPosition;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static com.fasterxml.jackson.databind.type.LogicalType.DateTime;
-import static org.apache.coyote.http11.Constants.a;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.LOCAL_DATE;
-import static org.assertj.core.api.InstanceOfAssertFactories.LOCAL_DATE_TIME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,7 +47,11 @@ public class AlertControllerTest {
     @MockBean
     private AlertService alertService;
 
+    @MockBean
     private AlertController alertController;
+
+    @Mock
+    AlertInfoDAO alertInfoDAO;
 
     @BeforeEach
     public void setUp() {
@@ -118,20 +109,17 @@ public class AlertControllerTest {
 
         AlertResponse response;
 
-        RetrieveAlertResponse output = new RetrieveAlertResponse();
+        Alert output = new Alert();
 
-        output.setAlertId(UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f"));
+        output.setId(UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f"));
 
 
         JSONObject key = new JSONObject();
         key.put("sku", "123456");
         key.put("cpi", "0.98");
         output.setKeyIdentifiers(key.toString());
-
         output.setSystemSource("My Assortment");
-
         output.setType("Regional Assortment");
-
         output.setTemplateName("default");
 
         JSONObject template = new JSONObject();
@@ -142,21 +130,15 @@ public class AlertControllerTest {
         output.setTemplateBody(template.toString());
 
         output.setCreatedBy("");
-
         output.setCreateDate(df);
-
         output.setLastUpdatedBy("");
-
         output.setLastUpdateDate(df);
-
         output.setExpirationDate(df);
 
         response = AlertResponse.builder().alerts(List.of(output)).build();
 
         ResponseEntity<String> mockResponse = new ResponseEntity(requestId, HttpStatus.OK);
-
         when(alertService.createAlertByUser(any(CreateAlertRequest.class))).thenReturn(String.valueOf(mockResponse));
-
         when(alertService.createAlertByUser(any())).thenReturn(String.valueOf(response));
 
         System.out.println(response);
@@ -165,17 +147,40 @@ public class AlertControllerTest {
                         get("/alert/retrieve/requestId").content(gson.toJson(requestId)).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(200));
 
-        Assertions.assertNotNull(response);
         Assertions.assertTrue(response.toString().length() > 0);
     }
+    public Alert generateAlert(String userId, UUID alertId) throws JSONException {
+
+        Alert alert= new Alert();
+        alert.setId(alertId);
+        alert.setKeyIdentifiers(new JSONObject()
+                .put("sku", "123456").put("cpi", "0.98").toString());
+        alert.setSystemSource("My Assortment");
+        alert.setType("Regional Assortment");
+        alert.setTemplateName("default");
+        alert.setTemplateBody(new JSONObject().put("title", "test1")
+                .put("titleDescription", "test2")
+                .put("primaryText1", "test3")
+                .put("primaryLink", "test4").toString());
+        alert.setCreatedBy(userId);
+        alert.setCreateDate(new Date());
+        alert.setLastUpdatedBy(userId);
+        alert.setLastUpdateDate(new Date());
+        alert.setExpirationDate(new Date());
+
+        return alert;
+    }
+
 
     @DisplayName("DeleteAlertsById")
     @Test
     void deleteAlertsById() throws Exception{
-        Mockito.doNothing().when(alertService).deleteAlertByAlertId(UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f"));
-        this.mvc.perform(delete("/alert/delete/{alertId}", UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f")).contentType(MediaType.APPLICATION_JSON))
+        UUID alertId= UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f");
+        Mockito.doNothing().when(alertInfoDAO).deleteById(Mockito.any());
+        this.mvc.perform(delete("/alert/{alertId}", alertId).contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk());
     }
+
 
 }
 
