@@ -1,15 +1,16 @@
-name: Java GCP pipeline Dev
+name: Java GCP pipeline Stage
 
 on:
   workflow_dispatch:
   push:
-    branches-ignore:
+    branches:
       - 'main'
 
 env:
   DEV_SPINNAKER_WEBHOOK: product-ops-gke-dev
-  IMAGE_PATH: product-ops/snapshot
-  GCR_REGISTRY: us.gcr.io/hd-pricing-dev
+  STAGE_SPINNAKER_WEBHOOK: product-ops-gke-stage
+  IMAGE_PATH: product-ops/release
+  GCR_REGISTRY: us.gcr.io/hd-pricing-stage
   ARTIFACTORY_REGISTRY: docker.artifactory.homedepot.com
 
 jobs:
@@ -67,7 +68,9 @@ jobs:
           echo "minor=${{fromJson(steps.set_var.outputs.buildConfig).versioning.minor}}" >> $GITHUB_OUTPUT
           echo "patch=${{fromJson(steps.set_var.outputs.buildConfig).versioning.patch}}" >> $GITHUB_OUTPUT
           echo "version=${{fromJson(steps.set_var.outputs.buildConfig).versioning.major}}.${{fromJson(steps.set_var.outputs.buildConfig).versioning.minor}}.${{fromJson(steps.set_var.outputs.buildConfig).versioning.patch}}" >> $GITHUB_OUTPUT
-          echo "sem_ver=${{fromJson(steps.set_var.outputs.buildConfig).versioning.major}}.${{fromJson(steps.set_var.outputs.buildConfig).versioning.minor}}.${{fromJson(steps.set_var.outputs.buildConfig).versioning.patch}}-alpha-${{ steps.short-sha.outputs.sha_short }}" >> $GITHUB_OUTPUT
+          echo "sem_ver=${{fromJson(steps.set_var.outputs.buildConfig).versioning.major}}.${{fromJson(steps.set_var.outputs.buildConfig).versioning.minor}}.${{fromJson(steps.set_var.outputs.buildConfig).versioning.patch}}" >> $GITHUB_OUTPUT
+      - name: Version and Tag
+        run: flow github -v v${{ steps.get-version.outputs.sem_ver }} version release
     outputs:
       branch: ${{ steps.extract_branch.outputs.branch }}
       short_branch: ${{ steps.short_branch.outputs.branch }}
@@ -78,7 +81,7 @@ jobs:
       sem_ver: ${{ steps.get-version.outputs.sem_ver }}
 
   Testing:
-    runs-on: [one-thd-onprem-np]
+    runs-on: [ one-thd-onprem-np ]
     needs: [Artifactory_Token]
     container:
       image: docker.artifactory.homedepot.com/flow/java11:latest
@@ -97,10 +100,111 @@ jobs:
         run: ./scripts/unit_test.sh
       - name: API Tests
         run: ./scripts/api_test.sh
+      - name: Archive test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_output
+          path: test_output
+          retention-days: 90
+
+  UploadTestResults:
+    runs-on: [ one-thd-onprem-np ]
+    needs: [Artifactory_Token, Testing, VersionAndTag]
+    container:
+      image: docker.artifactory.homedepot.com/flow/java11:latest
+      credentials:
+        username: ${{ secrets.ARTIFACTORY_USER }}
+        password: ${{ needs.Artifactory_Token.outputs.docker_token }}
+    steps:
+      - name: Pull test results
+        uses: actions/download-artifact@v2
+        with:
+          name: test_output
+          path: test_output
+      - name: Install zip package
+        run: apt-get install -y zip
+      - name: Zip test results
+        run: zip -r test_output test_output
+      - name: Upload test results zip to sqhub
+        run: |
+          curl -H 'X-Auth-Token: ${{ secrets.QUALITYHUB_TOKEN }}' \
+          -H 'X-MyApplication-API-Key: mp_merchant-alerting' \
+          -H 'Content-Type: multipart/form-data' \
+          -X POST \
+          -F pipelineExecutionId=$(openssl rand -hex 16) \
+          -F jobName=Tests -F applicationName=mp_merchant-alerting -F version=${{ needs.VersionAndTag.outputs.version }} \
+          -F jobSetName=Tests -F jobExecutionStatus=COMPLETED -F deploymentEnvironment=production -F testType=Tests \
+          -F 'file=@test_output.zip;type=application/zip' http://api-cipipeline.sqhub.homedepot.com/buildpipeline/publish
+
+  QualityScan:
+    runs-on: [ one-thd-onprem-np ]
+    needs: [ Artifactory_Token, VersionAndTag, Testing ]
+    container:
+      image: docker.artifactory.homedepot.com/flow/java11:latest
+      credentials:
+        username: ${{ secrets.ARTIFACTORY_USER }}
+        password: ${{ needs.Artifactory_Token.outputs.docker_token }}
+      env:
+        ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+        ARTIFACTORY_TOKEN: ${{ needs.Artifactory_Token.outputs.maven_token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build
+        run: ./scripts/compile.sh
+      - name: Pull test results
+        uses: actions/download-artifact@v2
+        with:
+          name: test_output
+          path: test_output
+      - name: Sonar Scan
+        run: flow sonar scan release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.VersionAndTag.outputs.version }}
+
+  SecurityScan:
+    runs-on: [ one-thd-onprem-np ]
+    needs: [Artifactory_Token]
+    container:
+      image: docker.artifactory.homedepot.com/flow/java11:latest
+      credentials:
+        username: ${{ secrets.ARTIFACTORY_USER }}
+        password: ${{ needs.Artifactory_Token.outputs.docker_token }}
+      env:
+        ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_USER }}
+        ARTIFACTORY_TOKEN: ${{ needs.Artifactory_Token.outputs.maven_token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build
+        run: ./scripts/compile.sh
+      - name: ShiftLeft scan
+        id: shiftleft-scan
+        uses: one-thd/de-actions/shiftleft-action@shiftleft-v1.0.3
+        with:
+          SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
+          SHIFTLEFT_ORG_ID: ${{ secrets.SHIFTLEFT_ORG_ID }}
+          shiftleft-team: THD-Pricing-Recommendation
+          shiftleft-group: MPulse
+          shiftleft-lang: java
+          artifact-dir: target
+          artifact-extension: .jar
+          break-the-build: false
+
+      - name: ShiftLeft results
+        run: |
+          ${GITHUB_WORKSPACE}/sl check-analysis \
+            --no-build-rules \
+            --report \
+            --app ${{ steps.shiftleft-scan.outputs.app-id }} \
+            --target scan.${{ steps.shiftleft-scan.outputs.scan-id }}
+        env:
+          SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
 
   Dockerize:
     runs-on: [ one-thd-onprem-np ]
-    needs: [ Artifactory_Token, VersionAndTag, Testing ]
+    needs: [ Artifactory_Token, VersionAndTag, Testing, QualityScan, SecurityScan ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -123,8 +227,8 @@ jobs:
       - name: Build Image Path
         id: build-image-path
         run: |
-            echo "imagePath=${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ needs.VersionAndTag.outputs.sem_ver }}" >> $GITHUB_OUTPUT
-            echo "gcrImagePath=${{ env.GCR_REGISTRY }}/${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ needs.VersionAndTag.outputs.sem_ver }}" >> $GITHUB_OUTPUT
+          echo "imagePath=${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ needs.VersionAndTag.outputs.sem_ver }}" >> $GITHUB_OUTPUT
+          echo "gcrImagePath=${{ env.GCR_REGISTRY }}/${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ needs.VersionAndTag.outputs.sem_ver }}" >> $GITHUB_OUTPUT
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
@@ -166,8 +270,8 @@ jobs:
       - name: Base64 encode deployment yaml
         id: base64-template-yaml
         run: |
-            echo '${{ steps.template-yaml.outputs.deploymentYaml }}'
-            echo base64DeploymentYaml=`echo '${{ steps.template-yaml.outputs.deploymentYaml }}' | base64 -w 0` >> $GITHUB_OUTPUT
+          echo '${{ steps.template-yaml.outputs.deploymentYaml }}'
+          echo base64DeploymentYaml=`echo '${{ steps.template-yaml.outputs.deploymentYaml }}' | base64 -w 0` >> $GITHUB_OUTPUT
       - name: Build Spinnaker Payload
         id: spinnaker-payload
         run: |
@@ -190,3 +294,6 @@ jobs:
       - name: Spinnaker Deploy Dev
         run: >
           curl 'https://api.spinnaker.homedepot.com/webhooks/webhook/${{ env.DEV_SPINNAKER_WEBHOOK }}' -X POST -H 'Content-Type: application/json; charset=utf-8' -d '${{ steps.spinnaker-payload.outputs.spinnakerPayload }}'
+      - name: Spinnaker Deploy STAGE
+        run: >
+          curl 'https://api.spinnaker.homedepot.com/webhooks/webhook/${{ env.STAGE_SPINNAKER_WEBHOOK }}' -X POST -H 'Content-Type: application/json; charset=utf-8' -d '${{ steps.spinnaker-payload.outputs.spinnakerPayload }}'
