@@ -60,12 +60,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
         @Operation(summary = "Create alerts by LDAP")
         @GetMapping(value = "/retrieve/{userId}", produces = APPLICATION_JSON_VALUE)
         @ResponseBody
+
         public ResponseEntity<List<RetrieveAlertResponse>> retrieveAlertByLdap(@PathVariable("userId") String userId) {
 
             if (null == userId || !isUserIdsInfoInputValid(userId)) {
                 throw new ValidationException("No valid input provided");
             }
             List<RetrieveAlertResponse> alerts = alertService.retrieveAlertByUser(userId);
+
             return new ResponseEntity<>(alerts, HttpStatus.OK);
         }
 
