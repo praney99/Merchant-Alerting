@@ -34,7 +34,7 @@ public class AlertController {
             @ApiResponse(responseCode = "404", description = "No Data Found", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content),
             @ApiResponse(responseCode = "503", description = "Service Unavailable", content = @Content)})
-    @Operation(summary = "Create alerts by LDAP")
+    @Operation(summary = "Create alert by LDAP.")
     @PostMapping(value = "/user/{ldap}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<Alert> createAlertByLdap(@PathVariable("ldap") String ldap, @RequestBody CreateAlertRequest createAlertRequest) {
@@ -50,7 +50,7 @@ public class AlertController {
             @ApiResponse(responseCode = "404", description = "No Data Found", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content),
             @ApiResponse(responseCode = "503", description = "Service Unavailable", content = @Content)})
-    @Operation(summary = "Create alerts by LDAP")
+    @Operation(summary = "Retrieve alerts by LDAP.")
     @GetMapping(value = "/user/{ldap}", produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<List<Alert>> retrieveAlertsByLdap(@PathVariable("ldap") String ldap) {
@@ -66,7 +66,7 @@ public class AlertController {
             @ApiResponse(responseCode = "404", description = "No Data Found", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content),
             @ApiResponse(responseCode = "503", description = "Service Unavailable", content = @Content)})
-    @Operation(summary = "Create alerts by LDAP")
+    @Operation(summary = "Retrieve alerts by alert id.")
     @GetMapping(value = "/{alertId}", produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<Alert> retrieveAlertById(@PathVariable("alertId") String alertId) {
