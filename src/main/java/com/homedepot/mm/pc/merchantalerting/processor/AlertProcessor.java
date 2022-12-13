@@ -13,13 +13,13 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class AlertService {
+public class AlertProcessor {
 
     private AlertInfoDAO alertInfoDAO;
 
     @Autowired
 
-    public AlertService(AlertInfoDAO alertInfoDAO) {
+    public AlertProcessor(AlertInfoDAO alertInfoDAO) {
 
         this.alertInfoDAO = alertInfoDAO;
     }

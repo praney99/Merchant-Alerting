@@ -10,6 +10,7 @@ import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.expression.ParseException;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @Builder
 @Data
@@ -20,9 +21,9 @@ public class CreateAlertRequest {
         private String systemSource;
         private String type;
         private String templateName;
-        private String templateBody;
+        private Map<String,String> templateBody;
         private String expirationDate;
-        private String keyIdentifiers;
+        private Map<String,String> keyIdentifiers;
 
 
 }
