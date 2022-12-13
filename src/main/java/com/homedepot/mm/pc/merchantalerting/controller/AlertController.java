@@ -57,7 +57,7 @@ public class AlertController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(alertService.getAlertsForUser(ldap));
+                .body(alertService.getAlertsByLdap(ldap));
     }
 
     @ApiResponses(value = {
@@ -71,7 +71,7 @@ public class AlertController {
     @ResponseBody
     public ResponseEntity<Alert> retrieveAlertById(@PathVariable("alertId") String alertId) {
         Optional<Alert> alert = alertService.getAlert(UUID.fromString(alertId));
-        return new ResponseEntity<>(alert.get(), HttpStatus.OK);
+        return new ResponseEntity<>(alert.orElse(null), HttpStatus.OK);
     }
 
 }

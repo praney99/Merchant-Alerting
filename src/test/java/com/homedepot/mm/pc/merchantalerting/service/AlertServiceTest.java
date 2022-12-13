@@ -112,7 +112,7 @@ public class AlertServiceTest {
         when(alertRepository.findAlertsByLdap(any()))
                 .thenReturn(alerts);
 
-        List<Alert> response = alertService.getAlertsForUser(ldap);
+        List<Alert> response = alertService.getAlertsByLdap(ldap);
         Assert.assertEquals(response.get(0).getId(), alertId);
     }
 }

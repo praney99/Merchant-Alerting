@@ -64,7 +64,7 @@ public class AlertService {
         return alertRepository.findById(uuid);
     }
 
-    public List<Alert> getAlertsForUser(String ldap) {
+    public List<Alert> getAlertsByLdap(String ldap) {
         return alertRepository.findAlertsByLdap(ldap);
     }
 
