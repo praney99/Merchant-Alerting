@@ -55,7 +55,7 @@ public class AlertServiceTest {
         assertNotNull(alert);//Cheking the aler not null
         //Cheking the output of the method.
         assertEquals("The AlertId: "+alert.getId()+" has been deleted",alertService.deleteAlertByAlertId(alert.getId()));
-        //chekingWithAnotherAlert
+        // Cheking With Another Alert
         System.out.println(alert.getId());
         alert.setId(UUID.randomUUID());
         assertEquals("The AlertId: "+alert.getId()+" has been deleted",alertService.deleteAlertByAlertId(alert.getId()));
