@@ -4,9 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import com.homedepot.mm.pc.merchantalerting.dao.AlertInfoDAO;
-import com.homedepot.mm.pc.merchantalerting.model.Alert;
+import com.homedepot.mm.pc.merchantalerting.domain.Alert;
 import com.homedepot.mm.pc.merchantalerting.domain.AlertResponse;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
+import com.homedepot.mm.pc.merchantalerting.domain.model.AlertInfo;
 import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +52,7 @@ public class AlertControllerTest {
     private AlertController alertController;
 
     @Mock
-    AlertInfoDAO alertInfoDAO;
+    AlertInfo alertInfo;
 
     @BeforeEach
     public void setUp() {
@@ -176,7 +177,7 @@ public class AlertControllerTest {
     @Test
     void deleteAlertsById() throws Exception{
         UUID alertId= UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f");
-        Mockito.doNothing().when(alertInfoDAO).deleteById(Mockito.any());
+        Mockito.doNothing().when(alertInfo).deleteById(Mockito.any());
         this.mvc.perform(delete("/alert/{alertId}", alertId).contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk());
     }

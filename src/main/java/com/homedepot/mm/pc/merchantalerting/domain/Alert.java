@@ -1,12 +1,12 @@
-package com.homedepot.mm.pc.merchantalerting.model;
+package com.homedepot.mm.pc.merchantalerting.domain;
 
 import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Date;
 import java.util.UUID;
-import javax.persistence.Id;
 
 @Entity
 @Setter

@@ -1,8 +1,10 @@
 package com.homedepot.mm.pc.merchantalerting.dao;
 
+import com.homedepot.mm.pc.merchantalerting.domain.Alert;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 
-import com.homedepot.mm.pc.merchantalerting.model.Alert;
+
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +17,7 @@ import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.*;
 
 @Repository
 @Slf4j
-public interface AlertInfoDAO extends JpaRepository<Alert, UUID> {
+public class AlertInfoDAO {
 
 
     public String createAlertDetails(CreateAlertRequest createAlertRequest) {

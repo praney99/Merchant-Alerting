@@ -1,6 +1,7 @@
 package com.homedepot.mm.pc.merchantalerting.processor;
 
-import com.homedepot.mm.pc.merchantalerting.model.Alert;
+import com.homedepot.mm.pc.merchantalerting.domain.Alert;
+import com.homedepot.mm.pc.merchantalerting.domain.model.AlertInfo;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 
 import io.micrometer.core.instrument.util.StringUtils;
@@ -13,19 +14,20 @@ import com.homedepot.mm.pc.merchantalerting.dao.AlertInfoDAO;
 
 import java.util.*;
 
+import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.ALERT_DELETED;
 import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.NO_RECORDS_FOR_GIVEN_INPUT;
 
 @Service
 @Slf4j
 public class AlertService {
 
+    private AlertInfo alertInfo;
     private AlertInfoDAO alertInfoDAO;
 
     @Autowired
+    public AlertService(AlertInfo alertInfo) {
 
-    public AlertService(AlertInfoDAO alertInfoDAO) {
-
-        this.alertInfoDAO = alertInfoDAO;
+        this.alertInfo = alertInfo;
     }
 
 
@@ -50,18 +52,15 @@ public class AlertService {
     }
 
     public String deleteAlertByAlertId(UUID alertId) {
-        if (!(StringUtils.isEmpty(alertId.toString()))) {
             try {
-                alertInfoDAO.deleteById(alertId);
-                return"The AlertId: "+alertId+" has been deleted";
+                alertInfo.deleteById(alertId);
+                return ALERT_DELETED;
                 }
                     catch (EmptyResultDataAccessException erdae)
                     {
-                    return ("The value {}  \nIs not correct:"+ alertId);
+                        log.error("Incorrect value" + alertId);
+                        return ("Incorrect value of alert id");
                     }
-            } else {
-                return ("AlertId is null");
-            }
 
     }
 

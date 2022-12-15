@@ -1,7 +1,8 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.homedepot.mm.pc.merchantalerting.Exception.ValidationException;
-import com.homedepot.mm.pc.merchantalerting.model.Alert;
+import com.homedepot.mm.pc.merchantalerting.dao.AlertInfoDAO;
+import com.homedepot.mm.pc.merchantalerting.domain.Alert;
 import com.homedepot.mm.pc.merchantalerting.domain.AlertResponse;
 
 import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
@@ -30,7 +31,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     @RestController
     @RequestMapping(value = "/alert")
     public class AlertController {
-        @Autowired
         AlertService alertService;
 
         public AlertController(AlertService alertService) {
@@ -83,10 +83,11 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
         @DeleteMapping(value = "/{alertId}", produces = APPLICATION_JSON_VALUE)
         @Transactional
         @ResponseBody
-        public ResponseEntity<ResponseEntity>deleteAlertsById(@PathVariable("alertId") @NotNull UUID alertId)
+        public ResponseEntity<String>deleteAlertsById(@PathVariable("alertId") @NotNull UUID alertId)
         {
             alertService.deleteAlertByAlertId(alertId);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON)
+                    .body(alertService.deleteAlertByAlertId(alertId));
         }
 
         private boolean isUserIdsInfoInputValid(String userId) {

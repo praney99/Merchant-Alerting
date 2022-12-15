@@ -1,6 +1,6 @@
 package com.homedepot.mm.pc.merchantalerting.domain;
 
-import com.homedepot.mm.pc.merchantalerting.model.Alert;
+import com.homedepot.mm.pc.merchantalerting.domain.Alert;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

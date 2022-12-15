@@ -1,7 +1,8 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.homedepot.mm.pc.merchantalerting.dao.AlertInfoDAO;
-import com.homedepot.mm.pc.merchantalerting.model.Alert;
+import com.homedepot.mm.pc.merchantalerting.domain.Alert;
+import com.homedepot.mm.pc.merchantalerting.domain.model.AlertInfo;
 import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.util.Date;
 import java.util.UUID;
 
+import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.ALERT_DELETED;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -26,6 +28,8 @@ public class AlertServiceTest {
     @Autowired
     AlertService alertService;
 
+    @MockBean
+    AlertInfo alertInfo;
     private Alert alert;
 
     @BeforeEach
@@ -51,15 +55,15 @@ public class AlertServiceTest {
     }
     @Test
     void DeleteAlert() throws JSONException {
-        Mockito.doNothing().when(alertInfoDAO).deleteById(Mockito.any());
+        Mockito.doNothing().when(alertInfo).deleteById(Mockito.any());
         // Checking the alert not null
         assertNotNull(alert);
         // Checking the output of the method.
-        assertEquals("The AlertId: "+alert.getId()+" has been deleted",alertService.deleteAlertByAlertId(alert.getId()));
+        assertEquals(ALERT_DELETED,alertService.deleteAlertByAlertId(alert.getId()));
         // Cheking With Another Alert
         System.out.println(alert.getId());
         alert.setId(UUID.randomUUID());
-        assertEquals("The AlertId: "+alert.getId()+" has been deleted",alertService.deleteAlertByAlertId(alert.getId()));
+        assertEquals(ALERT_DELETED,alertService.deleteAlertByAlertId(alert.getId()));
         System.out.println(alert.getId());
     }
 }
