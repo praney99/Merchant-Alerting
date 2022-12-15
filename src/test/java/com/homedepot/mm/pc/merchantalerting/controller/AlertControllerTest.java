@@ -2,26 +2,20 @@ package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import com.homedepot.mm.pc.merchantalerting.dao.AlertInfoDAO;
 import com.homedepot.mm.pc.merchantalerting.domain.Alert;
 import com.homedepot.mm.pc.merchantalerting.domain.AlertResponse;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
-import com.homedepot.mm.pc.merchantalerting.domain.model.AlertInfo;
 import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +25,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -48,11 +38,6 @@ public class AlertControllerTest {
     @MockBean
     private AlertService alertService;
 
-    @MockBean
-    private AlertController alertController;
-
-    @Mock
-    AlertInfo alertInfo;
 
     @BeforeEach
     public void setUp() {
@@ -118,7 +103,7 @@ public class AlertControllerTest {
         JSONObject key = new JSONObject();
         key.put("sku", "123456");
         key.put("cpi", "0.98");
-        output.setKeyIdentifiers(key.toString());
+        output.setKeyIdentifiers(key);
         output.setSystemSource("My Assortment");
         output.setType("Regional Assortment");
         output.setTemplateName("default");
@@ -128,7 +113,7 @@ public class AlertControllerTest {
         template.put("titleDescription", "test2");
         template.put("primaryText1", "test3");
         template.put("primaryLink", "test4");
-        output.setTemplateBody(template.toString());
+        output.setTemplateBody(template);
 
         output.setCreatedBy("");
         output.setCreateDate(df);
@@ -155,14 +140,14 @@ public class AlertControllerTest {
         Alert alert= new Alert();
         alert.setId(alertId);
         alert.setKeyIdentifiers(new JSONObject()
-                .put("sku", "123456").put("cpi", "0.98").toString());
+                .put("sku", "123456").put("cpi", "0.98"));
         alert.setSystemSource("My Assortment");
         alert.setType("Regional Assortment");
         alert.setTemplateName("default");
         alert.setTemplateBody(new JSONObject().put("title", "test1")
                 .put("titleDescription", "test2")
                 .put("primaryText1", "test3")
-                .put("primaryLink", "test4").toString());
+                .put("primaryLink", "test4"));
         alert.setCreatedBy(userId);
         alert.setCreateDate(new Date());
         alert.setLastUpdatedBy(userId);
@@ -177,7 +162,7 @@ public class AlertControllerTest {
     @Test
     void deleteAlertsById() throws Exception{
         UUID alertId= UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f");
-        Mockito.doNothing().when(alertInfo).deleteById(Mockito.any());
+        Mockito.doNothing().when(alertService).deleteAlertByAlertId(Mockito.any());
         this.mvc.perform(delete("/alert/{alertId}", alertId).contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk());
     }

@@ -1,6 +1,10 @@
 package com.homedepot.mm.pc.merchantalerting.domain;
 
+import com.vladmihalcea.hibernate.type.json.JsonType;
 import lombok.*;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,21 +19,25 @@ import java.util.UUID;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@TypeDef(name = "json", typeClass = JsonType.class)
 public class Alert {
 
         @Id
         @Column(name ="id")
         private UUID id;
-        @Column(name ="keyIdentifiers")
-        private String keyIdentifiers;
+
+        @Type(type = "json")
+        @Column(name ="keyIdentifiers", columnDefinition = "jsonb")
+        private JSONObject keyIdentifiers = new JSONObject();
         @Column(name ="systemSource")
         private String systemSource;
         @Column(name ="type")
         private String type;
         @Column(name ="templateName")
         private String templateName;
-        @Column(name ="templateBody")
-        private String templateBody;
+        @Type(type = "json")
+        @Column(name ="templateBody", columnDefinition = "jsonb")
+        private JSONObject templateBody = new JSONObject();
         @Column(name ="createdBy")
         private String createdBy;
         @Column(name ="createDate")

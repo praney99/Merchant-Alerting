@@ -1,66 +1,76 @@
 package com.homedepot.mm.pc.merchantalerting.processor;
 
 import com.homedepot.mm.pc.merchantalerting.domain.Alert;
-import com.homedepot.mm.pc.merchantalerting.domain.model.AlertInfo;
+import com.homedepot.mm.pc.merchantalerting.domain.model.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 
-import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import com.homedepot.mm.pc.merchantalerting.dao.AlertInfoDAO;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.*;
 
-import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.ALERT_DELETED;
 import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.NO_RECORDS_FOR_GIVEN_INPUT;
 
 @Service
 @Slf4j
 public class AlertService {
 
-    private AlertInfo alertInfo;
-    private AlertInfoDAO alertInfoDAO;
+    private AlertRepository alertRepository;
 
     @Autowired
-    public AlertService(AlertInfo alertInfo) {
+    public AlertService(AlertRepository alertRepository) {
 
-        this.alertInfo = alertInfo;
+        this.alertRepository = alertRepository;
     }
 
 
     public String createAlertByUser(CreateAlertRequest createAlertRequest)
     {
-        String uuid = alertInfoDAO.createAlertDetails(createAlertRequest);
+        String uuid = createAlertDetails(createAlertRequest);
         log.info("createAlertRequest: {}", createAlertRequest);
 
         String createAlertResponse = uuid;
 
         return createAlertResponse;
     }
+    public static String createAlertDetails(CreateAlertRequest createAlertRequest) {
+        String results;
+        try {
+            CreateAlertRequest rsExtractorId1 = new CreateAlertRequest();
+            results = null;
+            return results;
+        } catch (EmptyResultDataAccessException erdae) {
+            log.error(NO_RECORDS_FOR_GIVEN_INPUT);
+        }
 
+        return null;
+    }
 
     public List<Alert> retrieveAlertByUser(String userId) {
 
         List<Alert> retrieveAlertResponse;
-        retrieveAlertResponse = alertInfoDAO.retrieveAlertDetails(userId);
+        retrieveAlertResponse = retrieveAlertDetails(userId);
         log.info("createAlertRequest: {}", userId);
 
         return retrieveAlertResponse;
     }
 
-    public String deleteAlertByAlertId(UUID alertId) {
-            try {
-                alertInfo.deleteById(alertId);
-                return ALERT_DELETED;
-                }
-                    catch (EmptyResultDataAccessException erdae)
-                    {
-                        log.error("Incorrect value" + alertId);
-                        return ("Incorrect value of alert id");
-                    }
+    public static List<Alert> retrieveAlertDetails(String userId) {
+        return null;
+    }
+
+    @Transactional
+    public void deleteAlertByAlertId(UUID alertId) {
+        try {
+            alertRepository.deleteById(alertId);
+        } catch (EmptyResultDataAccessException erdae) {
+            log.error("Incorrect value "+ alertId);
+            throw new EmptyResultDataAccessException(erdae.getMessage(), erdae.getExpectedSize());
+        }
 
     }
 
