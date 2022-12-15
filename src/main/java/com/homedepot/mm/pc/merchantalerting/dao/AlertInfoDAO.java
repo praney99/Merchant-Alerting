@@ -15,7 +15,7 @@ import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.*;
 
 @Repository
 @Slf4j
-public abstract class AlertInfoDAO implements JpaRepository <Alert, UUID>{
+public interface AlertInfoDAO extends JpaRepository<Alert, UUID> {
 
 
     public String createAlertDetails(CreateAlertRequest createAlertRequest) {
