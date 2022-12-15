@@ -5,7 +5,6 @@ import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
-import com.homedepot.mm.pc.merchantalerting.util.AlertValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +37,6 @@ public class AlertService {
 
     @Transactional
     public Alert createAlertWithLdapAssociations(CreateAlertRequest request, List<String> ldapAssociations) {
-        AlertValidator.validateAlertRequest(request);
-
         Alert alert = request.toAlert();
         alert.setCreateBy("");
         alert.setCreateDate(new Date(System.currentTimeMillis()));
@@ -53,10 +50,8 @@ public class AlertService {
             userAlerts.add(ua);
         }
 
-        Alert savedAlert = alertRepository.save(alert);
         userAlertRepository.saveAll(userAlerts);
-
-        return savedAlert;
+        return alertRepository.save(alert);
     }
 
     public Optional<Alert> getAlert(UUID uuid) {
