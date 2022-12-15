@@ -40,10 +40,9 @@ public class AlertService {
     public Alert createAlertWithLdapAssociations(CreateAlertRequest request, List<String> ldapAssociations) {
         AlertValidator.validateAlertRequest(request);
 
-        Alert alert = new Alert();
+        Alert alert = request.toAlert();
         alert.setCreateBy("");
         alert.setCreateDate(new Date(System.currentTimeMillis()));
-        mapCreateAlertRequestToAlert(request, alert);
 
         List<UserAlert> userAlerts = new ArrayList<>();
         for (String ldap : ldapAssociations) {
@@ -66,15 +65,6 @@ public class AlertService {
 
     public List<Alert> getAlertsByLdap(String ldap) {
         return alertRepository.findAlertsByLdap(ldap);
-    }
-
-    private void mapCreateAlertRequestToAlert(CreateAlertRequest request, Alert alert) {
-        alert.setKeyIdentifiers(request.getKeyIdentifiers() == null ? null : request.getKeyIdentifiers().toString());
-        alert.setSystemSource(request.getSystemSource());
-        alert.setAlertType(request.getType());
-        alert.setTemplateName(request.getTemplateName());
-        alert.setTemplateBody(request.getTemplateBody().toString());
-        alert.setExpirationDate(request.getExpirationDate() == null ? null : new Date(Long.parseLong(request.getExpirationDate())));
     }
 
 }
