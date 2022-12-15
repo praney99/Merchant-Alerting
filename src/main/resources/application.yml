@@ -1,0 +1,59 @@
+# Swagger config
+springdoc:
+  api-docs:
+    path: /api-docs
+
+# Logging config
+logging:
+  level:
+    org:
+      springframework: INFO
+
+## Sku-Relationship config
+#app:
+#  skurelationship:
+#    url: http://sku-relationship-3:8080/v3
+#    skutoskupath: /recommendation/sku-to-sku
+#    skuanchorpath: /sku/query/anchors
+#  zonegroupservice:
+#    url: http://zone-group-service-1:8080/v1
+#    recspath: /recommendations
+#    zonemultpath: /zone-multiplier
+
+
+thd-identity:
+  resource-server:
+    enabled: true
+
+    public-paths:
+      - "/actuator/**"
+      - "/api-docs/**"
+      - "/swagger-ui.html"
+      - "/swagger-ui/**"
+      - "/"
+
+    allowed-issuers:
+      - pingfed-qa
+      - azuread-qa
+    authority-mappings:
+      - issuer-name: pingfed-qa
+        audience: spiffe://homedepot.dev/mpulse-ws
+        authorities:
+          - ROLE_read
+      - issuer-name: azuread-qa
+        audience: spiffe://homedepot.dev/mpulse-ws
+        authorities:
+          - ROLE_read
+      - issuer-name: pingfed-qa
+        audience: spiffe://homedepot.dev/mpulse-ui
+        authorities:
+          - ROLE_read
+      - issuer-name: azuread-qa
+        audience: spiffe://homedepot.dev/mpulse-ui
+        authorities:
+          - ROLE_read
+
+    path-checks:
+      - path: /**
+        needed-authorities:
+          - ROLE_read

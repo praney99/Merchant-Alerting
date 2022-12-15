@@ -22,4 +22,12 @@
             <nonProxyHosts>*.homedepot.com</nonProxyHosts>
         </proxy>
     </proxies>
+    <mirrors>
+        <mirror>
+            <id>central-proxy</id>
+            <name>Artifactory proxy of central repo</name>
+            <url>https://maven.artifactory.homedepot.com/artifactory/maven</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+    </mirrors>
 </settings>

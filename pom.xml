@@ -16,6 +16,22 @@
 	<properties>
 		<java.version>11</java.version>
 	</properties>
+	<pluginRepositories>
+		<pluginRepository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>central</id>
+			<name>libs-release</name>
+			<url>https://maven.artifactory.homedepot.com/artifactory/libs-release</url>
+		</pluginRepository>
+		<pluginRepository>
+			<snapshots />
+			<id>snapshots</id>
+			<name>libs-snapshot</name>
+			<url>https://maven.artifactory.homedepot.com/artifactory/libs-snapshot</url>
+		</pluginRepository>
+	</pluginRepositories>
 	<dependencies>
 		<!-- Spring Dependencies -->
 		<dependency>
@@ -39,6 +55,11 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
 			<version>1.6.12</version>
+		</dependency>
+		<dependency>
+			<groupId>com.homedepot.app-secure-community</groupId>
+			<artifactId>identity-middleware-springboot</artifactId>
+			<version>v0.22.0</version>
 		</dependency>
 
 		<!-- Database Dependencies -->
@@ -81,6 +102,11 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security.oauth</groupId>
+			<artifactId>spring-security-oauth2</artifactId>
+			<version>2.5.0.RELEASE</version>
 		</dependency>
 
 	</dependencies>
