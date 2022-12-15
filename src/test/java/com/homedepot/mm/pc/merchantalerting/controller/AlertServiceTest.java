@@ -53,7 +53,7 @@ public class AlertServiceTest {
     void DeleteAlert() throws JSONException {
         Mockito.doNothing().when(alertInfoDAO).deleteById(Mockito.any());
         assertNotNull(alert);//Cheking the aler not null
-        //Cheking the output of the method.
+        // Checking the output of the method.
         assertEquals("The AlertId: "+alert.getId()+" has been deleted",alertService.deleteAlertByAlertId(alert.getId()));
         // Cheking With Another Alert
         System.out.println(alert.getId());
