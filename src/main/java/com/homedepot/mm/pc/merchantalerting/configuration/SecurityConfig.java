@@ -14,12 +14,10 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 
-    @Autowired
-    THDAuthenticationManagerResolver authenticationManagerResolver;
-
+@Autowired
     private final THDIdentityConfig thdIdentityConfig;
 
-    @Autowired
+
     public SecurityConfig(THDIdentityConfig config) {
         this.thdIdentityConfig = config;
     }

@@ -1,3 +1,6 @@
+server:
+  port: 8080
+
 # Swagger config
 springdoc:
   api-docs:
@@ -9,16 +12,12 @@ logging:
     org:
       springframework: INFO
 
-## Sku-Relationship config
-#app:
-#  skurelationship:
-#    url: http://sku-relationship-3:8080/v3
-#    skutoskupath: /recommendation/sku-to-sku
-#    skuanchorpath: /sku/query/anchors
-#  zonegroupservice:
-#    url: http://zone-group-service-1:8080/v1
-#    recspath: /recommendations
-#    zonemultpath: /zone-multiplier
+#THD Proxy Properties
+thd-proxy-enabled: false
+thd-proxy-host: thd-svr-proxy-qa.homedepot.com
+thd-proxy-port: 7070
+allow-mwg: false
+thd-proxy-schema: http
 
 
 thd-identity:

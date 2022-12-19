@@ -3,3 +3,40 @@ server:
     servlet:
         contextPath: ${CONTEXT_PATH}
     forward-headers-strategy: FRAMEWORK
+
+thd-identity:
+    resource-server:
+        enabled: true
+
+        public-paths:
+            - "/actuator/**"
+            - "/api-docs/**"
+            - "/swagger-ui.html"
+            - "/swagger-ui/**"
+            - "/"
+
+        allowed-issuers:
+            - pingfed-pr
+            - azuread-pr
+        authority-mappings:
+            - issuer-name: pingfed-pr
+              audience: spiffe://homedepot.dev/mpulse-ws
+              authorities:
+                  - ROLE_read
+            - issuer-name: azuread-pr
+              audience: spiffe://homedepot.dev/mpulse-ws
+              authorities:
+                  - ROLE_read
+            - issuer-name: pingfed-pr
+              audience: spiffe://homedepot.dev/mpulse-ui
+              authorities:
+                  - ROLE_read
+            - issuer-name: azuread-pr
+              audience: spiffe://homedepot.dev/mpulse-ui
+              authorities:
+                  - ROLE_read
+
+        path-checks:
+            - path: /**
+              needed-authorities:
+                  - ROLE_read
