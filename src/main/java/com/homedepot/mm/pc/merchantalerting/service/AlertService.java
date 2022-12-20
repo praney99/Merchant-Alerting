@@ -8,6 +8,7 @@ import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.*;
 
 @Service
 public class AlertService {
@@ -52,6 +55,11 @@ public class AlertService {
 
         userAlertRepository.saveAll(userAlerts);
         return alertRepository.save(alert);
+    }
+
+    @Transactional
+    public void deleteAlertByAlertId(UUID alertId) throws EmptyResultDataAccessException {
+        alertRepository.deleteById(alertId);
     }
 
     public Optional<Alert> getAlert(UUID uuid) {

@@ -1,7 +1,7 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
-import com.homedepot.mm.pc.merchantalerting.domain.model.AlertRepository;
-import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
+import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
+import com.homedepot.mm.pc.merchantalerting.service.AlertService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

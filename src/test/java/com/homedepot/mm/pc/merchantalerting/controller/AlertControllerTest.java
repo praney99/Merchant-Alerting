@@ -1,46 +1,34 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.homedepot.mm.pc.merchantalerting.controller.AlertController;
-
-import com.homedepot.mm.pc.merchantalerting.domain.AlertResponse;
+import com.google.gson.JsonIOException;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
-import com.homedepot.mm.pc.merchantalerting.domain.RetrieveAlertResponse;
-import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
-import org.junit.Before;
-import org.junit.jupiter.api.Assertions;
+import com.homedepot.mm.pc.merchantalerting.model.Alert;
+import com.homedepot.mm.pc.merchantalerting.service.AlertService;
+import com.homedepot.mm.pc.merchantalerting.template.DefaultTemplate;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.text.DateFormat;
-import java.text.FieldPosition;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-import static com.fasterxml.jackson.databind.type.LogicalType.DateTime;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.LOCAL_DATE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
@@ -136,28 +124,6 @@ public class AlertControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(200));
     }
-    public Alert generateAlert(String userId, UUID alertId) throws JSONException {
-
-        Alert alert= new Alert();
-        alert.setId(alertId);
-        alert.setKeyIdentifiers(new JSONObject()
-                .put("sku", "123456").put("cpi", "0.98"));
-        alert.setSystemSource("My Assortment");
-        alert.setType("Regional Assortment");
-        alert.setTemplateName("default");
-        alert.setTemplateBody(new JSONObject().put("title", "test1")
-                .put("titleDescription", "test2")
-                .put("primaryText1", "test3")
-                .put("primaryLink", "test4"));
-        alert.setCreatedBy(userId);
-        alert.setCreateDate(new Date());
-        alert.setLastUpdatedBy(userId);
-        alert.setLastUpdateDate(new Date());
-        alert.setExpirationDate(new Date());
-
-        return alert;
-    }
-
 
     @DisplayName("DeleteAlertsById")
     @Test
