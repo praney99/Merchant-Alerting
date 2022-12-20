@@ -35,12 +35,17 @@ spec:
                   name: merchpro-postgres-sql-config
                   key: db-name
             - name: SCHEMA
-              value: sku_group
+              value: merch_alerts
             - name: PSQL_USER
               valueFrom:
-                configMapKeyRef:
-                  name: merchpro-postgres-sql-config
-                  key: db-user
+                secretKeyRef:
+                  name: mpulse-secret
+                  key: username
+            - name: PSQL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mpulse-secret
+                  key: password
             - name: PSQL_HOST
               valueFrom:
                 configMapKeyRef:
@@ -61,12 +66,13 @@ spec:
                 secretKeyRef:
                   name: mpulse-secret
                   key: username
+>>>>>>>>> Temporary merge branch 2
           image: ${gcrImagePath}
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 12
             httpGet:
-              path: /actuator/health
+              path: /v${major}/actuator/health
               port: 8080
             initialDelaySeconds: 20
             periodSeconds: 10

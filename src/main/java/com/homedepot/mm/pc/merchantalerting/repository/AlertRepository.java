@@ -12,7 +12,7 @@ import java.util.UUID;
 @Repository
 public interface AlertRepository extends JpaRepository<Alert, UUID> {
 
-    @Query(value = "SELECT * FROM alerting_schema.alert a JOIN alerting_schema.user_alert u ON a.id = u.alert_id WHERE u.ldap = :ldap", nativeQuery = true)
+    @Query(value = "SELECT * FROM merch_alerts.alert a JOIN merch_alerts.user_alert u ON a.id = u.alert_id WHERE u.ldap = :ldap", nativeQuery = true)
     List<Alert> findAlertsByLdap(@Param("ldap") String ldap);
 
 }

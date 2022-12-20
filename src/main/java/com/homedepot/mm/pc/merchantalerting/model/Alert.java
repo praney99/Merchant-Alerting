@@ -8,7 +8,7 @@ import java.sql.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = "alert", schema = "alerting_schema")
+@Table(name = "alert", schema = "merch_alerts")
 public class Alert {
 
     @Id
