@@ -1,14 +1,12 @@
 package com.homedepot.mm.pc.merchantalerting.processor;
 
-import com.homedepot.mm.pc.merchantalerting.domain.Alert;
-import com.homedepot.mm.pc.merchantalerting.domain.model.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
+import com.homedepot.mm.pc.merchantalerting.domain.RetrieveAlertResponse;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.homedepot.mm.pc.merchantalerting.dao.AlertInfoDAO;
 
 
 import java.util.*;
@@ -73,5 +71,4 @@ public class AlertService {
         }
 
     }
-
 }
