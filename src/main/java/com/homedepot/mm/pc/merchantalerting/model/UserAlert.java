@@ -13,7 +13,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "user_alert", schema = "alerting_schema")
+@Table(name = "user_alert", schema = "merch_alerts")
 public class UserAlert {
 
     @Id

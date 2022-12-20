@@ -8,9 +8,9 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=mpulse
 
-  merchant-alerting:
+  merch_alerts:
     build: .
     ports:
       - "8080:8080"

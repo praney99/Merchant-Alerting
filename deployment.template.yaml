@@ -35,12 +35,17 @@ spec:
                   name: merchpro-postgres-sql-config
                   key: db-name
             - name: SCHEMA
-              value: sku_group
+              value: merch_alerts
             - name: PSQL_USER
               valueFrom:
-                configMapKeyRef:
-                  name: merchpro-postgres-sql-config
-                  key: db-user
+                secretKeyRef:
+                  name: mpulse-secret
+                  key: username
+            - name: PSQL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mpulse-secret
+                  key: password
             - name: PSQL_HOST
               valueFrom:
                 configMapKeyRef:
@@ -51,16 +56,6 @@ spec:
                 configMapKeyRef:
                   name: merchpro-postgres-sql-config
                   key: db-port
-            - name: PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mpulse-secret
-                  key: password
-            - name: USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mpulse-secret
-                  key: username
           image: ${gcrImagePath}
           imagePullPolicy: Always
           livenessProbe:
