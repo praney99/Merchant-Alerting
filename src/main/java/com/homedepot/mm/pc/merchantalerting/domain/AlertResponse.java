@@ -1,5 +1,6 @@
 package com.homedepot.mm.pc.merchantalerting.domain;
 
+import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,5 +13,5 @@ import java.util.List;
 @AllArgsConstructor
 public class AlertResponse
 {
-    private List<RetrieveAlertResponse> alerts;
+    private List<Alert> alerts;
 }
