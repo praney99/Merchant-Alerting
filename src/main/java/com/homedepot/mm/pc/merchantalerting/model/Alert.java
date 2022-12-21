@@ -1,10 +1,9 @@
 package com.homedepot.mm.pc.merchantalerting.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -115,6 +114,32 @@ public class Alert {
     }
     public void setExpirationDate(Date expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    @OneToMany(mappedBy="id", cascade=CascadeType.ALL, orphanRemoval=true)
+    private List<UserAlert> users;
+
+    public List<UserAlert> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<UserAlert> users) {
+        this.users = users;
+    }
+
+    public void addUsers(UserAlert user){
+        if(this.users == null){
+            this.users = new ArrayList<UserAlert>();
+        }
+        this.users.add(user);
+        user.setAlert(this);
+    }
+
+    public void removeUsers(UserAlert user){
+        if(this.users != null){
+            users.remove(user);
+            user.setAlert(null);
+        }
     }
 
 }

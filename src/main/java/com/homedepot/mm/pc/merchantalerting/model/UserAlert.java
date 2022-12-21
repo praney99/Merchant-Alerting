@@ -25,4 +25,14 @@ public class UserAlert {
     @Column(name = "dismiss_date")
     private Date dismissDate;
 
+    @ManyToOne
+    @JoinColumn(name="ldap", nullable=false)
+    private Alert alert;
+
+    public Alert getAlert() {
+        return alert;
+    }
+    public void setAlert(Alert alert) {
+        this.alert = alert;
+    }
 }

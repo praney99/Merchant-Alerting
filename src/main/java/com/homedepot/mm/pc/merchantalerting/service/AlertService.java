@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.homedepot.mm.pc.merchantalerting.constants.ErrorConstants.*;
+import static io.netty.util.internal.TypeParameterMatcher.find;
 
 @Service
 public class AlertService {
@@ -60,6 +60,14 @@ public class AlertService {
     @Transactional
     public void deleteAlertByAlertId(UUID alertId) throws EmptyResultDataAccessException {
         alertRepository.deleteById(alertId);
+        Alert alert = new Alert();
+        UserAlert ldap;
+        ldap = getLdapById(alertId);
+        alert.removeUsers(ldap);
+    }
+
+    public UserAlert getLdapById(UUID uuid) {
+        return userAlertRepository.findLdapById(uuid);
     }
 
     public Optional<Alert> getAlert(UUID uuid) {
