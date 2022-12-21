@@ -1,58 +1,44 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.homedepot.mm.pc.merchantalerting.controller.AlertController;
-
-import com.homedepot.mm.pc.merchantalerting.domain.AlertResponse;
+import com.homedepot.mm.pc.merchantalerting.PostgresContainerBaseTest;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
-import com.homedepot.mm.pc.merchantalerting.domain.RetrieveAlertResponse;
-import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
-import org.junit.Before;
-import org.junit.jupiter.api.Assertions;
+import com.homedepot.mm.pc.merchantalerting.model.Alert;
+import com.homedepot.mm.pc.merchantalerting.service.AlertService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.text.DateFormat;
-import java.text.FieldPosition;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.sql.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
-import static com.fasterxml.jackson.databind.type.LogicalType.DateTime;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.LOCAL_DATE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
 @SpringBootTest
-public class AlertControllerTest {
+public class AlertControllerTest extends PostgresContainerBaseTest {
 
     @Autowired
     private WebApplicationContext context;
     @MockBean
     private AlertService alertService;
-
-    private AlertController alertController;
 
     @BeforeEach
     public void setUp() {
@@ -63,101 +49,79 @@ public class AlertControllerTest {
 
     @Test
     void generateAlertByLdap() throws Exception {
+        final String ldap = "fo42br";
+        CreateAlertRequest alertRequest = new CreateAlertRequest();
+        alertRequest.setType("Regional Assortment");
+        alertRequest.setSystemSource("My Assortment");
+        alertRequest.setExpirationDate(null);
+        alertRequest.setKeyIdentifiers(null);
 
-        final String responseString = "c0533e1f-f452-4747-8293-a43cf168ad3f";
-        CreateAlertRequest input = new CreateAlertRequest();
-        input.setSystemSource("My Assortment");
-        input.setType("Regional Assortment");
+        Map<String, String> keyIdentifiers = new HashMap<>();
+        keyIdentifiers.put("sku", "123456");
+        keyIdentifiers.put("cpi", "0.98");
 
-        JSONObject key = new JSONObject();
-        key.put("sku", "123456");
-        key.put("cpi", "0.98");
+        alertRequest.setKeyIdentifiers(keyIdentifiers);
+        alertRequest.setTemplateName("default");
 
-        input.setKeyIdentifiers(key.toString());
-        input.setTemplateName("default");
+        Map<String, String> defaultTemplate = new HashMap<>();
+        defaultTemplate.put("title","title");
+        defaultTemplate.put("titleDescription","title description");
+        defaultTemplate.put("primaryText1","primary text 1");
+        defaultTemplate.put("primaryText2","primary text 2");
+        defaultTemplate.put("tertiaryText","tertiary text");
+        defaultTemplate.put("primaryLinkText","link");
+        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
+        alertRequest.setTemplateBody(defaultTemplate);
 
-        JSONObject template = new JSONObject();
-        template.put("title", "test1");
-        template.put("titleDescription", "test2");
-        template.put("primaryText1", "test3");
-        template.put("primaryLink", "test4");
-
-        input.setTemplateBody(template.toString());
-        input.setExpirationDate("2023-09-30");
-
-        ResponseEntity<CreateAlertRequest> mockResponse = new ResponseEntity(input, HttpStatus.OK);
-
-        when(alertService.createAlertByUser(Mockito.any(CreateAlertRequest.class))).thenReturn(String.valueOf(mockResponse));
-
-        when(alertService.createAlertByUser(any())).thenReturn(responseString);
-
-        Assertions.assertNotNull(responseString);
-        Assertions.assertTrue(responseString.length() > 0);
+        when(alertService.createAlertByLdap(any(), anyString()))
+                .thenReturn(new Alert());
 
         Gson gson = new GsonBuilder().create();
         this.mvc.perform(
-                        post("/alert/create")
-                                .content(gson.toJson(input)).contentType(MediaType.APPLICATION_JSON))
+                        post("/alert/user/" + ldap)
+                                .content(gson.toJson(alertRequest))
+                                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(200));
-                }
+    }
 
 
     @Test
     void retrieveAlertByLdap() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        final String ldap = "PXP88N3";
+        Alert alert = new Alert();
 
-        final String requestId = "PXP88N3";
-        Date df = new Date();
+        Map<String, String> keyIdentifiers = new HashMap<>();
+        keyIdentifiers.put("sku", "123456");
+        keyIdentifiers.put("cpi", "0.98");
+        alert.setKeyIdentifiers(mapper.convertValue(keyIdentifiers, JsonNode.class));
 
-        AlertResponse response;
+        alert.setSystemSource("My Assortment");
+        alert.setAlertType("Regional Assortment");
+        alert.setTemplateName("default");
 
-        RetrieveAlertResponse output = new RetrieveAlertResponse();
+        Map<String, String> defaultTemplate = new HashMap<>();
+        defaultTemplate.put("title","title");
+        defaultTemplate.put("titleDescription","title description");
+        defaultTemplate.put("primaryText1","primary text 1");
+        defaultTemplate.put("primaryText2","primary text 2");
+        defaultTemplate.put("tertiaryText","tertiary text");
+        defaultTemplate.put("primaryLinkText","link");
+        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
+        alert.setTemplateBody(mapper.convertValue(defaultTemplate, JsonNode.class));
 
-        output.setId(UUID.fromString("c0533e1f-f452-4747-8293-a43cf168ad3f"));
+        alert.setCreateBy("unit test");
+        alert.setCreateDate(new Date(System.currentTimeMillis()));
+        alert.setLastUpdateBy(null);
+        alert.setLastUpdateDate(null);
+        alert.setExpirationDate(null);
 
-        JSONObject key = new JSONObject();
-        key.put("sku", "123456");
-        key.put("cpi", "0.98");
-        output.setKeyIdentifiers(key.toString());
+        when(alertService.getAlertsByLdap(anyString()))
+                .thenReturn(List.of(alert));
 
-        output.setSystemSource("My Assortment");
-
-        output.setType("Regional Assortment");
-
-        output.setTemplateName("default");
-
-        JSONObject template = new JSONObject();
-        template.put("title", "test1");
-        template.put("titleDescription", "test2");
-        template.put("primaryText1", "test3");
-        template.put("primaryLink", "test4");
-        output.setTemplateBody(template.toString());
-
-        output.setCreatedBy("");
-
-        output.setCreateDate(df);
-
-        output.setLastUpdatedBy("");
-
-        output.setLastUpdateDate(df);
-
-        output.setExpirationDate(df);
-
-        response=AlertResponse.builder().alerts(List.of(output)).build();
-
-        ResponseEntity<String> mockResponse = new ResponseEntity(requestId, HttpStatus.OK);
-
-        when(alertService.createAlertByUser(any(CreateAlertRequest.class))).thenReturn(String.valueOf(mockResponse));
-
-        when(alertService.createAlertByUser(any())).thenReturn(String.valueOf(response));
-
-        System.out.println(response);
-        Gson gson = new GsonBuilder().create();
-        this.mvc.perform(
-                        get("/alert/retrieve/requestId").content(gson.toJson(requestId)).contentType(MediaType.APPLICATION_JSON))
+        this.mvc.perform(get("/alert/user/" + ldap)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(200));
-
-        Assertions.assertNotNull(response);
-        Assertions.assertTrue(response.toString().length() > 0);
     }
 }
 

@@ -29,6 +29,33 @@ spec:
               value: ${version}
             - name: CONTEXT_PATH
               value: /v${major}
+            - name: DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: merchpro-postgres-sql-config
+                  key: db-name
+            - name: SCHEMA
+              value: merch_alerts
+            - name: PSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mpulse-secret
+                  key: username
+            - name: PSQL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mpulse-secret
+                  key: password
+            - name: PSQL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: merchpro-postgres-sql-config
+                  key: db-host
+            - name: PSQL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: merchpro-postgres-sql-config
+                  key: db-port
           image: ${gcrImagePath}
           imagePullPolicy: Always
           livenessProbe:
