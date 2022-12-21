@@ -41,20 +41,21 @@ public class AlertService {
     @Transactional
     public Alert createAlertWithLdapAssociations(CreateAlertRequest request, List<String> ldapAssociations) {
         Alert alert = request.toAlert();
-        alert.setCreateBy("");
+        alert.setCreateBy(request.getSystemSource());
         alert.setCreateDate(new Date(System.currentTimeMillis()));
+
+        Alert persistedAlert = alertRepository.save(alert);
 
         List<UserAlert> userAlerts = new ArrayList<>();
         for (String ldap : ldapAssociations) {
             UserAlert ua = new UserAlert();
-            ua.setAlertId(alert.getId());
+            ua.setAlertId(persistedAlert.getId());
             ua.setLdap(ldap);
             ua.setDismissDate(null);
             userAlerts.add(ua);
         }
-
         userAlertRepository.saveAll(userAlerts);
-        return alertRepository.save(alert);
+        return persistedAlert;
     }
 
     @Transactional

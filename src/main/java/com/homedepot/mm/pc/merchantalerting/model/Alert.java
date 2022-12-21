@@ -1,5 +1,15 @@
 package com.homedepot.mm.pc.merchantalerting.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.vladmihalcea.hibernate.type.json.JsonType;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -7,22 +17,32 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "alert", schema = "merch_alerts")
+@TypeDef(name = "json", typeClass = JsonType.class)
 public class Alert {
-
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private UUID id;
-    @Column(name = "key_identifiers")
-    private String keyIdentifiers;
+
+    @Type(type = "json")
+    @Column(name = "key_identifiers", columnDefinition = "jsonb")
+    @JsonIgnore
+    private JSONObject keyIdentifiers;
+
     @Column(name = "system_source", nullable = false)
     private String systemSource;
     @Column(name = "alert_type", nullable = false)
     private String alertType;
     @Column(name = "template_name", nullable = false)
     private String templateName;
-    @Column(name = "template_body", nullable = false)
-    private String templateBody;
+
+    @Type(type = "json")
+    @Column(name = "template_body", columnDefinition = "jsonb", nullable = false)
+    @JsonIgnore
+    private JSONObject templateBody;
     @Column(name = "create_by", nullable = false)
     private String createBy;
     @Column(name = "create_date", nullable = false)
@@ -36,84 +56,6 @@ public class Alert {
 
 
     public Alert() {
-        this.id = UUID.randomUUID();
-    }
-
-    public UUID getId(){
-        return id;
-    }
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getKeyIdentifiers() {
-        return keyIdentifiers;
-    }
-    public void setKeyIdentifiers(String keyIdentifiers) {
-        this.keyIdentifiers = keyIdentifiers;
-    }
-
-    public String getSystemSource() {
-        return systemSource;
-    }
-    public void setSystemSource(String systemSource) {
-        this.systemSource = systemSource;
-    }
-
-    public String getAlertType() {
-        return alertType;
-    }
-    public void setAlertType(String alertType) {
-        this.alertType = alertType;
-    }
-
-    public String getTemplateName() {
-        return templateName;
-    }
-    public void setTemplateName(String templateName) {
-        this.templateName = templateName;
-    }
-
-    public String getTemplateBody() {
-        return templateBody;
-    }
-    public void setTemplateBody(String templateBody) {
-        this.templateBody = templateBody;
-    }
-
-    public String getCreateBy() {
-        return createBy;
-    }
-    public void setCreateBy(String createBy) {
-        this.createBy = createBy;
-    }
-
-    public Date getCreateDate() {
-        return createDate;
-    }
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
-    }
-
-    public String getLastUpdateBy() {
-        return lastUpdateBy;
-    }
-    public void setLastUpdateBy(String lastUpdateBy) {
-        this.lastUpdateBy = lastUpdateBy;
-    }
-
-    public Date getLastUpdateDate() {
-        return lastUpdateDate;
-    }
-    public void setLastUpdateDate(Date lastUpdateDate) {
-        this.lastUpdateDate = lastUpdateDate;
-    }
-
-    public Date getExpirationDate() {
-        return expirationDate;
-    }
-    public void setExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
     }
 
     @OneToMany(mappedBy="alert", cascade=CascadeType.ALL, orphanRemoval=true)

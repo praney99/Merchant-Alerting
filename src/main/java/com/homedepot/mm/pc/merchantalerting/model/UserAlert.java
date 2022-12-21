@@ -26,7 +26,7 @@ public class UserAlert {
     private Date dismissDate;
 
     @ManyToOne
-    @JoinColumn(name="alert_id", nullable=false)
+    @JoinColumn(name="alert_id", nullable=false, insertable = false, updatable = false)
     private Alert alert;
 
     public Alert getAlert() {

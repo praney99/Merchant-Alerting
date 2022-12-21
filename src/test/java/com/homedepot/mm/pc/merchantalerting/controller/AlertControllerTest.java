@@ -1,5 +1,7 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -93,24 +95,22 @@ public class AlertControllerTest {
         final String ldap = "PXP88N3";
         Alert alert = new Alert();
 
-        Map<String, String> keyIdentifiers = new HashMap<>();
+        JSONObject keyIdentifiers = new JSONObject();
         keyIdentifiers.put("sku", "123456");
         keyIdentifiers.put("cpi", "0.98");
-        alert.setKeyIdentifiers(keyIdentifiers.toString());
+        alert.setKeyIdentifiers(keyIdentifiers);
 
         alert.setSystemSource("My Assortment");
         alert.setAlertType("Regional Assortment");
         alert.setTemplateName("default");
 
-        DefaultTemplate defaultTemplate = new DefaultTemplate();
-        defaultTemplate.setTitle("title");
-        defaultTemplate.setTitleDescription("title description");
-        defaultTemplate.setPrimaryText1("primary text 1");
-        defaultTemplate.setPrimaryText2("primary text 2");
-        defaultTemplate.setTertiaryText("tertiary text");
-        defaultTemplate.setPrimaryLinkText("link");
-        defaultTemplate.setPrimaryLinkUri("http://localhost:8080");
-        alert.setTemplateBody(defaultTemplate.toString());
+        JSONObject defaultTemplate = new JSONObject();
+        defaultTemplate.put("title", "test1");
+        defaultTemplate.put("titleDescription", "test2");
+        defaultTemplate.put("primaryText1", "test3");
+        defaultTemplate.put("primaryLink", "test4");
+        defaultTemplate.put("primaryLinkUri", "http://localhost:8080");
+        alert.setTemplateBody(defaultTemplate);
         alert.setCreateBy("unit test");
         alert.setCreateDate(new Date(System.currentTimeMillis()));
         alert.setLastUpdateBy(null);

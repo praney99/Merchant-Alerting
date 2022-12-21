@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://0.0.0.0:5432/mpulse
+    url: jdbc:postgresql://0.0.0.0:5432/postgres
     username: postgres
     password: password
     driver-class-name: org.postgresql.Driver
