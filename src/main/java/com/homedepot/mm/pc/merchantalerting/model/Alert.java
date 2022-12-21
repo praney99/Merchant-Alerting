@@ -116,7 +116,7 @@ public class Alert {
         this.expirationDate = expirationDate;
     }
 
-    @OneToMany(mappedBy="id", cascade=CascadeType.ALL, orphanRemoval=true)
+    @OneToMany(mappedBy="alert", cascade=CascadeType.ALL, orphanRemoval=true)
     private List<UserAlert> users;
 
     public List<UserAlert> getUsers() {

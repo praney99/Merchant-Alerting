@@ -26,7 +26,7 @@ public class UserAlert {
     private Date dismissDate;
 
     @ManyToOne
-    @JoinColumn(name="ldap", nullable=false)
+    @JoinColumn(name="alert_id", nullable=false)
     private Alert alert;
 
     public Alert getAlert() {
