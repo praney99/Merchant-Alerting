@@ -11,6 +11,9 @@ import org.springframework.boot.configurationprocessor.json.JSONObject;
 
 import java.sql.Date;
 import java.util.Map;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.Map;
 
 @Builder
 @Data
@@ -21,14 +24,13 @@ public class CreateAlertRequest {
     private String systemSource;
     private String type;
     private String templateName;
-    private Map<String, String> templateBody;
+    private Map<String,String> templateBody;
     private String expirationDate;
-    private Map<String, String> keyIdentifiers;
+    private Map<String,String> keyIdentifiers;
 
     /**
      * Maps the alert request to the internal alert model.
      * Generates a new UUID for the new alert object.
-     *
      * @return New alert
      */
     public Alert toAlert() {
@@ -40,7 +42,6 @@ public class CreateAlertRequest {
     /**
      * Maps the alert request to an existing alert model.
      * Overwrites existing properties on the alert with those from the request.
-     *
      * @param alert Alert model object
      */
     public void toAlert(Alert alert) {
@@ -50,7 +51,7 @@ public class CreateAlertRequest {
         alert.setAlertType(this.getType());
         alert.setTemplateName(this.getTemplateName());
         alert.setTemplateBody(mapper.convertValue(this.getTemplateBody(), JSONObject.class));
-        alert.setExpirationDate(this.getExpirationDate() == null ? null : new Date(Long.parseLong(this.getExpirationDate())));
+        alert.setExpirationDate(this.getExpirationDate() == null ? null : Date.valueOf(LocalDate.parse(this.getExpirationDate())));
     }
 }
 

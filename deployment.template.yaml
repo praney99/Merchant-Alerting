@@ -56,17 +56,6 @@ spec:
                 configMapKeyRef:
                   name: merchpro-postgres-sql-config
                   key: db-port
-            - name: PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mpulse-secret
-                  key: password
-            - name: USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mpulse-secret
-                  key: username
->>>>>>>>> Temporary merge branch 2
           image: ${gcrImagePath}
           imagePullPolicy: Always
           livenessProbe:
