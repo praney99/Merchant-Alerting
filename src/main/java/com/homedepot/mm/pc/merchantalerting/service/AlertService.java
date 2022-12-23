@@ -68,7 +68,7 @@ public class AlertService {
     }
 
     public UserAlert getLdapById(UUID uuid) {
-        return userAlertRepository.findLdapById(uuid);
+        return userAlertRepository.findUserAlertById(uuid);
     }
 
     public Optional<Alert> getAlert(UUID uuid) {

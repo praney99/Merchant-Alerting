@@ -14,6 +14,6 @@ import java.util.UUID;
 @Repository
 public interface UserAlertRepository extends JpaRepository<UserAlert, UserAlertId> {
 
-    @Query(value = "SELECT * FROM merch_alerts.alert a JOIN merch_alerts.user_alert u ON a.id = u.alert_id WHERE u.alert_id = :id", nativeQuery = true)
-    UserAlert findLdapById(@Param("id") UUID id);
+    @Query(value = "SELECT * FROM merch_alerts.user_alert WHERE alert_id = :id", nativeQuery = true)
+    UserAlert findUserAlertById(@Param("id") UUID id);
 }
