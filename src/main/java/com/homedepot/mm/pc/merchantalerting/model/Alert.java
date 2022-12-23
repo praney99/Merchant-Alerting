@@ -30,7 +30,7 @@ public class Alert {
     @Type(type = "json")
     @Column(name = "key_identifiers", columnDefinition = "jsonb")
     @JsonIgnore
-    private JSONObject keyIdentifiers;
+    private JsonNode keyIdentifiers;
 
     @Column(name = "system_source", nullable = false)
     private String systemSource;
@@ -42,7 +42,7 @@ public class Alert {
     @Type(type = "json")
     @Column(name = "template_body", columnDefinition = "jsonb", nullable = false)
     @JsonIgnore
-    private JSONObject templateBody;
+    private JsonNode templateBody;
     @Column(name = "create_by", nullable = false)
     private String createBy;
     @Column(name = "create_date", nullable = false)

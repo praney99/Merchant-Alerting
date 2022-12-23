@@ -46,11 +46,11 @@ public class CreateAlertRequest {
      */
     public void toAlert(Alert alert) {
         ObjectMapper mapper = new ObjectMapper();
-        alert.setKeyIdentifiers(this.getKeyIdentifiers() == null ? null : mapper.convertValue(this.getKeyIdentifiers(), JSONObject.class));
+        alert.setKeyIdentifiers(this.getKeyIdentifiers() == null ? null : mapper.convertValue(this.getKeyIdentifiers(), JsonNode.class));
         alert.setSystemSource(this.getSystemSource());
         alert.setAlertType(this.getType());
         alert.setTemplateName(this.getTemplateName());
-        alert.setTemplateBody(mapper.convertValue(this.getTemplateBody(), JSONObject.class));
+        alert.setTemplateBody(mapper.convertValue(this.getTemplateBody(), JsonNode.class));
         alert.setExpirationDate(this.getExpirationDate() == null ? null : Date.valueOf(LocalDate.parse(this.getExpirationDate())));
     }
 }

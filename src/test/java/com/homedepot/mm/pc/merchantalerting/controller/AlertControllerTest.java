@@ -97,26 +97,29 @@ public class AlertControllerTest {
 
     @Test
     void retrieveAlertByLdap() throws Exception {
-
+        ObjectMapper mapper = new ObjectMapper();
         final String ldap = "PXP88N3";
         Alert alert = new Alert();
 
-        JSONObject keyIdentifiers = new JSONObject();
+        Map<String, String> keyIdentifiers = new HashMap<>();
         keyIdentifiers.put("sku", "123456");
         keyIdentifiers.put("cpi", "0.98");
-        alert.setKeyIdentifiers(keyIdentifiers);
+        alert.setKeyIdentifiers(mapper.convertValue(keyIdentifiers, JsonNode.class));
 
         alert.setSystemSource("My Assortment");
         alert.setAlertType("Regional Assortment");
         alert.setTemplateName("default");
 
-        JSONObject defaultTemplate = new JSONObject();
-        defaultTemplate.put("title", "test1");
-        defaultTemplate.put("titleDescription", "test2");
-        defaultTemplate.put("primaryText1", "test3");
-        defaultTemplate.put("primaryLink", "test4");
-        defaultTemplate.put("primaryLinkUri", "http://localhost:8080");
-        alert.setTemplateBody(defaultTemplate);
+        Map<String, String> defaultTemplate = new HashMap<>();
+        defaultTemplate.put("title","title");
+        defaultTemplate.put("titleDescription","title description");
+        defaultTemplate.put("primaryText1","primary text 1");
+        defaultTemplate.put("primaryText2","primary text 2");
+        defaultTemplate.put("tertiaryText","tertiary text");
+        defaultTemplate.put("primaryLinkText","link");
+        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
+        alert.setTemplateBody(mapper.convertValue(defaultTemplate, JsonNode.class));
+
         alert.setCreateBy("unit test");
         alert.setCreateDate(new Date(System.currentTimeMillis()));
         alert.setLastUpdateBy(null);

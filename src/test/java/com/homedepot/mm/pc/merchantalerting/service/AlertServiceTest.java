@@ -1,11 +1,9 @@
 package com.homedepot.mm.pc.merchantalerting.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
-import com.homedepot.mm.pc.merchantalerting.template.DefaultTemplate;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.sql.Date;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -43,16 +40,15 @@ public class AlertServiceTest {
         request.setKeyIdentifiers(null);
         request.setTemplateName("default");
 
-        DefaultTemplate defaultTemplate = new DefaultTemplate();
-        defaultTemplate.setTitle("title");
-        defaultTemplate.setTitleDescription("title description");
-        defaultTemplate.setPrimaryText1("primary text 1");
-        defaultTemplate.setPrimaryText2("primary text 2");
-        defaultTemplate.setTertiaryText("tertiary text");
-        defaultTemplate.setPrimaryLinkText("link");
-        defaultTemplate.setPrimaryLinkUri("http://localhost:8080");
-
-        request.setTemplateBody(new ObjectMapper().convertValue(defaultTemplate, HashMap.class));
+        Map<String, String> defaultTemplate = new HashMap<>();
+        defaultTemplate.put("title","title");
+        defaultTemplate.put("titleDescription","title description");
+        defaultTemplate.put("primaryText1","primary text 1");
+        defaultTemplate.put("primaryText2","primary text 2");
+        defaultTemplate.put("tertiaryText","tertiary text");
+        defaultTemplate.put("primaryLinkText","link");
+        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
+        request.setTemplateBody(defaultTemplate);
 
         when(alertRepository.save(any())).thenReturn(new Alert());
         when(userAlertRepository.saveAll(any())).thenReturn(new ArrayList<>());
@@ -66,7 +62,6 @@ public class AlertServiceTest {
     public void testCreateAlertWithCompleteAlertMapping() {
         String ldap = "fo42br";
         Calendar calendar = Calendar.getInstance();
-        Date date = new Date(calendar.getTime().getTime());
 
         Map<String, String> keyIdentifiers = new HashMap<>();
         keyIdentifiers.put("cpi", "0.98");
@@ -75,19 +70,19 @@ public class AlertServiceTest {
         CreateAlertRequest request = new CreateAlertRequest();
         request.setType("testType");
         request.setSystemSource("testSystemSource");
-        request.setExpirationDate(Long.toString(date.getTime()));
+        request.setExpirationDate("2030-12-30");
         request.setKeyIdentifiers(keyIdentifiers);
         request.setTemplateName("default");
 
-        DefaultTemplate defaultTemplate = new DefaultTemplate();
-        defaultTemplate.setTitle("title");
-        defaultTemplate.setTitleDescription("title description");
-        defaultTemplate.setPrimaryText1("primary text 1");
-        defaultTemplate.setPrimaryText2("primary text 2");
-        defaultTemplate.setTertiaryText("tertiary text");
-        defaultTemplate.setPrimaryLinkText("link");
-        defaultTemplate.setPrimaryLinkUri("http://localhost:8080");
-        request.setTemplateBody(new ObjectMapper().convertValue(defaultTemplate, HashMap.class));
+        Map<String, String> defaultTemplate = new HashMap<>();
+        defaultTemplate.put("title","title");
+        defaultTemplate.put("titleDescription","title description");
+        defaultTemplate.put("primaryText1","primary text 1");
+        defaultTemplate.put("primaryText2","primary text 2");
+        defaultTemplate.put("tertiaryText","tertiary text");
+        defaultTemplate.put("primaryLinkText","link");
+        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
+        request.setTemplateBody(defaultTemplate);
 
         when(alertRepository.save(any())).thenReturn(new Alert());
         when(userAlertRepository.saveAll(any())).thenReturn(new ArrayList<>());
