@@ -131,6 +131,9 @@ jobs:
           context: .
           push: true
           tags: ${{ env.ARTIFACTORY_REGISTRY }}/${{ steps.build-image-path.outputs.imagePath }}
+          build-args: |
+            ARTIFACTORY_USER=${{ secrets.ARTIFACTORY_USER }}
+            ARTIFACTORY_TOKEN=${{ needs.Artifactory_Token.outputs.maven_token }}
     outputs:
       imagePath: ${{ steps.build-image-path.outputs.imagePath }}
       gcrImagePath: ${{ steps.build-image-path.outputs.gcrImagePath }}
