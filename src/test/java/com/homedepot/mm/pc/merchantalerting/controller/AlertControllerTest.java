@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,9 +111,9 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
         alert.setTemplateBody(mapper.convertValue(defaultTemplate, JsonNode.class));
 
         alert.setCreateBy("unit test");
-        alert.setCreateDate(new Date(System.currentTimeMillis()));
+        alert.setCreated(new Timestamp(System.currentTimeMillis()));
         alert.setLastUpdateBy(null);
-        alert.setLastUpdateDate(null);
+        alert.setLastUpdated(null);
         alert.setExpirationDate(null);
 
         when(alertService.getAlertsByLdap(anyString()))

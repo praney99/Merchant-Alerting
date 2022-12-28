@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,16 +40,13 @@ public class AlertService {
     public Alert createAlertWithLdapAssociations(CreateAlertRequest request, List<String> ldapAssociations) {
         Alert alert = request.toAlert();
         alert.setCreateBy(request.getSystemSource());
-        alert.setCreateDate(new Date(System.currentTimeMillis()));
+        alert.setCreated(new Timestamp(System.currentTimeMillis()));
 
         Alert persistedAlert = alertRepository.save(alert);
 
         List<UserAlert> userAlerts = new ArrayList<>();
         for (String ldap : ldapAssociations) {
-            UserAlert ua = new UserAlert();
-            ua.setAlertId(persistedAlert.getId());
-            ua.setLdap(ldap);
-            ua.setDismissDate(null);
+            UserAlert ua = new UserAlert(ldap, persistedAlert.getId());
             userAlerts.add(ua);
         }
         userAlertRepository.saveAll(userAlerts);
