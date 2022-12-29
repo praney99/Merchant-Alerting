@@ -3,10 +3,13 @@ package com.homedepot.mm.pc.merchantalerting.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.homedepot.mm.pc.merchantalerting.domain.AlertResponse;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.processor.AlertService;
 import com.homedepot.mm.pc.merchantalerting.template.DefaultTemplate;
+import org.apache.commons.lang3.StringUtils;
+import org.aspectj.weaver.ast.Var;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,15 +23,19 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import static org.apache.commons.lang3.Range.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
@@ -39,13 +46,13 @@ public class AlertControllerTest {
     @MockBean
     private AlertService alertService;
 
-
     @BeforeEach
     public void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(this.context).build();
     }
 
     private MockMvc mvc;
+    private final ObjectMapper mapper= new ObjectMapper();
 
     @Test
     void generateAlertByLdap() throws Exception {
@@ -145,16 +152,63 @@ public class AlertControllerTest {
         defaultTemplate.setPrimaryLinkText("link");
         defaultTemplate.setPrimaryLinkUri("http://localhost:8080");
         alertRequest.setTemplateBody(new ObjectMapper().convertValue(defaultTemplate, HashMap.class));
-        when(alertService.createAlertByDCS(any(), anyString()))
-                .thenReturn(alertRequest.toAlert().getId());
-        System.out.print(alertRequest);
-        Gson gson = new GsonBuilder().create();
-        this.mvc.perform(
-                        post("/alert/dcs/" + dcs)
-                                .content(gson.toJson(alertRequest))
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(200));
+        when(alertService.createAlertWithLdapAssociations(any(), List.of(anyString())))
+                .thenReturn(alertRequest.toAlert());
+        System.out.println(alertRequest);
+        AlertController AL= new AlertController(alertService);
+        System.out.println(AL.validateDCS(dcs));
+        final String SaveBy_DCS_URL="/alert/dcs/";
+
+        //1°Test SaveSuccess
+        this.mvc.perform(MockMvcRequestBuilders
+                .post( SaveBy_DCS_URL+ dcs)
+                .content(mapper.writeValueAsBytes(alertRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated());
+
+        //2°Test MissingDCS
+        this.mvc.perform(MockMvcRequestBuilders
+                        .post( SaveBy_DCS_URL)
+                        .content(mapper.writeValueAsBytes(alertRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(405));
+
+        //3° MissingBody
+         this.mvc.perform(MockMvcRequestBuilders
+                        .post( SaveBy_DCS_URL+ dcs)
+                        .content(mapper.writeValueAsBytes(null))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(400));
+
+         //4°Test WrongSize DCS
+        this.mvc.perform(MockMvcRequestBuilders
+                        .post( SaveBy_DCS_URL+ "0")
+                        .content(mapper.writeValueAsBytes(alertRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(400));
+
+        //5°Test Zero DCS
+        this.mvc.perform(MockMvcRequestBuilders
+                        .post( SaveBy_DCS_URL+ "000-000-000")
+                        .content(mapper.writeValueAsBytes(alertRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(400));
+
+        //6°Test WrongLetters DCS
+        this.mvc.perform(MockMvcRequestBuilders
+                        .post( SaveBy_DCS_URL+ "001-00A-001")
+                        .content(mapper.writeValueAsBytes(alertRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(400));
     }
+
+
 
 
 

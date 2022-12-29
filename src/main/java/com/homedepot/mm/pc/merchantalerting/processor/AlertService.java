@@ -36,7 +36,6 @@ public class AlertService {
         Alert alert = request.toAlert();
         alert.setCreateBy("");
         alert.setCreateDate(new Date(System.currentTimeMillis()));
-
         List<UserAlert> userAlerts = new ArrayList<>();
         for (String ldap : ldapAssociations) {
             UserAlert ua = new UserAlert();
@@ -45,9 +44,9 @@ public class AlertService {
             ua.setDismissDate(null);
             userAlerts.add(ua);
         }
-
-        userAlertRepository.saveAll(userAlerts);
-        return alertRepository.save(alert);
+        System.out.println(userAlertRepository.saveAll(userAlerts));
+        System.out.println(alertRepository.save(alert));
+        return alert;
     }
     public static String createAlertDetails(CreateAlertRequest createAlertRequest) {
         String results;
@@ -60,24 +59,6 @@ public class AlertService {
         }
 
         return null;
-    }
-    @Transactional
-    public UUID createAlertByDCS(CreateAlertRequest CR, String dcsAssociations)
-    {
-        Alert alert = CR.toAlert();
-        alert.setCreateBy("");
-        alert.setCreateDate(new Date(System.currentTimeMillis()));
-        List<UserAlert> userAlerts = new ArrayList<>();
-        for (String dcs : List.of(dcsAssociations)) {
-            UserAlert ua = new UserAlert();
-            ua.setAlertId(alert.getId());
-            ua.setLdap(dcs);
-            ua.setDismissDate(null);
-            userAlerts.add(ua);
-        }
-        userAlertRepository.saveAll(userAlerts);
-        alertRepository.save(alert);
-        return alert.getId();
     }
 
     public List<Alert> retrieveAlertByUser(String userId) {
