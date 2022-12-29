@@ -1,5 +1,6 @@
 package com.homedepot.mm.pc.merchantalerting.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,6 +29,10 @@ public class UserAlert {
     private Timestamp lastUpdated;
     @Column(name = "last_update_by")
     private String lastUpdateBy;
+
+    @ManyToOne
+    @JoinColumn(name="alert_id", nullable=false, insertable=false, updatable=false)
+    private Alert alert;
 
     public UserAlert(String ldap, UUID alertId) {
         this.ldap = ldap;

@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +51,11 @@ public class AlertService {
         userAlertRepository.saveAll(userAlerts);
 
         return persistedAlert;
+    }
+
+    @Transactional
+    public void deleteAlert(UUID alertId) {
+        alertRepository.deleteById(alertId);
     }
 
     public Optional<Alert> getAlert(UUID uuid) {

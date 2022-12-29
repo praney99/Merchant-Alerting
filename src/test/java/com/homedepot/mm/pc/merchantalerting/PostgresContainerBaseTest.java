@@ -1,6 +1,7 @@
 package com.homedepot.mm.pc.merchantalerting;
 
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
+import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -13,6 +14,9 @@ public class PostgresContainerBaseTest {
 
     @Autowired
     protected AlertRepository alertRepository;
+
+    @Autowired
+    protected UserAlertRepository userAlertRepository;
 
     static {
         postgreSQLContainer = new PostgreSQLContainer<>("postgres:latest");
@@ -30,5 +34,6 @@ public class PostgresContainerBaseTest {
     @AfterEach
     protected void cleanup() {
         alertRepository.deleteAll();
+        userAlertRepository.deleteAll();
     }
 }
