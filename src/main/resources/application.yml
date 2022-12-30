@@ -12,12 +12,6 @@ logging:
     org:
       springframework: INFO
 
-#THD Proxy Properties
-thd-proxy-enabled: false
-thd-proxy-host: thd-svr-proxy-qa.homedepot.com
-thd-proxy-port: 7070
-allow-mwg: false
-thd-proxy-schema: http
 
 
 thd-identity:
@@ -53,7 +47,12 @@ thd-identity:
           - ROLE_read
 
     path-checks:
-      - path: /**
+      - path: /alert/**
+        method: GET
+        needed-authorities:
+          - ROLE_read
+      - path: /alert/**
+        method: DELETE
         needed-authorities:
           - ROLE_read
 

@@ -36,7 +36,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
             @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content)})
-    @Operation(summary = "Create alert by LDAP.", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Create alert by LDAP.")
     @PostMapping(value = "/user/{ldap}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<Alert> createAlertByLdap(@PathVariable("ldap") String ldap, @RequestBody CreateAlertRequest createAlertRequest) {
@@ -49,7 +49,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
             @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content)})
-    @Operation(summary = "Retrieve alerts by LDAP.", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Retrieve alerts by LDAP.")
     @GetMapping(value = "/user/{ldap}", produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<List<Alert>> retrieveAlertsByLdap(@PathVariable("ldap") String ldap) {
@@ -62,7 +62,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
             @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content)})
-    @Operation(summary = "Retrieve alerts by alert id.", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Retrieve alerts by alert id.")
     @GetMapping(value = "/{alertId}", produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<Alert> retrieveAlertById(@PathVariable("alertId") UUID alertId) {
