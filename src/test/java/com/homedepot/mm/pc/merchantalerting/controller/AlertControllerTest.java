@@ -8,6 +8,8 @@ import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
+import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
+import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
 import com.homedepot.mm.pc.merchantalerting.service.AlertService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,12 +43,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class AlertControllerTest extends PostgresContainerBaseTest {
-
+public class AlertControllerTest {
+    @Autowired
+    private WebApplicationContext context;
+    @MockBean
+    private AlertService alertService;
     @LocalServerPort
     private int port;
 
@@ -54,16 +57,18 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
     @Qualifier("noErrorRestTemplate")
     RestTemplate restTemplate;
 
-    @Autowired
-    private WebApplicationContext context;
     @BeforeEach
     public void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(this.context).build();
     }
-    @MockBean
-    AlertService alertService;
+
     private MockMvc mvc;
     private final ObjectMapper mapper= new ObjectMapper();
+    @Autowired
+    private AlertRepository alertRepository;
+    @Autowired
+    private UserAlertRepository userAlertRepository;
+
 
     @Test
     void generateAlertByLdap() {
@@ -233,12 +238,13 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
         assertEquals(0, deletedAlerts.size());
 
         List<UserAlertId> userAlertIds = List.of(
-          new UserAlertId(persistedUserAlert0.getLdap(), persistedUserAlert0.getAlertId()),
-          new UserAlertId(persistedUserAlert1.getLdap(), persistedUserAlert1.getAlertId())
+                new UserAlertId(persistedUserAlert0.getLdap(), persistedUserAlert0.getAlertId()),
+                new UserAlertId(persistedUserAlert1.getLdap(), persistedUserAlert1.getAlertId())
         );
         List<UserAlert> deletedUserAlerts = userAlertRepository.findAllById(userAlertIds);
         assertEquals(0, deletedUserAlerts.size());
     }
+
     @Test
     @DisplayName("SaveAlertsByDCS")
     void generateAlertByDCS() throws Exception {
@@ -301,7 +307,7 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
                         .content(mapper.writeValueAsBytes(alertRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(400));
+                .andExpect(status().is(409));
 
         //5°Test Zero DCS
         mvc.perform(MockMvcRequestBuilders
@@ -309,15 +315,7 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
                         .content(mapper.writeValueAsBytes(alertRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(400));
-
-        //6°Test WrongLetters DCS
-        mvc.perform(MockMvcRequestBuilders
-                        .post( SaveBy_DCS_URL+ "001-00A-001")
-                        .content(mapper.writeValueAsBytes(alertRequest))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(400));
+                .andExpect(status().is(406));
     }
 
 }

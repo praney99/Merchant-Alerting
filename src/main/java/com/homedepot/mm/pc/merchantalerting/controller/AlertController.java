@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class AlertController {
 
     private final AlertService alertService;
-    private ValidationDCSException Validate;
+
+    ValidationDCSException Validate= new ValidationDCSException();
 
     public AlertController(AlertService alertService) {
         this.alertService = alertService;
