@@ -16,15 +16,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -45,11 +41,14 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class AlertControllerTest {
+public class AlertControllerTest extends PostgresContainerBaseTest
+{
     @Autowired
     private WebApplicationContext context;
-    @MockBean
+    @Autowired
     private AlertService alertService;
+
+
     @LocalServerPort
     private int port;
 
@@ -64,11 +63,6 @@ public class AlertControllerTest {
 
     private MockMvc mvc;
     private final ObjectMapper mapper= new ObjectMapper();
-    @Autowired
-    private AlertRepository alertRepository;
-    @Autowired
-    private UserAlertRepository userAlertRepository;
-
 
     @Test
     void generateAlertByLdap() {
