@@ -47,12 +47,7 @@ thd-identity:
           - ROLE_read
 
     path-checks:
-      - path: /alert/**
-        method: GET
-        needed-authorities:
-          - ROLE_read
-      - path: /alert/**
-        method: DELETE
+      - path: /**
         needed-authorities:
           - ROLE_read
 
