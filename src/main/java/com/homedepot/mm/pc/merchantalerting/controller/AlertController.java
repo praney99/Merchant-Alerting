@@ -65,5 +65,13 @@ public class AlertController {
         return alert.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
     }
-}
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Deleted successfully.", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
+            @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing.", content = @Content)})
+    @Operation(summary = "Delete alert by alert id")
+    @DeleteMapping(value = "/{alertId}", produces = APPLICATION_JSON_VALUE)
+    public void deleteAlertById(@PathVariable("alertId") UUID alertId) {
+        alertService.deleteAlert(alertId);
+    }
+}

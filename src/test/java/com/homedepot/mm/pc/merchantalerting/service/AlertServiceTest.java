@@ -14,7 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AlertServiceTest {
@@ -109,5 +109,12 @@ public class AlertServiceTest {
 
         List<Alert> response = alertService.getAlertsByLdap(ldap);
         Assert.assertEquals(response.get(0).getId(), alertId);
+    }
+
+    @Test
+    public void testDeleteAlert() {
+        UUID alertId = UUID.randomUUID();
+        doNothing().when(alertRepository).deleteById(any());
+        alertService.deleteAlert(alertId);
     }
 }

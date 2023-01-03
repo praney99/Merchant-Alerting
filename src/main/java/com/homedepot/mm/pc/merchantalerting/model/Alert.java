@@ -1,5 +1,6 @@
 package com.homedepot.mm.pc.merchantalerting.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import lombok.Getter;
@@ -9,6 +10,9 @@ import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.List;
+
 import java.util.UUID;
 
 @Entity
@@ -36,13 +40,16 @@ public class Alert {
     private JsonNode templateBody;
     @Column(name = "create_by", nullable = false)
     private String createBy;
-    @Column(name = "create_date", nullable = false)
-    private Date createDate;
+    @Column(name = "created", nullable = false)
+    private Timestamp created;
     @Column(name = "last_update_by")
     private String lastUpdateBy;
-    @Column(name = "last_update_date")
-    private Date lastUpdateDate;
+    @Column(name = "last_updated")
+    private Timestamp lastUpdated;
     @Column(name = "expiration_date")
     private Date expirationDate;
 
+    @JsonIgnore
+    @OneToMany(mappedBy="alert", cascade=CascadeType.ALL, orphanRemoval=true)
+    private List<UserAlert> userAlerts;
 }
