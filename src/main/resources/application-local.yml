@@ -15,3 +15,7 @@ spring:
         hbm2dll:
           create_namespaces: true
     show-sql: true
+respmatrix-client-url: https://webapps-qa.homedepot.com/RespMatrix/rs
+
+
+

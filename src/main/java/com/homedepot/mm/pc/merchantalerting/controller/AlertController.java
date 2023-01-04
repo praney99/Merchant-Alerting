@@ -82,10 +82,7 @@ public class AlertController {
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
-            @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content),
-            @ApiResponse(responseCode = "404", description = "No Data Found", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content),
-            @ApiResponse(responseCode = "503", description = "Service Unavailable", content = @Content)})
+            @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content)})
     @Operation(summary = "Create alerts by DCS")
     @PostMapping(value = "/dcs/{dcs}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -94,6 +91,4 @@ public class AlertController {
         return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
                 .body(alertService.createAlertWithLdapAssociations(createAlertRequest, List.of(Validate.validateDCS(dcs))));
     }
-
-
 }

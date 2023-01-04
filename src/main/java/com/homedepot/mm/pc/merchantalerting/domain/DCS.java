@@ -1,3 +1,4 @@
+/*
 package com.homedepot.mm.pc.merchantalerting.domain;
 
 import lombok.Data;
@@ -22,3 +23,4 @@ public class DCS {
         return getDepartment()+getSubDepartment()+getClassNumber()+getSubClassNumber();
     }
 }
+*/
