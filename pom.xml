@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.5</version>
+		<version>2.4.13</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.homedepot.mm.pc</groupId>
@@ -16,6 +16,38 @@
 	<properties>
 		<java.version>11</java.version>
 	</properties>
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>artifactory-release</id>
+			<name>libs-release</name>
+			<url>https://maven.artifactory.homedepot.com/artifactory/libs-release</url>
+		</repository>
+		<repository>
+			<snapshots />
+			<id>artifactory-snapshots</id>
+			<name>libs-snapshot</name>
+			<url>https://maven.artifactory.homedepot.com/artifactory/libs-snapshot</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>central</id>
+			<name>libs-release</name>
+			<url>https://maven.artifactory.homedepot.com/artifactory/libs-release</url>
+		</pluginRepository>
+		<pluginRepository>
+			<snapshots />
+			<id>snapshots</id>
+			<name>libs-snapshot</name>
+			<url>https://maven.artifactory.homedepot.com/artifactory/libs-snapshot</url>
+		</pluginRepository>
+	</pluginRepositories>
 	<dependencies>
 		<!-- Spring Dependencies -->
 		<dependency>
@@ -53,6 +85,17 @@
 			<artifactId>springdoc-openapi-ui</artifactId>
 			<version>1.6.12</version>
 		</dependency>
+		<dependency>
+			<groupId>com.homedepot.app-secure-community</groupId>
+			<artifactId>identity-middleware-springboot</artifactId>
+			<version>v0.22.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+
 
 		<!-- Database Dependencies -->
 		<dependency>
@@ -100,6 +143,11 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-jaxb-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security.oauth</groupId>
+			<artifactId>spring-security-oauth2</artifactId>
+			<version>2.5.0.RELEASE</version>
 		</dependency>
 
 	</dependencies>

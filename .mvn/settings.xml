@@ -17,9 +17,59 @@
         <proxy>
             <active>true</active>
             <protocol>http</protocol>
-            <host>thd-svr-proxy-qa.homedepot.com </host>
+            <host>thd-svr-proxy-qa.homedepot.com</host>
             <port>7070</port>
             <nonProxyHosts>*.homedepot.com</nonProxyHosts>
         </proxy>
     </proxies>
+    <profiles>
+        <profile>
+            <repositories>
+                <repository>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <id>centrals</id>
+                    <name>libs-release</name>
+                    <url>
+                        https://maven.artifactory.homedepot.com/artifactory/libs-release
+                    </url>
+                </repository>
+                <repository>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <id>snapshots</id>
+                    <name>libs-snapshot</name>
+                    <url>
+                        https://maven.artifactory.homedepot.com/artifactory/libs-snapshot
+                    </url>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <id>centrals</id>
+                    <name>plugins-release</name>
+                    <url>
+                        https://maven.artifactory.homedepot.com/artifactory/plugins-release
+                    </url>
+                </pluginRepository>
+                <pluginRepository>
+                    <snapshots/>
+                    <id>snapshots</id>
+                    <name>plugins-snapshot</name>
+                    <url>
+                        https://maven.artifactory.homedepot.com/artifactory/plugins-snapshot
+                    </url>
+                </pluginRepository>
+            </pluginRepositories>
+            <id>artifactory</id>
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>artifactory</activeProfile>
+    </activeProfiles>
 </settings>

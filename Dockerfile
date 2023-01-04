@@ -1,6 +1,9 @@
 FROM adoptopenjdk/openjdk11:jdk-11.0.11_9 as build
 WORKDIR /workspace/app
 
+ARG ARTIFACTORY_USER
+ARG ARTIFACTORY_TOKEN
+
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
