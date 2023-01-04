@@ -20,19 +20,19 @@ thd-identity:
             - azuread-pr
         authority-mappings:
             - issuer-name: pingfed-pr
-              audience: spiffe://homedepot.dev/mpulse-ws
+              audience: spiffe://homedepot.com/mpulse-ws
               authorities:
                   - ROLE_read
             - issuer-name: azuread-pr
-              audience: spiffe://homedepot.dev/mpulse-ws
+              audience: spiffe://homedepot.com/mpulse-ws
               authorities:
                   - ROLE_read
             - issuer-name: pingfed-pr
-              audience: spiffe://homedepot.dev/mpulse-ui
+              audience: spiffe://homedepot.com/mpulse-ui
               authorities:
                   - ROLE_read
             - issuer-name: azuread-pr
-              audience: spiffe://homedepot.dev/mpulse-ui
+              audience: spiffe://homedepot.com/mpulse-ui
               authorities:
                   - ROLE_read
 
