@@ -16,7 +16,7 @@ logging:
 
 thd-identity:
   resource-server:
-    enabled: true
+    enabled: false
 
     public-paths:
       - "/actuator/**"
