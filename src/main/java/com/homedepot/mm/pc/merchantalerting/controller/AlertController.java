@@ -1,5 +1,6 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
+import com.homedepot.mm.pc.merchantalerting.Exception.ValidationDCSException;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.service.AlertService;
@@ -11,11 +12,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +31,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     public class AlertController {
         @Autowired
         AlertService alertService;
+
+    ValidationDCSException Validate= new ValidationDCSException();
 
     public AlertController(AlertService alertService) {
         this.alertService = alertService;
@@ -78,5 +83,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     @DeleteMapping(value = "/{alertId}", produces = APPLICATION_JSON_VALUE)
     public void deleteAlertById(@PathVariable("alertId") UUID alertId) {
         alertService.deleteAlert(alertId);
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
+            @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content)})
+    @Operation(summary = "Create alerts by DCS")
+    @PostMapping(value = "/dcs/{dcs}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<Alert> generateAlertByDCS(@PathVariable("dcs") @NotNull String dcs, @RequestBody @NotNull CreateAlertRequest createAlertRequest) {
+
+        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
+                .body(alertService.createAlertWithLdapAssociations(createAlertRequest, List.of(Validate.validateDCS(dcs))));
     }
 }
