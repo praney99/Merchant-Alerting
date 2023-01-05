@@ -2,9 +2,9 @@ package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.homedepot.mm.pc.merchantalerting.Exception.ValidationDCSException;
-import com.homedepot.mm.pc.merchantalerting.PostgresContainerBaseTest;
+
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
+import com.homedepot.mm.pc.merchantalerting.exception.ValidationException;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
@@ -19,8 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -286,8 +286,8 @@ public class AlertControllerTest //extends PostgresContainerBaseTest
         when(alertService.createAlertWithLdapAssociations(any(), List.of(anyString())))
                 .thenReturn(alertRequest.toAlert());
         System.out.println(alertRequest);
-        ValidationDCSException AL= new ValidationDCSException();
-        System.out.println(AL.validateDCS(dcs));
+        ValidationException AL= new ValidationException("apple");
+        System.out.println(AL.getStatus());
         final String SaveBy_DCS_URL="/alert/dcs/";
 
         //1°Test SaveSuccess

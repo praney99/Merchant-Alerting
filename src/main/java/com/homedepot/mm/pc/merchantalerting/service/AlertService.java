@@ -85,19 +85,19 @@ public class AlertService {
         return alertRepository.findAlertsByLdap(ldap);
     }
 
-    public Mono<List<DCS>> generateAlertByDCS(List<String> subclasses) {
-        Mono<List<DCS>> userList = Flux.fromIterable(subclasses)
-                .distinct()
-                .filter(subclass -> Pattern.matches(dcsRegexPattern, subclass))
-                .flatMap(subclass -> {
-                    String[] dcs = subclass.split("-");
-                    return respMatrixClient.getUsersByDcs(dcs[0], dcs[1], dcs[2]);
-                })
-                .onErrorContinue((e, o) -> LOGGER.error(e.getMessage()))
-                .distinct()
-                .collectList();
-
-        return userList;
-    }
+//    public Mono<List<DCS>> generateAlertByDCS(List<String> subclasses) {
+//        Mono<List<DCS>> userList = Flux.fromIterable(subclasses)
+//                .distinct()
+//                .filter(subclass -> Pattern.matches(dcsRegexPattern, subclass))
+//                .flatMap(subclass -> {
+//                    String[] dcs = subclass.split("-");
+//                    return respMatrixClient.getUsersByDcs(dcs[0], dcs[1], dcs[2]);
+//                })
+//                .onErrorContinue((e, o) -> LOGGER.error(e.getMessage()))
+//                .distinct()
+//                .collectList();
+//
+//        return userList;
+//    }
 
 }

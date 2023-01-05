@@ -1,4 +1,4 @@
-package com.homedepot.mm.pc.merchantalerting.Exception;
+package com.homedepot.mm.pc.merchantalerting.exception;
 
 
 import lombok.Data;
@@ -9,14 +9,6 @@ public class ValidationException extends RuntimeException {
 private String code;
 private HttpStatus status;
 
-    public ValidationException(String code,HttpStatus status, String message)
-    {
-        super(message);
-        this.code=code;
-        this.status=status;
-    public ValidationException() {
-        super();
-    }
     public ValidationException(String errorMessage) {
         super(errorMessage);
     }

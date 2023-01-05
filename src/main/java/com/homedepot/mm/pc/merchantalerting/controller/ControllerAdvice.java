@@ -1,6 +1,6 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
-import com.homedepot.mm.pc.merchantalerting.Exception.ValidationException;
+import com.homedepot.mm.pc.merchantalerting.exception.ValidationException;
 import com.homedepot.mm.pc.merchantalerting.model.ErrorDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

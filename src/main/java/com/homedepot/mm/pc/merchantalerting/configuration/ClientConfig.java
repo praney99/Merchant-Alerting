@@ -4,6 +4,7 @@ import com.homedepot.mm.pc.merchantalerting.model.DCS;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -12,24 +13,20 @@ import org.springframework.context.annotation.Configuration;
 @AllArgsConstructor
 @NoArgsConstructor
 @Configuration
-@ConfigurationProperties(prefix = "respmatrix.client")
+@ConfigurationProperties(prefix = "respmatrix-client-url")
 public class ClientConfig {
 
-    @Value("${respmatrix.client.url}")
+    @Value("${respmatrix-client-url}")
     private String dcsEndpoint;
-    private String url;
 
-    String queryString;
-
-    private static DCS dcs = null;
+    @Autowired
+    public static DCS dcs = new DCS();
 
     public static final String
-        URI_ZONE_DEFINITION_SUBDEPT_SUBCLASS = "/findUser/DCS"
+            URI_DCS = "/findUser/DCS"
             + "?d=" + dcs.getDepartment()
             + "&c=" + dcs.getClassNumber()
-            + "&sc=" + dcs.getSubClassNumber();;
+            + "&sc=" + dcs.getSubClassNumber();
 
-
-    public static final String CATEGORY_CODE = "1";
 
 }

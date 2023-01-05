@@ -23,6 +23,7 @@ thd-identity:
       - "/api-docs/**"
       - "/swagger-ui.html"
       - "/swagger-ui/**"
+      - "/matrix-client/**"
       - "/"
 
     allowed-issuers:
