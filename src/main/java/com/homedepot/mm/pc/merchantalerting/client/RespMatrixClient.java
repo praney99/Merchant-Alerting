@@ -20,7 +20,6 @@ public class RespMatrixClient {
 
     ClientConfig webClientConfigurationProperties;
 
-    @Autowired
     public RespMatrixClient(ClientConfig webClientConfigurationProperties) {
         this.webClientConfigurationProperties = webClientConfigurationProperties;
         this.webClient = WebClient.builder()
@@ -33,9 +32,8 @@ public class RespMatrixClient {
                 .uri(ClientConfig.URI_ZONE_DEFINITION_SUBDEPT_SUBCLASS, department, clazz, subClass)
                 .retrieve()
                 .bodyToMono(DCS.class)
-                .doOnError((throwable) -> {
-                    log.error("Failed to get zone definition for " +
-                            "department:" + department + " class:" + clazz + " subclass:" + subClass);
+                .onErrorResume((throwable) -> {
+                    log.error("Failed to get Users");
                     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                             "Exception occurred requesting Users from RespMatrix: " + throwable);
                 });

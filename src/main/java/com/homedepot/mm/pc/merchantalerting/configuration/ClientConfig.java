@@ -29,7 +29,4 @@ public class ClientConfig {
             + "&c=" + dcs.getClassNumber()
             + "&sc=" + dcs.getSubClassNumber();;
 
-
-    public static final String CATEGORY_CODE = "1";
-
 }

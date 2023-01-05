@@ -91,7 +91,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     @ResponseBody
     public ResponseEntity<Alert> generateAlertByDCS(@PathVariable("dcs") @NotNull String dcs, @RequestBody @NotNull CreateAlertRequest createAlertRequest) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).contentType(MediaType.APPLICATION_JSON)
-                .body(alertService.createAlertWithLdapAssociations(createAlertRequest, List.of(Validate.validateDCS(dcs))));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(alertService
+                        .createAlertWithLdapAssociations(createAlertRequest, List.of(Validate.validateDCS(dcs))));
     }
 }

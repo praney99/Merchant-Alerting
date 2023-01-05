@@ -85,7 +85,7 @@ public class AlertService {
         return alertRepository.findAlertsByLdap(ldap);
     }
 
-    public Mono<List<DCS>> generateAlertByDCS(List<String> subclasses) {
+    /*public Mono<List<DCS>> generateAlertByDCS(String d, String c, String s) {
         Mono<List<DCS>> userList = Flux.fromIterable(subclasses)
                 .distinct()
                 .filter(subclass -> Pattern.matches(dcsRegexPattern, subclass))
@@ -98,6 +98,6 @@ public class AlertService {
                 .collectList();
 
         return userList;
-    }
+    }*/
 
 }
