@@ -1,23 +1,19 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
-import com.homedepot.mm.pc.merchantalerting.domain.UserDCSRequest;
-import com.homedepot.mm.pc.merchantalerting.exception.ValidationException;
+
 import com.homedepot.mm.pc.merchantalerting.model.DCS;
 import com.homedepot.mm.pc.merchantalerting.service.UserMatrixService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 
 import javax.validation.Valid;
@@ -47,7 +43,6 @@ public class UserMatrixController {
     })
     public ResponseEntity<List<String>> retrieveUserLDAPByDCS(@Valid @RequestBody DCS dcs) throws Exception {
 
-//        validateDepartmentOrSubDepartment(userDCSRequest);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -55,11 +50,4 @@ public class UserMatrixController {
 
     }
 
-//    private void validateDepartmentOrSubDepartment(UserDCSRequest userDCSRequest) {
-//        if (StringUtils.isNotBlank(userDCSRequest.getDepartment()) && StringUtils.isNotBlank(userDCSRequest.getSubDepartment())) {
-//            throw new ValidationException("You must submit the request with department or sub-department param, not both");
-//        } else if (!StringUtils.isNotBlank(userDCSRequest.getDepartment()) && !StringUtils.isNotBlank(userDCSRequest.getSubDepartment())) {
-//            throw new ValidationException("You cannot make the request, mandatory department or sub-department param");
-//        }
-//    }
 }

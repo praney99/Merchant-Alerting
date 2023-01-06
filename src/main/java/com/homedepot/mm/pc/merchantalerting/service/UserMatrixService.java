@@ -16,7 +16,6 @@ import java.util.List;
 public class UserMatrixService {
 
     final RespMatrixClient responsibilityMatrixClient;
-    final static String[] PARAMS = {"d", "c", "sc"};
 
     DCS dcs = new DCS();
 
@@ -28,9 +27,11 @@ public class UserMatrixService {
 
     public List<String> getUserLDAPForGivenDCS(String department, String clazz, String subClass) throws Exception {
 
+        String cleanDepartment = cleanSubDepartment(department);
+
         if (!StringUtils.isNotEmpty(dcs.getDepartment())) {
 
-            return responsibilityMatrixClient.getUserIDs(department, clazz, subClass);
+            return responsibilityMatrixClient.getUserIDs(cleanDepartment, clazz, subClass);
 
         } else {
 
@@ -38,13 +39,20 @@ public class UserMatrixService {
         }
 
     }
-//    private static String buildRequestParams(String paramValue, UserDCSRequest userDCSRequest) {
-//        //If param string matches sub-deparment format ex. "026p" then truncate values to only get dept "26"
-//        //This only works if sub-department always comes as the format above
-//
-//
-//        return StringUtils.join(PARAMS[0] + "=" + paramValue,
-//                "&" + PARAMS[1] + "=" + userDCSRequest.getClassNumber(),
-//                "&" + PARAMS[2] + "=" + userDCSRequest.getSubClassNumber());
-//    }
+
+    private String cleanSubDepartment(String oldDepartment){
+        String newDepartment, removedZeros;
+
+        if(oldDepartment.length() > 2){
+            removedZeros = oldDepartment.replaceFirst("^0+(?!$)", "");
+
+            newDepartment = removedZeros.replaceAll("([a-zA-Z])", "");
+
+        } else {
+            newDepartment = oldDepartment;
+        }
+
+        return newDepartment;
+    }
+
 }
