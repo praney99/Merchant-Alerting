@@ -22,11 +22,4 @@ public class ClientConfig {
     @Autowired
     public static DCS dcs = new DCS();
 
-    public static final String
-            URI_DCS = "/findUser/DCS"
-            + "?d=" + dcs.getDepartment()
-            + "&c=" + dcs.getClassNumber()
-            + "&sc=" + dcs.getSubClassNumber();
-
-
 }
