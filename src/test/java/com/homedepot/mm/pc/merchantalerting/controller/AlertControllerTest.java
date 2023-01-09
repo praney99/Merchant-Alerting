@@ -1,5 +1,6 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homedepot.mm.pc.merchantalerting.PostgresContainerBaseTest;
@@ -15,9 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -26,6 +33,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @ActiveProfiles("test")
@@ -39,6 +47,10 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
     @Autowired
     @Qualifier("noErrorRestTemplate")
     RestTemplate restTemplate;
+    private final ObjectMapper mapper= new ObjectMapper();
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
     @Test
     void generateAlertByLdap() {
@@ -217,7 +229,7 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
 
     @Test
     @DisplayName("GenerateAlertsByDCS")
-    void generateAlertByDCS() {
+    void generateAlertByDCS() throws Exception {
         final String dcs = "001-001-001";
         CreateAlertRequest alertRequest = new CreateAlertRequest();
         alertRequest.setType("Regional Assortment");
@@ -245,5 +257,27 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
                 alertRequest, Alert.class);
         assertNotNull(responseEntity);
         assertNotNull(responseEntity.getBody());
+
+        MockMvc mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
+        mvc.perform(MockMvcRequestBuilders
+                        .post( "/alert/dcs/" + dcs)
+                        .content(mapper.writeValueAsString(alertRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect((status().is(HttpStatus.CREATED.value())));
+
+        mvc.perform(MockMvcRequestBuilders
+                        .post( "/alert/dcs/")
+                        .content(mapper.writeValueAsBytes(alertRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(405));
+        
+        mvc.perform(MockMvcRequestBuilders
+                .post( "/alert/dcs/" + dcs)
+                .content(mapper.writeValueAsBytes(null))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is(400));
     }
 }

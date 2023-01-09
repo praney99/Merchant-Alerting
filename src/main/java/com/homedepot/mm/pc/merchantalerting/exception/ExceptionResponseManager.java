@@ -36,10 +36,10 @@ public class ExceptionResponseManager extends ResponseEntityExceptionHandler {
 
     // Error 404
 
-    @ExceptionHandler(NotFoundException.class)
+    /*@ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleNotFoundException(Exception ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-    }
+    }*/
 
     // Error 500
 
