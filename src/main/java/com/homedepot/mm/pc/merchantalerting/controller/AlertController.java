@@ -1,7 +1,6 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
-import com.homedepot.mm.pc.merchantalerting.exception.ValidationException;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.service.AlertService;
 import com.homedepot.mm.pc.merchantalerting.service.UserMatrixService;
@@ -17,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,13 +26,15 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     @SecurityRequirement(name = "PingFed")
     @RequestMapping(value = "/alert")
     public class AlertController {
+
+        final UserMatrixService userMatrixService;
+
         @Autowired
         AlertService alertService;
 
-        UserMatrixService userMatrixService;
 
-
-    public AlertController(AlertService alertService) {
+    public AlertController(UserMatrixService userMatrixService, AlertService alertService) {
+        this.userMatrixService = userMatrixService;
         this.alertService = alertService;
     }
 
@@ -89,11 +89,16 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
             @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
             @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content)})
     @Operation(summary = "Create alerts by DCS")
-    @PostMapping(value = "/dcs/{d}-{c}-{s}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/dcs/{dcs}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Alert> generateAlertByDCS(@PathVariable @NotNull String d, String c, String s, @RequestBody CreateAlertRequest createAlertRequest) throws Exception {
+    public ResponseEntity<Alert> generateAlertByDCS(@PathVariable String dcs, @RequestBody CreateAlertRequest createAlertRequest) throws Exception {
 
-        List<String> userIds = userMatrixService.getUserLDAPForGivenDCS(d,c,s);
+        String[] parts = dcs.split("-");
+        String d = parts[0];
+        String c = parts[1];
+        String s = parts[2];
+
+        List<String> userIds = userMatrixService.getUserLDAPForGivenDCS(d, c, s);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(alertService

@@ -43,7 +43,6 @@ public class UserMatrixController {
     })
     public ResponseEntity<List<String>> retrieveUserLDAPByDCS(@Valid @RequestBody DCS dcs) throws Exception {
 
-
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(userMatrixService.getUserLDAPForGivenDCS(dcs.getDepartment(), dcs.getClassNumber(), dcs.getSubClassNumber()));

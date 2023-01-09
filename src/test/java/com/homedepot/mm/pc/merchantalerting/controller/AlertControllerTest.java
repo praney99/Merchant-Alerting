@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homedepot.mm.pc.merchantalerting.PostgresContainerBaseTest;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
+import com.homedepot.mm.pc.merchantalerting.exception.ValidationException;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
+import com.homedepot.mm.pc.merchantalerting.service.AlertService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,6 +27,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class AlertControllerTest extends PostgresContainerBaseTest {
@@ -31,6 +35,7 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
     @LocalServerPort
     private int port;
 
+    AlertService alertService;
     @Autowired
     @Qualifier("noErrorRestTemplate")
     RestTemplate restTemplate;
@@ -208,5 +213,37 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
         );
         List<UserAlert> deletedUserAlerts = userAlertRepository.findAllById(userAlertIds);
         assertEquals(0, deletedUserAlerts.size());
+    }
+
+    @Test
+    @DisplayName("GenerateAlertsByDCS")
+    void generateAlertByDCS() {
+        final String dcs = "001-001-001";
+        CreateAlertRequest alertRequest = new CreateAlertRequest();
+        alertRequest.setType("Regional Assortment");
+        alertRequest.setSystemSource("My Assortment");
+        alertRequest.setExpirationDate(null);
+        alertRequest.setKeyIdentifiers(null);
+        Map<String, String> keyIdentifiers = new HashMap<>();
+        keyIdentifiers.put("sku", "123456");
+        keyIdentifiers.put("cpi", "0.98");
+        alertRequest.setKeyIdentifiers(keyIdentifiers);
+        alertRequest.setTemplateName("default");
+        Map<String, String> defaultTemplate = new HashMap<>();
+        defaultTemplate.put("title", "title");
+        defaultTemplate.put("titleDescription", "title description");
+        defaultTemplate.put("primaryText1", "primary text 1");
+        defaultTemplate.put("primaryText2", "primary text 2");
+        defaultTemplate.put("tertiaryText", "tertiary text");
+        defaultTemplate.put("primaryLinkText", "link");
+        defaultTemplate.put("primaryLinkUri", "http://localhost:8080");
+        alertRequest.setTemplateBody(new ObjectMapper().convertValue(defaultTemplate, HashMap.class));
+        alertRequest.setTemplateName("default");
+
+        ResponseEntity<Alert> responseEntity = this.restTemplate.postForEntity(
+                "http://localhost:" + port + "/alert/dcs/" + dcs,
+                alertRequest, Alert.class);
+        assertNotNull(responseEntity);
+        assertNotNull(responseEntity.getBody());
     }
 }
