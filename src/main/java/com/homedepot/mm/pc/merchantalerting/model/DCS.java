@@ -15,11 +15,17 @@ import org.springframework.web.reactive.function.client.WebClient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import java.util.List;
+import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 @Data
-@Component
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Component
 public class DCS {
     @Pattern(regexp = "^\\d{0,3}$")
     String department;

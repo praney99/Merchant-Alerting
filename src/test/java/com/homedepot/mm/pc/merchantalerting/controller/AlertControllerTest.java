@@ -2,9 +2,10 @@ package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.homedepot.mm.pc.merchantalerting.Exception.ValidationDCSException;
+
 import com.homedepot.mm.pc.merchantalerting.PostgresContainerBaseTest;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
+import com.homedepot.mm.pc.merchantalerting.exception.ValidationException;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
@@ -19,8 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -47,7 +48,7 @@ import static org.testcontainers.shaded.org.hamcrest.Matchers.is;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class AlertControllerTest //extends PostgresContainerBaseTest
+public class AlertControllerTest extends PostgresContainerBaseTest
 {
     @Autowired
     private WebApplicationContext context;
@@ -109,7 +110,7 @@ public class AlertControllerTest //extends PostgresContainerBaseTest
 
 
     @Test
-    void retrieveAlertByLdap() throws Exception{
+    void retrieveAlertByLdap() {
         Alert alert = new Alert();
         alert.setSystemSource("My Assortment");
         alert.setAlertType("Regional Assortment");
@@ -136,27 +137,22 @@ public class AlertControllerTest //extends PostgresContainerBaseTest
         alert.setTemplateBody(mapper.convertValue(defaultTemplate, JsonNode.class));
         alert.setTemplateName("default");
 
-        //Alert persistedAlert = alertRepository.save(alert);
-        Alert persistedAlert=alert;
-
-
+        Alert persistedAlert = alertRepository.save(alert);
         assertNotNull(persistedAlert);
 
         String ldap = "foo42br";
         UserAlert userAlert = new UserAlert(ldap, persistedAlert.getId());
         userAlert.setAlert(persistedAlert);
 
-        //UserAlert persistedUserAlert = userAlertRepository.save(userAlert);
-        UserAlert persistedUserAlert = userAlert;
+        UserAlert persistedUserAlert = userAlertRepository.save(userAlert);
         assertNotNull(persistedUserAlert);
-
 
         ResponseEntity<Alert[]> responseEntity = this.restTemplate.getForEntity(
                 "http://localhost:" + port + "/alert/user/" + ldap, Alert[].class);
 
         assertNotNull(responseEntity);
-        //assertEquals(1, responseEntity.getBody() == null ? 0 : responseEntity.getBody().length);
-        //assertEquals(responseEntity.getBody()[0].getId(), persistedAlert.getId());
+        assertEquals(1, responseEntity.getBody() == null ? 0 : responseEntity.getBody().length);
+        assertEquals(responseEntity.getBody()[0].getId(), persistedAlert.getId());
     }
 
     @Test
@@ -286,8 +282,8 @@ public class AlertControllerTest //extends PostgresContainerBaseTest
         when(alertService.createAlertWithLdapAssociations(any(), List.of(anyString())))
                 .thenReturn(alertRequest.toAlert());
         System.out.println(alertRequest);
-        ValidationDCSException AL= new ValidationDCSException();
-        System.out.println(AL.validateDCS(dcs));
+        ValidationException AL= new ValidationException("apple");
+        System.out.println(AL.getStatus());
         final String SaveBy_DCS_URL="/alert/dcs/";
 
         //1°Test SaveSuccess

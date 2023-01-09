@@ -1,3 +1,4 @@
+/*
 package com.homedepot.mm.pc.merchantalerting.configuration;
 
 import com.homedepot.appsecurecommunity.resourceserver.*;
@@ -43,4 +44,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 
-}
+}*/

@@ -1,8 +1,10 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
+import com.homedepot.mm.pc.merchantalerting.exception.ValidationException;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.service.AlertService;
+import com.homedepot.mm.pc.merchantalerting.service.UserMatrixService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,6 +30,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     public class AlertController {
         @Autowired
         AlertService alertService;
+
+        UserMatrixService userMatrixService;
 
 
     public AlertController(AlertService alertService) {
@@ -85,13 +89,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
             @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
             @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content)})
     @Operation(summary = "Create alerts by DCS")
-    @PostMapping(value = "/dcs/{dcs}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/dcs/{d}-{c}-{s}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Alert> generateAlertByDCS(@PathVariable("dcs") @NotNull String dcs, @RequestBody CreateAlertRequest createAlertRequest) {
+    public ResponseEntity<Alert> generateAlertByDCS(@PathVariable @NotNull String d, String c, String s, @RequestBody CreateAlertRequest createAlertRequest) throws Exception {
 
+        List<String> userIds = userMatrixService.getUserLDAPForGivenDCS(d,c,s);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(alertService
-                        .createAlertWithLdapAssociations(createAlertRequest, List.of(dcs)));
+                        .createAlertWithLdapAssociations(createAlertRequest, userIds));
     }
 }
