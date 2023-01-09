@@ -1,6 +1,7 @@
+/*
 package com.homedepot.mm.pc.merchantalerting.Exception;
 
-import com.homedepot.mm.pc.merchantalerting.domain.DCS;
+import com.homedepot.mm.pc.merchantalerting.model.DCS;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 
@@ -29,3 +30,4 @@ public class ValidationDCSException {
         }
     }
 }
+*/

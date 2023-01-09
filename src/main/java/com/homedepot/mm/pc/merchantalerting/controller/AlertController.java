@@ -1,6 +1,5 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
-import com.homedepot.mm.pc.merchantalerting.Exception.ValidationDCSException;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.service.AlertService;
@@ -30,7 +29,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
         @Autowired
         AlertService alertService;
 
-    ValidationDCSException Validate= new ValidationDCSException();
 
     public AlertController(AlertService alertService) {
         this.alertService = alertService;
@@ -89,11 +87,11 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     @Operation(summary = "Create alerts by DCS")
     @PostMapping(value = "/dcs/{dcs}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Alert> generateAlertByDCS(@PathVariable("dcs") @NotNull String dcs, @RequestBody @NotNull CreateAlertRequest createAlertRequest) {
+    public ResponseEntity<Alert> generateAlertByDCS(@PathVariable("dcs") @NotNull String dcs, @RequestBody CreateAlertRequest createAlertRequest) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(alertService
-                        .createAlertWithLdapAssociations(createAlertRequest, List.of(Validate.validateDCS(dcs))));
+                        .createAlertWithLdapAssociations(createAlertRequest, List.of(dcs)));
     }
 }
