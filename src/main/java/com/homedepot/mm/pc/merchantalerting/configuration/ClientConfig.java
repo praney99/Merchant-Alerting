@@ -7,26 +7,29 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Configuration
-@ConfigurationProperties(prefix = "respmatrix-client-url")
+@ConfigurationProperties
 public class ClientConfig {
-
-    @Value("${respmatrix-client-url}")
-    private String dcsEndpoint;
-
-    @Autowired
-    public static DCS dcs = new DCS();
-
-    public static final String
-            URI_DCS = "/findUser/DCS"
-            + "?d=" + dcs.getDepartment()
-            + "&c=" + dcs.getClassNumber()
-            + "&sc=" + dcs.getSubClassNumber();
+    @Bean
+    RestTemplate getRestTemplate(){
+        return new RestTemplate();
+    }
 
 
+    private String respMatrixClientUrl;
+
+    public String getRespMatrixClientUrl() {
+        return respMatrixClientUrl;
+    }
+
+    public void setRespMatrixClientUrl(String respMatrixClientUrl) {
+        this.respMatrixClientUrl = respMatrixClientUrl;
+    }
 }

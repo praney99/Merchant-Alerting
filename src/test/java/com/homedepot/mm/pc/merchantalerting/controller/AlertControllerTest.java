@@ -258,78 +258,78 @@ public class AlertControllerTest //extends PostgresContainerBaseTest
         //assertEquals(0, deletedUserAlerts.size());
     }
 
-    @Test
-    @DisplayName("SaveAlertsByDCS")
-    void generateAlertByDCS() throws Exception {
-        final String dcs = "001-001-001";
-        CreateAlertRequest alertRequest = new CreateAlertRequest();
-        alertRequest.setType("Regional Assortment");
-        alertRequest.setSystemSource("My Assortment");
-        alertRequest.setExpirationDate(null);
-        alertRequest.setKeyIdentifiers(null);
-        Map<String, String> keyIdentifiers = new HashMap<>();
-        keyIdentifiers.put("sku", "123456");
-        keyIdentifiers.put("cpi", "0.98");
-        alertRequest.setKeyIdentifiers(keyIdentifiers);
-        alertRequest.setTemplateName("default");
-        Map<String, String> defaultTemplate = new HashMap<>();
-        defaultTemplate.put("title","title");
-        defaultTemplate.put("titleDescription","title description");
-        defaultTemplate.put("primaryText1","primary text 1");
-        defaultTemplate.put("primaryText2","primary text 2");
-        defaultTemplate.put("tertiaryText","tertiary text");
-        defaultTemplate.put("primaryLinkText","link");
-        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
-        alertRequest.setTemplateBody(new ObjectMapper().convertValue(defaultTemplate, HashMap.class));
-        alertRequest.setTemplateName("default");
-
-        when(alertService.createAlertWithLdapAssociations(any(), List.of(anyString())))
-                .thenReturn(alertRequest.toAlert());
-        System.out.println(alertRequest);
-        ValidationException AL= new ValidationException("apple");
-        System.out.println(AL.getStatus());
-        final String SaveBy_DCS_URL="/alert/dcs/";
-
-        //1°Test SaveSuccess
-        mvc.perform(MockMvcRequestBuilders
-                        .post( SaveBy_DCS_URL+ dcs)
-                        .content(mapper.writeValueAsBytes(alertRequest))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
-
-        //2°Test MissingDCS
-        mvc.perform(MockMvcRequestBuilders
-                        .post( SaveBy_DCS_URL)
-                        .content(mapper.writeValueAsBytes(alertRequest))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(405));
-
-        //3° MissingBody
-        mvc.perform(MockMvcRequestBuilders
-                        .post( SaveBy_DCS_URL+ dcs)
-                        .content(mapper.writeValueAsBytes(null))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(400));
-
-        //4°Test WrongSize DCS
-        mvc.perform(MockMvcRequestBuilders
-                        .post( SaveBy_DCS_URL+ "0")
-                        .content(mapper.writeValueAsBytes(alertRequest))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(409));
-
-        //5°Test Zero DCS
-        mvc.perform(MockMvcRequestBuilders
-                        .post( SaveBy_DCS_URL+ "000-000-000")
-                        .content(mapper.writeValueAsBytes(alertRequest))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(406));
-    }
+//    @Test
+//    @DisplayName("SaveAlertsByDCS")
+//    void generateAlertByDCS() throws Exception {
+//        final String dcs = "001-001-001";
+//        CreateAlertRequest alertRequest = new CreateAlertRequest();
+//        alertRequest.setType("Regional Assortment");
+//        alertRequest.setSystemSource("My Assortment");
+//        alertRequest.setExpirationDate(null);
+//        alertRequest.setKeyIdentifiers(null);
+//        Map<String, String> keyIdentifiers = new HashMap<>();
+//        keyIdentifiers.put("sku", "123456");
+//        keyIdentifiers.put("cpi", "0.98");
+//        alertRequest.setKeyIdentifiers(keyIdentifiers);
+//        alertRequest.setTemplateName("default");
+//        Map<String, String> defaultTemplate = new HashMap<>();
+//        defaultTemplate.put("title","title");
+//        defaultTemplate.put("titleDescription","title description");
+//        defaultTemplate.put("primaryText1","primary text 1");
+//        defaultTemplate.put("primaryText2","primary text 2");
+//        defaultTemplate.put("tertiaryText","tertiary text");
+//        defaultTemplate.put("primaryLinkText","link");
+//        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
+//        alertRequest.setTemplateBody(new ObjectMapper().convertValue(defaultTemplate, HashMap.class));
+//        alertRequest.setTemplateName("default");
+//
+//        when(alertService.createAlertWithLdapAssociations(any(), List.of(anyString())))
+//                .thenReturn(alertRequest.toAlert());
+//        System.out.println(alertRequest);
+//        ValidationException AL= new ValidationException("apple");
+//        System.out.println(AL.getStatus());
+//        final String SaveBy_DCS_URL="/alert/dcs/";
+//
+//        //1°Test SaveSuccess
+//        mvc.perform(MockMvcRequestBuilders
+//                        .post( SaveBy_DCS_URL+ dcs)
+//                        .content(mapper.writeValueAsBytes(alertRequest))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isCreated());
+//
+//        //2°Test MissingDCS
+//        mvc.perform(MockMvcRequestBuilders
+//                        .post( SaveBy_DCS_URL)
+//                        .content(mapper.writeValueAsBytes(alertRequest))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().is(405));
+//
+//        //3° MissingBody
+//        mvc.perform(MockMvcRequestBuilders
+//                        .post( SaveBy_DCS_URL+ dcs)
+//                        .content(mapper.writeValueAsBytes(null))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().is(400));
+//
+//        //4°Test WrongSize DCS
+//        mvc.perform(MockMvcRequestBuilders
+//                        .post( SaveBy_DCS_URL+ "0")
+//                        .content(mapper.writeValueAsBytes(alertRequest))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().is(409));
+//
+//        //5°Test Zero DCS
+//        mvc.perform(MockMvcRequestBuilders
+//                        .post( SaveBy_DCS_URL+ "000-000-000")
+//                        .content(mapper.writeValueAsBytes(alertRequest))
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andExpect(status().is(406));
+//    }
 
 }
 

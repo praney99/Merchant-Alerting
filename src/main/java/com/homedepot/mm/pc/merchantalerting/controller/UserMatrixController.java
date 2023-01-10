@@ -41,12 +41,12 @@ public class UserMatrixController {
             @ApiResponse(responseCode = "404", description = "No matches found with the parameters given."),
             @ApiResponse(responseCode = "500", description = "An error occurred while processing the request")
     })
-    public ResponseEntity<List<String>> retrieveUserLDAPByDCS(@Valid @RequestBody DCS dcs) throws Exception {
+    public ResponseEntity<List<String>> retrieveUserLDAPByDCS(@Valid @RequestBody String dcs) throws Exception {
 
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(userMatrixService.getUserLDAPForGivenDCS(dcs.getDepartment(), dcs.getClassNumber(), dcs.getSubClassNumber()));
+                .body(userMatrixService.getUserLDAPForGivenDCS(dcs));
 
     }
 
