@@ -40,4 +40,3 @@ thd-identity:
             - path: /**
               needed-authorities:
                   - ROLE_read
-respmatrix-client-url: https://webapps-qa.homedepot.com/RespMatrix/rs

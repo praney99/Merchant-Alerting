@@ -14,44 +14,28 @@ public class UserMatrixService {
 
     final RespMatrixClient responsibilityMatrixClient;
 
-
-    @Autowired
     public UserMatrixService(RespMatrixClient responsibilityMatrixClient) {
         this.responsibilityMatrixClient = responsibilityMatrixClient;
     }
 
+    public List<String> getUserLDAPForGivenDCS(String dcs) {
+        String[] dcsArray = dcs.split("-");
 
-    public List<String> getUserLDAPForGivenDCS(String dcs) throws Exception {
-        String[] dcsArry = dcs.split("-");
-
-
-        if (dcsArry.length == 3) {
-            String cleanDepartment = cleanDCS(dcsArry[0]);
-            String cleanClass = cleanDCS(dcsArry[1]);
-            String cleanSubClass = cleanDCS(dcsArry[2]);
+        if (dcsArray.length == 3) {
+            String cleanDepartment = cleanDCS(dcsArray[0]);
+            String cleanClass = cleanDCS(dcsArray[1]);
+            String cleanSubClass = cleanDCS(dcsArray[2]);
 
             return responsibilityMatrixClient.getUsersByDcs(cleanDepartment, cleanClass, cleanSubClass);
-
         } else {
-
-            throw new ValidationException("Missing param");
+            throw new ValidationException("DCS malformed. Must be in the format: 001A-001-001 or 001-001-001");
         }
 
     }
 
-    private String cleanDCS(String oldDCSValue){
-        String newDCSValue, removedZeros;
-
-        if(oldDCSValue.length() > 2){
-            removedZeros = oldDCSValue.replaceFirst("^0+(?!$)", "");
-
-            newDCSValue = removedZeros.replaceAll("([a-zA-Z])", "");
-
-        } else {
-            newDCSValue = oldDCSValue;
-        }
-
-        return newDCSValue;
+    private String cleanDCS(String oldDCSValue) {
+        return oldDCSValue.replaceFirst("^0+(?!$)", "")
+                .replaceAll("([a-zA-Z])", "");
     }
 
 }

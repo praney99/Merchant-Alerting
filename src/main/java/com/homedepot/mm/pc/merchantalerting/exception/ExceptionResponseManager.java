@@ -13,7 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.stream.Collectors;
 
 @ControllerAdvice
-public class ExceptionResponseManager extends ResponseEntityExceptionHandler {
+public class ExceptionResponseManager {
 
     // Error 400
 
@@ -27,25 +27,9 @@ public class ExceptionResponseManager extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-                                                                  HttpHeaders headers, HttpStatus status, WebRequest request) {
-        return new ResponseEntity<>(ex.getAllErrors().stream().map(objectError -> objectError.getDefaultMessage())
-                .collect(Collectors.toList()), HttpStatus.BAD_REQUEST);
-    }
-
-    // Error 404
-
-    /*@ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Object> handleNotFoundException(Exception ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-    }*/
-
-    // Error 500
-
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Object> handleResponseStatusException(Exception ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex) {
+        return new ResponseEntity<>(ex.getMessage(), ex.getStatus());
     }
 
 }
