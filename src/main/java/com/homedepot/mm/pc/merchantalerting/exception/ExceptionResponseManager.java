@@ -1,16 +1,14 @@
 package com.homedepot.mm.pc.merchantalerting.exception;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.stream.Collectors;
+import javax.validation.ConstraintViolationException;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class ExceptionResponseManager {
@@ -29,7 +27,16 @@ public class ExceptionResponseManager {
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex) {
-        return new ResponseEntity<>(ex.getMessage(), ex.getStatus());
+        Map<String, String> response = new HashMap<>();
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response, ex.getStatus());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleResponseStatusException(ConstraintViolationException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
 }

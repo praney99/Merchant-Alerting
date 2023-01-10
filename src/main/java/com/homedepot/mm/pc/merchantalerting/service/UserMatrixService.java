@@ -4,7 +4,9 @@ import com.homedepot.mm.pc.merchantalerting.client.RespMatrixClient;
 import com.homedepot.mm.pc.merchantalerting.exception.ValidationException;
 import com.homedepot.mm.pc.merchantalerting.model.DCS;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -28,7 +30,7 @@ public class UserMatrixService {
 
             return responsibilityMatrixClient.getUsersByDcs(cleanDepartment, cleanClass, cleanSubClass);
         } else {
-            throw new ValidationException("DCS malformed. Must be in the format: 001A-001-001 or 001-001-001");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "DCS malformed. Must be in the format: 001A-001-001 or 001-001-001");
         }
 
     }

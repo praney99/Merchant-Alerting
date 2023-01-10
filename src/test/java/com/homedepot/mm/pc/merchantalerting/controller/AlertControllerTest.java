@@ -21,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -31,9 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -336,6 +335,48 @@ class AlertControllerTest extends PostgresContainerBaseTest {
 
     @Test
     void testDcsValidations() {
+        CreateAlertRequest alertRequest = new CreateAlertRequest();
+        alertRequest.setType("Regional Assortment");
+        alertRequest.setSystemSource("test source");
+        alertRequest.setTemplateName(AlertTemplateType.DEFAULT);
+
+        when(respMatrixClient.getUsersByDcs(any(), any(), any())).thenReturn(List.of("bcb44jc"));
+
+        ResponseEntity<Alert> responseEntity = this.restTemplate.postForEntity(
+                "http://localhost:" + port + "/alert/dcs/cat",
+                alertRequest, Alert.class);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+
+        responseEntity = this.restTemplate.postForEntity(
+                "http://localhost:" + port + "/alert/dcs/12345-123-123",
+                alertRequest, Alert.class);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+
+        responseEntity = this.restTemplate.postForEntity(
+                "http://localhost:" + port + "/alert/dcs/123-abc-123",
+                alertRequest, Alert.class);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+
+        responseEntity = this.restTemplate.postForEntity(
+                "http://localhost:" + port + "/alert/dcs/003-001-123a",
+                alertRequest, Alert.class);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void testNoUsersForRequestedDCS() {
+        CreateAlertRequest alertRequest = new CreateAlertRequest();
+        alertRequest.setType("Regional Assortment");
+        alertRequest.setSystemSource("test source");
+        alertRequest.setTemplateName(AlertTemplateType.DEFAULT);
+
+        // No users for the input DCS.
+        when(respMatrixClient.getUsersByDcs(any(), any(), any())).thenReturn(List.of());
+
+        ResponseEntity<Alert> responseEntity = this.restTemplate.postForEntity(
+                "http://localhost:" + port + "/alert/dcs/001-001-001",
+                alertRequest, Alert.class);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
 
     }
 }
