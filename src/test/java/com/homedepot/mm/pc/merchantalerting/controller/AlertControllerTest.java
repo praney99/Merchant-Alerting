@@ -1,53 +1,58 @@
 package com.homedepot.mm.pc.merchantalerting.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
 import com.homedepot.mm.pc.merchantalerting.PostgresContainerBaseTest;
+import com.homedepot.mm.pc.merchantalerting.client.RespMatrixClient;
+import com.homedepot.mm.pc.merchantalerting.domain.AlertTemplateType;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
-import com.homedepot.mm.pc.merchantalerting.exception.ValidationException;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
 import com.homedepot.mm.pc.merchantalerting.service.AlertService;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class AlertControllerTest extends PostgresContainerBaseTest {
+class AlertControllerTest extends PostgresContainerBaseTest {
 
     @LocalServerPort
     private int port;
 
     AlertService alertService;
+
     @Autowired
     @Qualifier("noErrorRestTemplate")
     RestTemplate restTemplate;
-    private final ObjectMapper mapper= new ObjectMapper();
+
+    @MockBean
+    RespMatrixClient respMatrixClient;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -66,7 +71,7 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
         keyIdentifiers.put("cpi", "0.98");
 
         alertRequest.setKeyIdentifiers(keyIdentifiers);
-        alertRequest.setTemplateName("default");
+        alertRequest.setTemplateName(AlertTemplateType.DEFAULT);
 
         Map<String, String> defaultTemplate = new HashMap<>();
         defaultTemplate.put("title","title");
@@ -228,19 +233,16 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
     }
 
     @Test
-    @DisplayName("GenerateAlertsByDCS")
     void generateAlertByDCS() throws Exception {
         final String dcs = "001-001-001";
         CreateAlertRequest alertRequest = new CreateAlertRequest();
         alertRequest.setType("Regional Assortment");
         alertRequest.setSystemSource("My Assortment");
         alertRequest.setExpirationDate(null);
-        alertRequest.setKeyIdentifiers(null);
         Map<String, String> keyIdentifiers = new HashMap<>();
         keyIdentifiers.put("sku", "123456");
-        keyIdentifiers.put("cpi", "0.98");
+        keyIdentifiers.put("store", "123");
         alertRequest.setKeyIdentifiers(keyIdentifiers);
-        alertRequest.setTemplateName("default");
         Map<String, String> defaultTemplate = new HashMap<>();
         defaultTemplate.put("title", "title");
         defaultTemplate.put("titleDescription", "title description");
@@ -249,35 +251,91 @@ public class AlertControllerTest extends PostgresContainerBaseTest {
         defaultTemplate.put("tertiaryText", "tertiary text");
         defaultTemplate.put("primaryLinkText", "link");
         defaultTemplate.put("primaryLinkUri", "http://localhost:8080");
-        alertRequest.setTemplateBody(new ObjectMapper().convertValue(defaultTemplate, HashMap.class));
-        alertRequest.setTemplateName("default");
+        alertRequest.setTemplateBody(defaultTemplate);
+        alertRequest.setTemplateName(AlertTemplateType.DEFAULT);
+
+        when(respMatrixClient.getUsersByDcs(any(), any(), any())).thenReturn(List.of("bcb44jc"));
 
         ResponseEntity<Alert> responseEntity = this.restTemplate.postForEntity(
                 "http://localhost:" + port + "/alert/dcs/" + dcs,
                 alertRequest, Alert.class);
-        assertNotNull(responseEntity);
+        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
         assertNotNull(responseEntity.getBody());
 
-        MockMvc mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        ResponseEntity<Alert[]> alertsByLdap = this.restTemplate.getForEntity(
+                "http://localhost:" + port + "/alert/user/bcb44jc", Alert[].class);
 
-        mvc.perform(MockMvcRequestBuilders
-                        .post( "/alert/dcs/" + dcs)
-                        .content(mapper.writeValueAsString(alertRequest))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect((status().is(HttpStatus.CREATED.value())));
+        Alert createdAlert = alertsByLdap.getBody()[0];
+        assertTrue(createdAlert.getExpirationDate().after(Date.valueOf(LocalDate.now().plusDays(29))));
+        assertEquals("primary text 1", createdAlert.getTemplateBody().get("primaryText1").asText());
+        assertEquals(AlertTemplateType.DEFAULT.toString().toLowerCase(), createdAlert.getTemplateName());
+        assertEquals("123456", createdAlert.getKeyIdentifiers().get("sku").asText());
 
-        mvc.perform(MockMvcRequestBuilders
-                        .post( "/alert/dcs/")
-                        .content(mapper.writeValueAsBytes(alertRequest))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(405));
-        
-        mvc.perform(MockMvcRequestBuilders
-                .post( "/alert/dcs/" + dcs)
-                .content(mapper.writeValueAsBytes(null))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(400));
+    }
+
+    @Test
+    void testRequiredAlertFields() {
+        final String dcs = "001-001-001";
+        CreateAlertRequest alertRequest = new CreateAlertRequest();
+        alertRequest.setType("Regional Assortment");
+        alertRequest.setSystemSource(null); // Required Field
+        alertRequest.setTemplateName(AlertTemplateType.DEFAULT);
+
+        when(respMatrixClient.getUsersByDcs(any(), any(), any())).thenReturn(List.of("bcb44jc"));
+
+        ResponseEntity<Alert> responseEntity = this.restTemplate.postForEntity(
+                "http://localhost:" + port + "/alert/dcs/" + dcs,
+                alertRequest, Alert.class);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+
+        alertRequest.setType(null); // Required Field
+        alertRequest.setSystemSource("test");
+        alertRequest.setTemplateName(AlertTemplateType.DEFAULT);
+
+        responseEntity = this.restTemplate.postForEntity(
+                "http://localhost:" + port + "/alert/dcs/" + dcs,
+                alertRequest, Alert.class);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void testFutureExpirationDate() {
+        final String dcs = "001-001-001";
+        CreateAlertRequest alertRequest = new CreateAlertRequest();
+        alertRequest.setType("Regional Assortment");
+        alertRequest.setSystemSource("test source");
+        alertRequest.setTemplateName(AlertTemplateType.DEFAULT);
+        alertRequest.setExpirationDate(LocalDate.now().minusDays(1));
+
+        when(respMatrixClient.getUsersByDcs(any(), any(), any())).thenReturn(List.of("bcb44jc"));
+
+        ResponseEntity<Alert> responseEntity = this.restTemplate.postForEntity(
+                "http://localhost:" + port + "/alert/dcs/" + dcs,
+                alertRequest, Alert.class);
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void testAlertTemplateName() {
+        final String dcs = "001-001-001";
+        final String alertRequest = "{\n" +
+                "  \"systemSource\": \"mpulse\",\n" +
+                "  \"type\": \"test\",\n" +
+                "  \"templateName\": \"someOtherTemplate\"\n" +
+                "}";
+
+        when(respMatrixClient.getUsersByDcs(any(), any(), any())).thenReturn(List.of("bcb44jc"));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        ResponseEntity<Alert> responseEntity = restTemplate.exchange("http://localhost:" + port + "/alert/dcs/" + dcs, HttpMethod.POST,
+                new HttpEntity<>(alertRequest, headers), Alert.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void testDcsValidations() {
+
     }
 }
