@@ -35,6 +35,14 @@ thd-identity:
               audience: spiffe://homedepot.dev/mpulse-ui
               authorities:
                   - ROLE_read
+            - issuer-name: pingfed-qa
+              audience: spiffe://homedepot.dev/myassortment-service
+              authorities:
+                - ROLE_read
+            - issuer-name: azuread-qa
+              audience: spiffe://homedepot.dev/myassortment-service
+              authorities:
+                - ROLE_read
 
         path-checks:
             - path: /**

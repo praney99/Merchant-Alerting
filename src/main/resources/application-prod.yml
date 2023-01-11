@@ -35,8 +35,18 @@ thd-identity:
               audience: spiffe://homedepot.com/mpulse-ui
               authorities:
                   - ROLE_read
+            - issuer-name: pingfed-pr
+              audience: spiffe://homedepot.com/myassortment-service
+              authorities:
+                  - ROLE_read
+            - issuer-name: azuread-pr
+              audience: spiffe://homedepot.com/myassortment-service
+              authorities:
+                  - ROLE_read
 
         path-checks:
             - path: /**
               needed-authorities:
                   - ROLE_read
+
+respMatrixClientUrl: https://webapps.homedepot.com/RespMatrix/rs

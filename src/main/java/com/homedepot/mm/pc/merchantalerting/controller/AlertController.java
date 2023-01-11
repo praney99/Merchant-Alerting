@@ -7,27 +7,28 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-    @RestController
-    @SecurityRequirement(name = "PingFed")
-    @RequestMapping(value = "/alert")
-    public class AlertController {
-        @Autowired
-        AlertService alertService;
+@RestController
+@SecurityRequirement(name = "PingFed")
+@RequestMapping(value = "/alert")
+@Validated
+public class AlertController {
+
+    final AlertService alertService;
 
     public AlertController(AlertService alertService) {
         this.alertService = alertService;
@@ -39,7 +40,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     @Operation(summary = "Create alert by LDAP.")
     @PostMapping(value = "/user/{ldap}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Alert> createAlertByLdap(@PathVariable("ldap") String ldap, @RequestBody CreateAlertRequest createAlertRequest) {
+    public ResponseEntity<Alert> createAlertByLdap(@PathVariable("ldap") String ldap, @RequestBody @Valid CreateAlertRequest createAlertRequest) {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -53,7 +54,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     @GetMapping(value = "/user/{ldap}", produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<List<Alert>> retrieveAlertsByLdap(@PathVariable("ldap") String ldap) {
-
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(alertService.getAlertsByLdap(ldap));
@@ -78,5 +78,22 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     @DeleteMapping(value = "/{alertId}", produces = APPLICATION_JSON_VALUE)
     public void deleteAlertById(@PathVariable("alertId") UUID alertId) {
         alertService.deleteAlert(alertId);
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
+            @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content)})
+    @Operation(summary = "Creates an alert, and assigns the alert to all users who manage the input DCS.")
+    @PostMapping(value = "/dcs/{dcs}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<Alert> generateAlertByDCS(
+            @PathVariable("dcs") @Pattern(regexp = "^((\\d{1,3}[a-zA-Z])|(\\d{1,4}))-\\d{1,3}-\\d{1,3}$") String dcs,
+            @RequestBody @Valid CreateAlertRequest createAlertRequest
+    ) {
+        Alert alert = alertService.createAlertByDCS(createAlertRequest, dcs);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(alert);
     }
 }

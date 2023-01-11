@@ -1,6 +1,5 @@
 package com.homedepot.mm.pc.merchantalerting.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

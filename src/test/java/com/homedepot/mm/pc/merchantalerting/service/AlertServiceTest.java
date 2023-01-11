@@ -1,5 +1,6 @@
 package com.homedepot.mm.pc.merchantalerting.service;
 
+import com.homedepot.mm.pc.merchantalerting.domain.AlertTemplateType;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
@@ -11,10 +12,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AlertServiceTest {
@@ -38,7 +41,7 @@ public class AlertServiceTest {
         request.setSystemSource("testSystemSource");
         request.setExpirationDate(null);
         request.setKeyIdentifiers(null);
-        request.setTemplateName("default");
+        request.setTemplateName(AlertTemplateType.DEFAULT);
 
         Map<String, String> defaultTemplate = new HashMap<>();
         defaultTemplate.put("title","title");
@@ -70,9 +73,9 @@ public class AlertServiceTest {
         CreateAlertRequest request = new CreateAlertRequest();
         request.setType("testType");
         request.setSystemSource("testSystemSource");
-        request.setExpirationDate("2030-12-30");
+        request.setExpirationDate(LocalDate.parse("2030-12-30"));
         request.setKeyIdentifiers(keyIdentifiers);
-        request.setTemplateName("default");
+        request.setTemplateName(AlertTemplateType.DEFAULT);
 
         Map<String, String> defaultTemplate = new HashMap<>();
         defaultTemplate.put("title","title");
