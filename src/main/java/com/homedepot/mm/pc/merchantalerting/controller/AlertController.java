@@ -87,7 +87,7 @@ public class AlertController {
     @PostMapping(value = "/dcs/{dcs}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<Alert> generateAlertByDCS(
-            @PathVariable("dcs") @Pattern(regexp = "^((\\d{1,3}[a-zA-Z])|(\\d{1,4}))-\\d{0,3}-\\d{0,3}$") String dcs,
+            @PathVariable("dcs") @Pattern(regexp = "^((\\d{1,3}[a-zA-Z])|(\\d{1,4}))-\\d{1,3}-\\d{1,3}$") String dcs,
             @RequestBody @Valid CreateAlertRequest createAlertRequest
     ) {
         Alert alert = alertService.createAlertByDCS(createAlertRequest, dcs);
