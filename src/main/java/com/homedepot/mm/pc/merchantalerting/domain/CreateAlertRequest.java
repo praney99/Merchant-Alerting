@@ -18,6 +18,8 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.homedepot.mm.pc.merchantalerting.constants.AlertConstants.DEFAULT_EXPIRATION_DAYS;
+
 @Builder
 @Data
 @NoArgsConstructor
@@ -49,7 +51,7 @@ public class CreateAlertRequest {
             alert.setAlertType(this.getType());
             alert.setTemplateName(this.getTemplateName().toString().toLowerCase());
             alert.setTemplateBody(mapper.convertValue(this.getTemplateBody(), JsonNode.class));
-            alert.setExpirationDate(this.getExpirationDate() == null ? Date.valueOf(LocalDate.now().plusMonths(1)) : Date.valueOf(this.getExpirationDate()));
+            alert.setExpirationDate(this.getExpirationDate() == null ? Date.valueOf(LocalDate.now().plusDays(DEFAULT_EXPIRATION_DAYS)) : Date.valueOf(this.getExpirationDate()));
             alert.setCreateBy(this.getSystemSource());
             alert.setCreated(new Timestamp(System.currentTimeMillis()));
         } catch (IllegalArgumentException e) {
