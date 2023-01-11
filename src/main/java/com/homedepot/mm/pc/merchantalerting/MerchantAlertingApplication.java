@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
-import  com.homedepot.mm.pc.merchantalerting.model.DCS;
 
 @OpenAPIDefinition(info = @Info(title = "Merchant Alerting", description = "Alert creation/management system"))
 @SecurityScheme(name = "PingFed", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)

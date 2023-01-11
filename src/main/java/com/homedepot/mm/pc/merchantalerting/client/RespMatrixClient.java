@@ -1,19 +1,14 @@
 package com.homedepot.mm.pc.merchantalerting.client;
 
 import com.homedepot.mm.pc.merchantalerting.configuration.ClientConfig;
-import com.homedepot.mm.pc.merchantalerting.model.RespMatrixReponse;
+import com.homedepot.mm.pc.merchantalerting.model.RespMatrixResponse;
 import com.homedepot.mm.pc.merchantalerting.model.RespMatrixUser;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONArray;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,8 +38,8 @@ public class RespMatrixClient {
                 + "&sc=" + subClass
                 + "&json=true";
 
-        ResponseEntity<RespMatrixReponse> respMatrixResp = restTemplate.exchange(url, HttpMethod.GET, entity, RespMatrixReponse.class);
-        RespMatrixReponse response = respMatrixResp.getBody();
+        ResponseEntity<RespMatrixResponse> respMatrixResp = restTemplate.exchange(url, HttpMethod.GET, entity, RespMatrixResponse.class);
+        RespMatrixResponse response = respMatrixResp.getBody();
 
         if (respMatrixResp.getStatusCode() == HttpStatus.OK && response != null) {
             if (response.getUsers() != null) {
