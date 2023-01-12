@@ -120,4 +120,10 @@ public class AlertServiceTest {
         doNothing().when(alertRepository).deleteById(any());
         alertService.deleteAlert(alertId);
     }
+
+    @Test
+    public void testExpireCronJob() {
+        doNothing().when(alertRepository).deleteAlertsByExpirationDateBefore(any());
+        alertService.cleanupExpiredAlerts();
+    }
 }
