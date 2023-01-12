@@ -42,13 +42,18 @@ public class AlertService {
         this.userMatrixService = userMatrixService;
     }
 
+    /**
+     * CRON JOB - Scheduled to run every day at midnight.
+     *
+     * Deletes from the database Alerts with expiration dates prior to today's date.
+     * Cascading delete functionality will also delete associated UserAlerts.
+     */
     @Transactional
     @Scheduled(cron = "0 0 0 * * *")
     public void cleanupExpiredAlerts() {
         LOGGER.warn("Running Cleanup Job for Expired Alert...");
         Date todaysDate = Date.valueOf(LocalDate.now());
         List<Alert> deletedAlerts = alertRepository.deleteAlertsByExpirationDateBefore(todaysDate);
-
         List<UUID> deletedAlertIds = deletedAlerts.stream()
                 .map(Alert::getId)
                 .collect(Collectors.toList());
