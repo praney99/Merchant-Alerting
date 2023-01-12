@@ -3,6 +3,7 @@ package com.homedepot.mm.pc.merchantalerting.service;
 import com.homedepot.mm.pc.merchantalerting.domain.AlertTemplateType;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
+import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
 import org.junit.Assert;
@@ -119,5 +120,15 @@ public class AlertServiceTest {
         UUID alertId = UUID.randomUUID();
         doNothing().when(alertRepository).deleteById(any());
         alertService.deleteAlert(alertId);
+    }
+
+    @Test
+    public void testDismissAlert() {
+        UUID alertId = UUID.randomUUID();
+        String ldap = "foo42br";
+        UserAlert userAlert = new UserAlert(ldap, alertId);
+        when(userAlertRepository.findById(any()))
+                .thenReturn(Optional.of(userAlert));
+        alertService.dismissAlert(ldap, alertId);
     }
 }

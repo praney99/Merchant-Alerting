@@ -3,6 +3,7 @@ package com.homedepot.mm.pc.merchantalerting.service;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
+import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -63,9 +65,9 @@ public class AlertService {
         return persistedAlert;
     }
 
-    @Transactional
-    public void deleteAlert(UUID alertId) {
-        alertRepository.deleteById(alertId);
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<Alert> getAlertsByLdap(String ldap) {
+        return alertRepository.findAlertsByLdap(ldap);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -73,9 +75,24 @@ public class AlertService {
         return alertRepository.findById(uuid);
     }
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<Alert> getAlertsByLdap(String ldap) {
-        return alertRepository.findAlertsByLdap(ldap);
+    @Transactional
+    public void deleteAlert(UUID alertId) {
+        alertRepository.deleteById(alertId);
     }
 
+    @Transactional
+    public void dismissAlert(String ldap, UUID alertId) {
+        UserAlertId id = new UserAlertId(ldap, alertId);
+        Optional<UserAlert> optionalUserAlert = userAlertRepository.findById(id);
+
+        if (optionalUserAlert.isPresent()) {
+            UserAlert userAlert = optionalUserAlert.get();
+            userAlert.setIsDismissed(true);
+            userAlert.setLastUpdated(new Timestamp(System.currentTimeMillis()));
+            userAlert.setLastUpdateBy(ldap); // Should this value come from the system making this call? Right now this assumes only users will dismiss their own alerts.
+            userAlertRepository.save(userAlert);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error dismissing alert " + alertId + " for user " + ldap + ".");
+        }
+    }
 }

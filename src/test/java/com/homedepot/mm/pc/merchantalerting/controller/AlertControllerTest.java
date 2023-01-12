@@ -9,7 +9,6 @@ import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
-import com.homedepot.mm.pc.merchantalerting.service.AlertService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,14 +18,11 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,17 +36,12 @@ class AlertControllerTest extends PostgresContainerBaseTest {
     @LocalServerPort
     private int port;
 
-    AlertService alertService;
-
     @Autowired
     @Qualifier("noErrorRestTemplate")
     RestTemplate restTemplate;
 
     @MockBean
     RespMatrixClient respMatrixClient;
-
-    @Autowired
-    private WebApplicationContext webApplicationContext;
 
     @Test
     void generateAlertByLdap() {
@@ -228,7 +219,7 @@ class AlertControllerTest extends PostgresContainerBaseTest {
     }
 
     @Test
-    void generateAlertByDCS() throws Exception {
+    void generateAlertByDCS() {
         final String dcs = "001-001-001";
         CreateAlertRequest alertRequest = new CreateAlertRequest();
         alertRequest.setType("Regional Assortment");
@@ -373,6 +364,118 @@ class AlertControllerTest extends PostgresContainerBaseTest {
                 "http://localhost:" + port + "/alert/dcs/001-001-001",
                 alertRequest, Alert.class);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
 
+    @Test
+    void testDismissAlertHappyPath() {
+        Alert alert = new Alert();
+        alert.setSystemSource("My Assortment");
+        alert.setAlertType("Regional Assortment");
+        alert.setCreateBy("unit test");
+        alert.setCreated(new Timestamp(System.currentTimeMillis()));
+        alert.setLastUpdateBy(null);
+        alert.setLastUpdated(null);
+        alert.setExpirationDate(null);
+
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, String> keyIdentifiers = new HashMap<>();
+        keyIdentifiers.put("sku", "123456");
+        keyIdentifiers.put("cpi", "0.98");
+        alert.setKeyIdentifiers(mapper.convertValue(keyIdentifiers, JsonNode.class));
+
+        Map<String, String> defaultTemplate = new HashMap<>();
+        defaultTemplate.put("title","title");
+        defaultTemplate.put("titleDescription","title description");
+        defaultTemplate.put("primaryText1","primary text 1");
+        defaultTemplate.put("primaryText2","primary text 2");
+        defaultTemplate.put("tertiaryText","tertiary text");
+        defaultTemplate.put("primaryLinkText","link");
+        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
+        alert.setTemplateBody(mapper.convertValue(defaultTemplate, JsonNode.class));
+        alert.setTemplateName("default");
+
+        Alert persistedAlert = alertRepository.save(alert);
+        assertNotNull(persistedAlert);
+
+        String ldap = "foo42br";
+        UserAlert userAlert = new UserAlert(ldap, persistedAlert.getId());
+        userAlert.setAlert(persistedAlert);
+
+        UserAlert persistedUserAlert = userAlertRepository.save(userAlert);
+        assertNotNull(persistedUserAlert);
+
+        this.restTemplate.postForObject(
+                "http://localhost:" + port + "/alert/user/" + ldap + "/dismiss/" + persistedAlert.getId(),
+                null, Void.class);
+
+        UserAlertId userAlertId = new UserAlertId(
+                persistedUserAlert.getLdap(),
+                persistedUserAlert.getAlertId()
+        );
+        Optional<UserAlert> optionalUserAlert = userAlertRepository.findById(userAlertId);
+        assertTrue(optionalUserAlert.isPresent());
+        UserAlert dismissedUserAlert = optionalUserAlert.get();
+        assertNotNull(dismissedUserAlert);
+        assertTrue(dismissedUserAlert.getIsDismissed());
+        assertNotNull(dismissedUserAlert.getLastUpdated());
+        assertNotNull(dismissedUserAlert.getLastUpdateBy());
+    }
+
+    @Test
+    void testDismissAlertFailure() {
+        Alert alert = new Alert();
+        alert.setSystemSource("My Assortment");
+        alert.setAlertType("Regional Assortment");
+        alert.setCreateBy("unit test");
+        alert.setCreated(new Timestamp(System.currentTimeMillis()));
+        alert.setLastUpdateBy(null);
+        alert.setLastUpdated(null);
+        alert.setExpirationDate(null);
+
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, String> keyIdentifiers = new HashMap<>();
+        keyIdentifiers.put("sku", "123456");
+        keyIdentifiers.put("cpi", "0.98");
+        alert.setKeyIdentifiers(mapper.convertValue(keyIdentifiers, JsonNode.class));
+
+        Map<String, String> defaultTemplate = new HashMap<>();
+        defaultTemplate.put("title","title");
+        defaultTemplate.put("titleDescription","title description");
+        defaultTemplate.put("primaryText1","primary text 1");
+        defaultTemplate.put("primaryText2","primary text 2");
+        defaultTemplate.put("tertiaryText","tertiary text");
+        defaultTemplate.put("primaryLinkText","link");
+        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
+        alert.setTemplateBody(mapper.convertValue(defaultTemplate, JsonNode.class));
+        alert.setTemplateName("default");
+
+        Alert persistedAlert = alertRepository.save(alert);
+        assertNotNull(persistedAlert);
+
+        String ldap = "foo42br";
+        UserAlert userAlert = new UserAlert(ldap, persistedAlert.getId());
+        userAlert.setAlert(persistedAlert);
+
+        UserAlert persistedUserAlert = userAlertRepository.save(userAlert);
+        assertNotNull(persistedUserAlert);
+
+        // Test for failure with an ID that does not exist in the system.
+        UUID nonexistentAlertId = UUID.randomUUID();
+
+        this.restTemplate.postForObject(
+                "http://localhost:" + port + "/alert/user/" + ldap + "/dismiss/" + nonexistentAlertId,
+                null, Void.class);
+
+        UserAlertId userAlertId = new UserAlertId(
+                persistedUserAlert.getLdap(),
+                persistedUserAlert.getAlertId()
+        );
+        Optional<UserAlert> optionalUserAlert = userAlertRepository.findById(userAlertId);
+        assertTrue(optionalUserAlert.isPresent());
+        UserAlert dismissedUserAlert = optionalUserAlert.get();
+        assertNotNull(dismissedUserAlert);
+        assertFalse(dismissedUserAlert.getIsDismissed());
+        assertNull(dismissedUserAlert.getLastUpdated());
+        assertNull(dismissedUserAlert.getLastUpdateBy());
     }
 }
