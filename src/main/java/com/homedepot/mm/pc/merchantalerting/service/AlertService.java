@@ -80,7 +80,7 @@ public class AlertService {
         alertRepository.deleteById(alertId);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void dismissAlert(String ldap, UUID alertId) {
         UserAlertId id = new UserAlertId(ldap, alertId);
         Optional<UserAlert> optionalUserAlert = userAlertRepository.findById(id);
