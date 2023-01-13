@@ -15,10 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -81,18 +78,20 @@ public class AlertService {
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void dismissAlert(String ldap, UUID alertId) {
-        UserAlertId id = new UserAlertId(ldap, alertId);
-        Optional<UserAlert> optionalUserAlert = userAlertRepository.findById(id);
+    public void dismissAlert(String ldap, Map<UUID, Boolean> alertDismissalStates) {
+        alertDismissalStates.forEach((alertId, isDismissed) -> {
+            UserAlertId id = new UserAlertId(ldap, alertId);
+            Optional<UserAlert> optionalUserAlert = userAlertRepository.findById(id);
 
-        if (optionalUserAlert.isPresent()) {
-            UserAlert userAlert = optionalUserAlert.get();
-            userAlert.setIsDismissed(true);
-            userAlert.setLastUpdated(new Timestamp(System.currentTimeMillis()));
-            userAlert.setLastUpdateBy(ldap); // Should this value come from the system making this call? Right now this assumes only users will dismiss their own alerts.
-            userAlertRepository.save(userAlert);
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error dismissing alert " + alertId + " for user " + ldap + ".");
-        }
+            if (optionalUserAlert.isPresent()) {
+                UserAlert userAlert = optionalUserAlert.get();
+                userAlert.setIsDismissed(isDismissed);
+                userAlert.setLastUpdated(new Timestamp(System.currentTimeMillis()));
+                userAlert.setLastUpdateBy(ldap); // TODO: Set this value with user from PingFed token. Right now this assumes only users will dismiss their own alerts.
+                userAlertRepository.save(userAlert);
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error dismissing alert " + alertId + " for user " + ldap + ".");
+            }
+        });
     }
 }

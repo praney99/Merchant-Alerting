@@ -124,11 +124,17 @@ public class AlertServiceTest {
 
     @Test
     public void testDismissAlert() {
-        UUID alertId = UUID.randomUUID();
-        String ldap = "foo42br";
-        UserAlert userAlert = new UserAlert(ldap, alertId);
+        Map<UUID, Boolean> alertDismissalStates = new HashMap<>();
+        UUID alertId_0 = UUID.randomUUID();
+        UUID alertId_1 = UUID.randomUUID();
+        alertDismissalStates.put(alertId_0, true);
+        alertDismissalStates.put(alertId_1, false);
+        String ldap = "user0";
+        UserAlert userAlert_0 = new UserAlert(ldap, alertId_0);
+        UserAlert userAlert_1 = new UserAlert(ldap, alertId_1);
         when(userAlertRepository.findById(any()))
-                .thenReturn(Optional.of(userAlert));
-        alertService.dismissAlert(ldap, alertId);
+                .thenReturn(Optional.of(userAlert_0))
+                .thenReturn(Optional.of(userAlert_1));
+        alertService.dismissAlert(ldap, alertDismissalStates);
     }
 }

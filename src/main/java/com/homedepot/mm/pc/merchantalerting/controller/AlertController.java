@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -101,9 +102,9 @@ public class AlertController {
             @ApiResponse(responseCode = "200", description = "Dismissed successfully.", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
             @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing.", content = @Content)})
     @Operation(summary = "Dismiss user alert.")
-    @PostMapping(value = "/user/{ldap}/dismiss/{alertId}", produces = APPLICATION_JSON_VALUE)
-    public void dismissUserAlert(@PathVariable("ldap") String ldap, @PathVariable("alertId") UUID alertId) {
-        alertService.dismissAlert(ldap, alertId);
+    @PostMapping(value = "/user/{ldap}/dismiss", produces = APPLICATION_JSON_VALUE)
+    public void dismissUserAlert(@PathVariable("ldap") String ldap, @RequestBody Map<UUID, Boolean> alertDismissalStates) {
+        alertService.dismissAlert(ldap, alertDismissalStates);
     }
 
 }
