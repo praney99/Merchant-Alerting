@@ -79,6 +79,7 @@ public class AlertService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void dismissAlert(String ldap, Map<UUID, Boolean> alertDismissalStates) {
+        List<UserAlert> userAlerts = new ArrayList<>();
         alertDismissalStates.forEach((alertId, isDismissed) -> {
             UserAlertId id = new UserAlertId(ldap, alertId);
             Optional<UserAlert> optionalUserAlert = userAlertRepository.findById(id);
@@ -88,10 +89,11 @@ public class AlertService {
                 userAlert.setIsDismissed(isDismissed);
                 userAlert.setLastUpdated(new Timestamp(System.currentTimeMillis()));
                 userAlert.setLastUpdateBy(ldap); // TODO: Set this value with user from PingFed token. Right now this assumes only users will dismiss their own alerts.
-                userAlertRepository.save(userAlert);
+                userAlerts.add(userAlert);
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error dismissing alert " + alertId + " for user " + ldap + ".");
             }
         });
+        userAlertRepository.saveAll(userAlerts);
     }
 }
