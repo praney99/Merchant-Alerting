@@ -9,7 +9,6 @@ import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
-import com.homedepot.mm.pc.merchantalerting.service.AlertService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,7 +18,6 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -40,17 +38,12 @@ class AlertControllerTest extends PostgresContainerBaseTest {
     @LocalServerPort
     private int port;
 
-    AlertService alertService;
-
     @Autowired
     @Qualifier("noErrorRestTemplate")
     RestTemplate restTemplate;
 
     @MockBean
     RespMatrixClient respMatrixClient;
-
-    @Autowired
-    private WebApplicationContext webApplicationContext;
 
     @Test
     void generateAlertByLdap() {
