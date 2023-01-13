@@ -7,7 +7,8 @@ import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.service.AlertService;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.sql.Date;
@@ -20,9 +21,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
+@SpringBootTest
 public class AlertServiceIntegrationTest extends PostgresContainerBaseTest {
 
-    @InjectMocks
+    @Autowired
     AlertService alertService;
 
     @Test
