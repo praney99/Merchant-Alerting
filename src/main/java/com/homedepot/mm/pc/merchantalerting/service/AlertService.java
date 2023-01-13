@@ -48,7 +48,7 @@ public class AlertService {
      * Deletes from the database Alerts with expiration dates prior to today's date.
      * Cascading delete functionality will also delete associated UserAlerts.
      */
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     @Scheduled(cron = "0 0 0 * * *")
     public void cleanupExpiredAlerts() {
         LOGGER.warn("Running Cleanup Job for Expired Alert...");
