@@ -49,4 +49,4 @@ thd-identity:
               needed-authorities:
                   - ROLE_read
 
-respMatrixClientUrl: https://webapps.homedepot.com/RespMatrix/rs
+respMatrixClientUrl: https://merch-product-resp-matrix-service.hd-merch-prod.gcp.homedepot.com/RespMatrix/rs
