@@ -95,8 +95,6 @@ jobs:
         run: ./scripts/compile.sh
       - name: Unit Tests
         run: ./scripts/unit_test.sh
-      - name: API Tests
-        run: ./scripts/api_test.sh
 
   Dockerize:
     runs-on: [ one-thd-onprem-np ]

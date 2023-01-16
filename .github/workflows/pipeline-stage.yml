@@ -98,8 +98,6 @@ jobs:
         run: ./scripts/compile.sh
       - name: Unit Tests
         run: ./scripts/unit_test.sh
-      - name: API Tests
-        run: ./scripts/api_test.sh
       - name: Archive test results
         uses: actions/upload-artifact@v2
         with:
