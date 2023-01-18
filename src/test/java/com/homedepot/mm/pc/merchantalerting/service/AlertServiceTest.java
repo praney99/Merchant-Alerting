@@ -132,9 +132,11 @@ public class AlertServiceTest {
         String ldap = "user0";
         UserAlert userAlert_0 = new UserAlert(ldap, alertId_0);
         UserAlert userAlert_1 = new UserAlert(ldap, alertId_1);
-        when(userAlertRepository.findById(any()))
-                .thenReturn(Optional.of(userAlert_0))
-                .thenReturn(Optional.of(userAlert_1));
+        List<UserAlert> userAlerts = List.of(userAlert_0, userAlert_1);
+        when(userAlertRepository.findAllById(any()))
+                .thenReturn(userAlerts);
+        when(userAlertRepository.saveAll(any()))
+                .thenReturn(userAlerts);
         alertService.dismissAlert(ldap, alertDismissalStates);
     }
 }

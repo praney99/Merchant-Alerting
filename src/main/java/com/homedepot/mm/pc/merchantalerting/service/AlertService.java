@@ -79,21 +79,25 @@ public class AlertService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void dismissAlert(String ldap, Map<UUID, Boolean> alertDismissalStates) {
-        List<UserAlert> userAlerts = new ArrayList<>();
-        alertDismissalStates.forEach((alertId, isDismissed) -> {
+        List<UserAlertId> userAlertIds = new ArrayList<>();
+        alertDismissalStates.keySet().forEach(alertId ->  {
             UserAlertId id = new UserAlertId(ldap, alertId);
-            Optional<UserAlert> optionalUserAlert = userAlertRepository.findById(id);
-
-            if (optionalUserAlert.isPresent()) {
-                UserAlert userAlert = optionalUserAlert.get();
-                userAlert.setIsDismissed(isDismissed);
-                userAlert.setLastUpdated(new Timestamp(System.currentTimeMillis()));
-                userAlert.setLastUpdateBy(ldap); // TODO: Set this value with user from PingFed token. Right now this assumes only users will dismiss their own alerts.
-                userAlerts.add(userAlert);
-            } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error dismissing alert " + alertId + " for user " + ldap + ".");
-            }
+            userAlertIds.add(id);
         });
+
+        List<UserAlert> userAlerts = userAlertRepository.findAllById(userAlertIds);
+
+        if (userAlerts.size() != userAlertIds.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error dismissing alerts. One or more alert not found.");
+        }
+
+        for (UserAlert userAlert : userAlerts) {
+            Boolean isDismissed = alertDismissalStates.get(userAlert.getAlertId());
+            userAlert.setIsDismissed(isDismissed);
+            userAlert.setLastUpdated(new Timestamp(System.currentTimeMillis()));
+            userAlert.setLastUpdateBy(ldap); // TODO: Set this value with user from PingFed token. Right now this assumes only users will dismiss their own alerts.
+        }
+
         userAlertRepository.saveAll(userAlerts);
     }
 }
