@@ -7,19 +7,27 @@ import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class AlertService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlertService.class);
 
     private final AlertRepository alertRepository;
     private final UserAlertRepository userAlertRepository;
@@ -31,6 +39,24 @@ public class AlertService {
         this.alertRepository = alertRepository;
         this.userAlertRepository = userAlertRepository;
         this.userMatrixService = userMatrixService;
+    }
+
+    /**
+     * CRON JOB - Scheduled to run every day at midnight.
+     *
+     * Deletes from the database Alerts with expiration dates prior to today's date.
+     * Cascading delete functionality will also delete associated UserAlerts.
+     */
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Scheduled(cron = "0 0 0 * * *")
+    public void cleanupExpiredAlerts() {
+        LOGGER.warn("Running Cleanup Job for Expired Alert...");
+        Date todaysDate = Date.valueOf(LocalDate.now());
+        List<Alert> deletedAlerts = alertRepository.deleteAlertsByExpirationDateBefore(todaysDate);
+        List<UUID> deletedAlertIds = deletedAlerts.stream()
+                .map(Alert::getId)
+                .collect(Collectors.toList());
+        LOGGER.warn("Removed the following expired alerts: " + deletedAlertIds);
     }
 
     @Transactional
@@ -76,7 +102,6 @@ public class AlertService {
     public void deleteAlert(UUID alertId) {
         alertRepository.deleteById(alertId);
     }
-
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void dismissAlert(String ldap, Map<UUID, Boolean> alertDismissalStates) {
         List<UserAlertId> userAlertIds = new ArrayList<>();

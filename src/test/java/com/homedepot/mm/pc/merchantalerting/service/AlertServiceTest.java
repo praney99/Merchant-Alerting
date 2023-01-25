@@ -123,6 +123,12 @@ public class AlertServiceTest {
     }
 
     @Test
+    public void testExpireCronJob() {
+        doNothing().when(alertRepository).deleteAlertsByExpirationDateBefore(any());
+        alertService.cleanupExpiredAlerts();
+        }
+
+    @Test
     public void testDismissAlert() {
         Map<UUID, Boolean> alertDismissalStates = new HashMap<>();
         UUID alertId_0 = UUID.randomUUID();
@@ -138,5 +144,6 @@ public class AlertServiceTest {
         when(userAlertRepository.saveAll(any()))
                 .thenReturn(userAlerts);
         alertService.dismissAlert(ldap, alertDismissalStates);
+
     }
 }
