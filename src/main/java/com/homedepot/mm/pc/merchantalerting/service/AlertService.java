@@ -3,6 +3,7 @@ package com.homedepot.mm.pc.merchantalerting.service;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
+import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -89,9 +90,9 @@ public class AlertService {
         return persistedAlert;
     }
 
-    @Transactional
-    public void deleteAlert(UUID alertId) {
-        alertRepository.deleteById(alertId);
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<Alert> getAlertsByLdap(String ldap) {
+        return alertRepository.findAlertsByLdap(ldap);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -99,8 +100,31 @@ public class AlertService {
         return alertRepository.findById(uuid);
     }
 
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<Alert> getAlertsByLdap(String ldap) {
-        return alertRepository.findAlertsByLdap(ldap);
+    @Transactional
+    public void deleteAlert(UUID alertId) {
+        alertRepository.deleteById(alertId);
+    }
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void dismissAlert(String ldap, Map<UUID, Boolean> alertDismissalStates) {
+        List<UserAlertId> userAlertIds = new ArrayList<>();
+        alertDismissalStates.keySet().forEach(alertId ->  {
+            UserAlertId id = new UserAlertId(ldap, alertId);
+            userAlertIds.add(id);
+        });
+
+        List<UserAlert> userAlerts = userAlertRepository.findAllById(userAlertIds);
+
+        if (userAlerts.size() != userAlertIds.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error dismissing alerts. One or more alert not found.");
+        }
+
+        for (UserAlert userAlert : userAlerts) {
+            Boolean isDismissed = alertDismissalStates.get(userAlert.getAlertId());
+            userAlert.setIsDismissed(isDismissed);
+            userAlert.setLastUpdated(new Timestamp(System.currentTimeMillis()));
+            userAlert.setLastUpdateBy(ldap); // TODO: Set this value with user from PingFed token. Right now this assumes only users will dismiss their own alerts.
+        }
+
+        userAlertRepository.saveAll(userAlerts);
     }
 }

@@ -22,9 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -221,7 +219,7 @@ class AlertControllerTest extends PostgresContainerBaseTest {
     }
 
     @Test
-    void generateAlertByDCS() throws Exception {
+    void generateAlertByDCS() {
         final String dcs = "001-001-001";
         CreateAlertRequest alertRequest = new CreateAlertRequest();
         alertRequest.setType("Regional Assortment");
@@ -366,6 +364,136 @@ class AlertControllerTest extends PostgresContainerBaseTest {
                 "http://localhost:" + port + "/alert/dcs/001-001-001",
                 alertRequest, Alert.class);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
 
+    @Test
+    void testDismissAlertHappyPath() {
+        Alert alert_0 = populateNewTestAlert();
+        Alert alert_1 = populateNewTestAlert();
+
+        Alert persistedAlert_0 = alertRepository.save(alert_0);
+        assertNotNull(persistedAlert_0);
+        Alert persistedAlert_1 = alertRepository.save(alert_1);
+        assertNotNull(persistedAlert_1);
+
+        String ldap = "foo42br";
+        UserAlert userAlert_0 = new UserAlert(ldap, persistedAlert_0.getId());
+        userAlert_0.setAlert(persistedAlert_0);
+        UserAlert userAlert_1 = new UserAlert(ldap, persistedAlert_1.getId());
+        userAlert_1.setAlert(persistedAlert_1);
+
+        UserAlert persistedUserAlert_0 = userAlertRepository.save(userAlert_0);
+        assertNotNull(persistedUserAlert_0);
+        UserAlert persistedUserAlert_1 = userAlertRepository.save(userAlert_1);
+        assertNotNull(persistedUserAlert_1);
+
+        Map<UUID, Boolean> alertDismissalStates = new HashMap<>();
+        alertDismissalStates.put(persistedAlert_0.getId(), true);
+        alertDismissalStates.put(persistedAlert_1.getId(), false);
+
+        this.restTemplate.postForObject(
+                "http://localhost:" + port + "/alert/user/" + ldap + "/dismiss",
+                alertDismissalStates, Void.class);
+
+        UserAlertId userAlertId_0 = new UserAlertId(
+                persistedUserAlert_0.getLdap(),
+                persistedUserAlert_0.getAlertId()
+        );
+        Optional<UserAlert> optionalUserAlert_0 = userAlertRepository.findById(userAlertId_0);
+        assertTrue(optionalUserAlert_0.isPresent());
+        UserAlert dismissedUserAlert_0 = optionalUserAlert_0.get();
+        assertNotNull(dismissedUserAlert_0);
+        assertTrue(dismissedUserAlert_0.getIsDismissed());
+        assertNotNull(dismissedUserAlert_0.getLastUpdated());
+        assertNotNull(dismissedUserAlert_0.getLastUpdateBy());
+
+        UserAlertId userAlertId_1 = new UserAlertId(
+                persistedUserAlert_1.getLdap(),
+                persistedUserAlert_1.getAlertId()
+        );
+        Optional<UserAlert> optionalUserAlert_1 = userAlertRepository.findById(userAlertId_1);
+        assertTrue(optionalUserAlert_1.isPresent());
+        UserAlert dismissedUserAlert_1 = optionalUserAlert_1.get();
+        assertNotNull(dismissedUserAlert_1);
+        assertFalse(dismissedUserAlert_1.getIsDismissed());
+        assertNotNull(dismissedUserAlert_1.getLastUpdated());
+        assertNotNull(dismissedUserAlert_1.getLastUpdateBy());
+    }
+
+    @Test
+    void testDismissAlertFailure() {
+        Alert alert_0 = populateNewTestAlert();
+        Alert alert_1 = populateNewTestAlert();
+
+        Alert persistedAlert_0 = alertRepository.save(alert_0);
+        assertNotNull(persistedAlert_0);
+        Alert persistedAlert_1 = alertRepository.save(alert_1);
+        assertNotNull(persistedAlert_1);
+
+        String ldap = "foo42br";
+        UserAlert userAlert_0 = new UserAlert(ldap, persistedAlert_0.getId());
+        userAlert_0.setAlert(persistedAlert_0);
+        UserAlert userAlert_1 = new UserAlert(ldap, persistedAlert_1.getId());
+        userAlert_1.setAlert(persistedAlert_1);
+
+        UserAlert persistedUserAlert_0 = userAlertRepository.save(userAlert_0);
+        assertNotNull(persistedUserAlert_0);
+        UserAlert persistedUserAlert_1 = userAlertRepository.save(userAlert_1);
+        assertNotNull(persistedUserAlert_1);
+
+        Map<UUID, Boolean> alertDismissalStates = new HashMap<>();
+        alertDismissalStates.put(persistedAlert_0.getId(), true);
+
+        // Test for failure with an ID that does not exist in the system.
+        UUID nonexistentAlertId = UUID.randomUUID();
+        alertDismissalStates.put(nonexistentAlertId, true);
+
+        this.restTemplate.postForObject(
+                "http://localhost:" + port + "/alert/user/" + ldap + "/dismiss",
+                alertDismissalStates, Void.class);
+
+        UserAlertId userAlertId_0 = new UserAlertId(
+                persistedUserAlert_0.getLdap(),
+                persistedUserAlert_0.getAlertId()
+        );
+        Optional<UserAlert> optionalUserAlert_0 = userAlertRepository.findById(userAlertId_0);
+        assertTrue(optionalUserAlert_0.isPresent());
+        UserAlert dismissedUserAlert_0 = optionalUserAlert_0.get();
+        assertNotNull(dismissedUserAlert_0);
+        // The SECOND alert id did not exist. This assertion tests that the FIRST alert,
+        // whose dismiss was originally set to true, was rolled back after the failure.
+        assertFalse(dismissedUserAlert_0.getIsDismissed());
+        assertNull(dismissedUserAlert_0.getLastUpdated());
+        assertNull(dismissedUserAlert_0.getLastUpdateBy());
+    }
+
+    private Alert populateNewTestAlert() {
+        Alert alert = new Alert();
+        alert.setSystemSource("My Assortment");
+        alert.setAlertType("Regional Assortment");
+        alert.setCreateBy("unit test");
+        alert.setCreated(new Timestamp(System.currentTimeMillis()));
+        alert.setLastUpdateBy(null);
+        alert.setLastUpdated(null);
+        alert.setExpirationDate(null);
+
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, String> keyIdentifiers = new HashMap<>();
+        keyIdentifiers.put("sku", "123456");
+        keyIdentifiers.put("cpi", "0.98");
+        alert.setKeyIdentifiers(mapper.convertValue(keyIdentifiers, JsonNode.class));
+
+        Map<String, String> defaultTemplate = new HashMap<>();
+        defaultTemplate.put("title","title");
+        defaultTemplate.put("titleDescription","title description");
+        defaultTemplate.put("primaryText1","primary text 1");
+        defaultTemplate.put("primaryText2","primary text 2");
+        defaultTemplate.put("tertiaryText","tertiary text");
+        defaultTemplate.put("primaryLinkText","link");
+        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
+        alert.setTemplateBody(mapper.convertValue(defaultTemplate, JsonNode.class));
+        alert.setTemplateName("default");
+
+        return alert;
     }
 }

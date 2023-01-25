@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,6 +51,23 @@ public class AlertController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
             @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content)})
+    @Operation(summary = "Creates an alert, and assigns the alert to all users who manage the input DCS.")
+    @PostMapping(value = "/dcs/{dcs}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<Alert> createAlertByDCS(
+            @PathVariable("dcs") @Pattern(regexp = "^((\\d{1,3}[a-zA-Z])|(\\d{1,4}))-\\d{1,3}-\\d{1,3}$") String dcs,
+            @RequestBody @Valid CreateAlertRequest createAlertRequest
+    ) {
+        Alert alert = alertService.createAlertByDCS(createAlertRequest, dcs);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(alert);
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
+            @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content)})
     @Operation(summary = "Retrieve alerts by LDAP.")
     @GetMapping(value = "/user/{ldap}", produces = APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -74,26 +92,19 @@ public class AlertController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Deleted successfully.", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
             @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing.", content = @Content)})
-    @Operation(summary = "Delete alert by alert id")
+    @Operation(summary = "Delete alert by alert id.")
     @DeleteMapping(value = "/{alertId}", produces = APPLICATION_JSON_VALUE)
     public void deleteAlertById(@PathVariable("alertId") UUID alertId) {
         alertService.deleteAlert(alertId);
     }
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Success", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
-            @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing", content = @Content)})
-    @Operation(summary = "Creates an alert, and assigns the alert to all users who manage the input DCS.")
-    @PostMapping(value = "/dcs/{dcs}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<Alert> generateAlertByDCS(
-            @PathVariable("dcs") @Pattern(regexp = "^((\\d{1,3}[a-zA-Z])|(\\d{1,4}))-\\d{1,3}-\\d{1,3}$") String dcs,
-            @RequestBody @Valid CreateAlertRequest createAlertRequest
-    ) {
-        Alert alert = alertService.createAlertByDCS(createAlertRequest, dcs);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(alert);
+            @ApiResponse(responseCode = "200", description = "Dismissed successfully.", content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
+            @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing.", content = @Content)})
+    @Operation(summary = "Dismiss user alert.")
+    @PostMapping(value = "/user/{ldap}/dismiss", produces = APPLICATION_JSON_VALUE)
+    public void dismissUserAlert(@PathVariable("ldap") String ldap, @RequestBody Map<UUID, Boolean> alertDismissalStates) {
+        alertService.dismissAlert(ldap, alertDismissalStates);
     }
+
 }

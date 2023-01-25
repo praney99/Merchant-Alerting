@@ -3,6 +3,7 @@ package com.homedepot.mm.pc.merchantalerting.service;
 import com.homedepot.mm.pc.merchantalerting.domain.AlertTemplateType;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
+import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
 import org.junit.Assert;
@@ -125,5 +126,23 @@ public class AlertServiceTest {
     public void testExpireCronJob() {
         doNothing().when(alertRepository).deleteAlertsByExpirationDateBefore(any());
         alertService.cleanupExpiredAlerts();
+
+    @Test
+    public void testDismissAlert() {
+        Map<UUID, Boolean> alertDismissalStates = new HashMap<>();
+        UUID alertId_0 = UUID.randomUUID();
+        UUID alertId_1 = UUID.randomUUID();
+        alertDismissalStates.put(alertId_0, true);
+        alertDismissalStates.put(alertId_1, false);
+        String ldap = "user0";
+        UserAlert userAlert_0 = new UserAlert(ldap, alertId_0);
+        UserAlert userAlert_1 = new UserAlert(ldap, alertId_1);
+        List<UserAlert> userAlerts = List.of(userAlert_0, userAlert_1);
+        when(userAlertRepository.findAllById(any()))
+                .thenReturn(userAlerts);
+        when(userAlertRepository.saveAll(any()))
+                .thenReturn(userAlerts);
+        alertService.dismissAlert(ldap, alertDismissalStates);
+
     }
 }
