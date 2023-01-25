@@ -126,6 +126,7 @@ public class AlertServiceTest {
     public void testExpireCronJob() {
         doNothing().when(alertRepository).deleteAlertsByExpirationDateBefore(any());
         alertService.cleanupExpiredAlerts();
+        }
 
     @Test
     public void testDismissAlert() {
