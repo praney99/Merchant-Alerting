@@ -79,4 +79,4 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
 
-respMatrixClientUrl: https://webapps-qa.homedepot.com/RespMatrix/rs
+respMatrixClientUrl: https://merch-product-resp-matrix-service.hd-merch-stage.gcp.homedepot.com/RespMatrix/rs

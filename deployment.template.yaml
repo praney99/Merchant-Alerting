@@ -133,7 +133,7 @@ metadata:
   namespace: pricing-guru
 spec:
   securityPolicy:
-    name: thd-network-cloud-armor-policy
+    name: gcp-thd-cloud-armor-policy
 ---
 apiVersion: networking.gke.io/v1
 kind: ManagedCertificate

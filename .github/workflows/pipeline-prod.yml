@@ -13,8 +13,8 @@ on:
         default: '0.0.0'
 
 env:
-  PROD_SPINNAKER_WEBHOOK: product-ops-gke-prod
-  IMAGE_PATH: product-ops/snapshot
+  PROD_SPINNAKER_WEBHOOK: product-ops-gke-production
+  IMAGE_PATH: product-ops/release
   GCR_REGISTRY: us.gcr.io/hd-pricing-prod
   ARTIFACTORY_REGISTRY: docker.artifactory.homedepot.com
 
@@ -25,11 +25,13 @@ jobs:
       - name: Generate Docker Token
         id: docker_step
         run: |
-          echo "token=$(curl -s -X POST -d username="${{ secrets.ARTIFACTORY_USER }}" -d password="${{ secrets.ARTIFACTORY_PASSWORD }}" "https://token-generator.artifactory.homedepot.com/api/docker/generateToken" | jq -r .access_token)" >> $GITHUB_OUTPUT
+          token=$(curl -s -X POST -d username='${{ secrets.ARTIFACTORY_USER }}' -d password='${{ secrets.ARTIFACTORY_PASSWORD }}' "https://token-generator.artifactory.homedepot.com/api/docker/generateToken" | jq -r .access_token)
+          echo "token=$token" >> $GITHUB_OUTPUT
       - name: Generate Maven Token
         id: maven_step
         run: |
-          echo "token=$(curl -s -X POST -d username="${{ secrets.ARTIFACTORY_USER }}" -d password="${{ secrets.ARTIFACTORY_PASSWORD }}" "https://token-generator.artifactory.homedepot.com/api/maven/generateToken" | jq -r .access_token)" >> $GITHUB_OUTPUT
+          token=$(curl -s -X POST -d username='${{ secrets.ARTIFACTORY_USER }}' -d password='${{ secrets.ARTIFACTORY_PASSWORD }}' "https://token-generator.artifactory.homedepot.com/api/maven/generateToken" | jq -r .access_token)
+          echo "token=$token" >> $GITHUB_OUTPUT
     outputs:
       docker_token: ${{ steps.docker_step.outputs.token }}
       maven_token: ${{ steps.maven_step.outputs.token }}
@@ -40,14 +42,14 @@ jobs:
       - name: Split version
         id: split
         run: |
-          echo "major=`echo "${{ env.INPUT_VERSION }}" | cut -d "." -f 1`" >> $GITHUB_OUTPUT
-          echo "minor=`echo "${{ env.INPUT_VERSION }}" | cut -d "." -f 2`" >> $GITHUB_OUTPUT
-          echo "patch=`echo "${{ env.INPUT_VERSION }}" | cut -d "." -f 3`" >> $GITHUB_OUTPUT
+          echo "major=`echo "${{ github.event.inputs.version }}" | cut -d "." -f 1`" >> $GITHUB_OUTPUT
+          echo "minor=`echo "${{ github.event.inputs.version }}" | cut -d "." -f 2`" >> $GITHUB_OUTPUT
+          echo "patch=`echo "${{ github.event.inputs.version }}" | cut -d "." -f 3`" >> $GITHUB_OUTPUT
       - name: Build Image Path
         id: image
         run: |
-          echo "imagePath=${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ env.INPUT_VERSION }}" >> $GITHUB_OUTPUT
-          echo "gcrImagePath=${{ env.GCR_REGISTRY }}/${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ needs.VersionAndTag.outputs.sem_ver }}" >> $GITHUB_OUTPUT
+          echo "imagePath=${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          echo "gcrImagePath=${{ env.GCR_REGISTRY }}/${{ env.IMAGE_PATH }}/${{ github.event.repository.name }}:${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
     outputs:
       major: ${{ steps.split.outputs.major }}
       minor: ${{ steps.split.outputs.minor }}
@@ -57,20 +59,20 @@ jobs:
 
   Deploy:
     runs-on: [ one-thd-onprem-np ]
-    needs: [ Artifactory_Token, Version ]
+    needs: [ Artifactory_Token, CollectInputs ]
     container:
       image: docker.artifactory.homedepot.com/flow/java11:latest
       credentials:
         username: ${{ secrets.ARTIFACTORY_USER }}
         password: ${{ needs.Artifactory_Token.outputs.docker_token }}
       env:
-        version: ${{ env.INPUT_VERSION }}
-        major: ${{ needs.Version.outputs.major }}
-        minor: ${{ needs.Version.outputs.minor }}
-        patch: ${{ needs.Version.outputs.patch }}
+        version: ${{ github.event.inputs.version }}
+        major: ${{ needs.CollectInputs.outputs.major }}
+        minor: ${{ needs.CollectInputs.outputs.minor }}
+        patch: ${{ needs.CollectInputs.outputs.patch }}
         repoName: ${{ github.event.repository.name }}
-        imagePath: ${{ needs.Version.outputs.imagePath }}
-        gcrImagePath: ${{ needs.Version.outputs.gcrImagePath }}
+        imagePath: ${{ needs.CollectInputs.outputs.imagePath }}
+        gcrImagePath: ${{ needs.CollectInputs.outputs.gcrImagePath }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -101,12 +103,12 @@ jobs:
                 }
               ],
               "parameters": {
-                "Service Now Record": "${{ env.INPUT_CHANGE_REQUEST }}"
+                "Service Now Record": "${{ github.event.inputs.change_request }}"
               },
               "secret": "${{ secrets.SPINNAKER_SECRET }}",
               "sourceRegistry": "${{ env.ARTIFACTORY_REGISTRY }}",
               "targetRegistry": "${{ env.GCR_REGISTRY }}",
-              "imagePaths": "${{ needs.Dockerize.outputs.imagePath }}"
+              "imagePaths": "${{ needs.CollectInputs.outputs.imagePath }}"
             }"' >> $GITHUB_OUTPUT
           echo >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
