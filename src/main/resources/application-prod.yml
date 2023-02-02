@@ -51,5 +51,9 @@ thd-identity:
 
 respMatrixClientUrl: https://merch-product-resp-matrix-service.hd-merch-prod.gcp.homedepot.com/RespMatrix/rs
 
-projectId: hd-merch-prod
+projectId: hd-pricing-prod
+
+cors:
+  allowed:
+    origins: merchant-alerting.hd-pricing-prod.gcp.homedepot.com
 

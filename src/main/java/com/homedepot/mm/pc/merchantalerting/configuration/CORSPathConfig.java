@@ -1,21 +1,24 @@
 package com.homedepot.mm.pc.merchantalerting.configuration;
 
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 public class CORSPathConfig {
+    @Value("${cors.allowed.origins}")
+    private String[] allowedOrigins;
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                if("${projectId}".equalsIgnoreCase("localhost"))
-                    registry.addMapping("/**").allowedOrigins("http://localhost:3000");
-                else
-                    registry.addMapping("/**").allowedMethods("*").allowedOriginPatterns("https://*.homedepot.com");
-
+                    registry.addMapping("/**")
+                            .allowedOrigins(allowedOrigins)
+                            .allowedMethods("*")
+                            .allowedHeaders("*");
             }
         };
     }
