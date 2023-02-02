@@ -11,8 +11,11 @@ public class CORSPathConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-//                registry.addMapping("/**").allowedMethods("*").allowedOriginPatterns("https://*.homedepot.com");
-                registry.addMapping("/**").allowedOrigins("http://localhost:3000");
+                if("${respMatrixClientUrl}".equalsIgnoreCase("localhost"))
+                    registry.addMapping("/**").allowedOrigins("http://localhost:3000");
+                else
+                    registry.addMapping("/**").allowedMethods("*").allowedOriginPatterns("https://*.homedepot.com");
+
             }
         };
     }

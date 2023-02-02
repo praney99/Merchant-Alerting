@@ -48,3 +48,7 @@ thd-identity:
             - path: /**
               needed-authorities:
                   - ROLE_read
+
+respMatrixClientUrl: https://merch-product-resp-matrix-service.hd-merch-dev.gcp.homedepot.com/RespMatrix/rs
+
+projectId: hd-merch-dev
