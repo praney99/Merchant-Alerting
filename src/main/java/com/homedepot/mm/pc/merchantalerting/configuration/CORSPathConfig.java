@@ -12,6 +12,9 @@ public class CORSPathConfig {
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
+
+        //String allowedDomains = "https://" + "*" + allowedOrigins;
+
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {

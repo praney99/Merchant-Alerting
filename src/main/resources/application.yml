@@ -83,5 +83,5 @@ projectId: hd-pricing-dev
 
 cors:
   allowed:
-    origins: merchant-alerting.hd-pricing-dev.gcp.homedepot.com
+    origins: https://*.homedepot.com*
 

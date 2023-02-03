@@ -55,4 +55,4 @@ projectId: hd-pricing-stage
 
 cors:
   allowed:
-    origins: merchant-alerting.hd-pricing-stage.gcp.homedepot.com
+    origins: https://*.homedepot.com*
