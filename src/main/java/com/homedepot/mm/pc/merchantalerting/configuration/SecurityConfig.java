@@ -35,6 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // This is only a helper method.  If you want to hand craft the HttpSecurity object
         // then no worries, just don't call this and copy the code inside of it, and adjust
         // exactly as you need it.
+        http.cors();
         THDIdentityHelper.defaultHTTPConfig(http, thdIdentityConfig);
 
     }

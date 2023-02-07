@@ -50,3 +50,7 @@ thd-identity:
                   - ROLE_read
 
 respMatrixClientUrl: https://merch-product-resp-matrix-service.hd-merch-prod.gcp.homedepot.com/RespMatrix/rs
+
+projectId: hd-pricing-prod
+
+

@@ -15,7 +15,13 @@ spring:
         hbm2dll:
           create_namespaces: true
     show-sql: true
-respmatrix-client-url: https://webapps-qa.homedepot.com/RespMatrix/rs
+respMatrixClientUrl: https://merch-product-resp-matrix-service.hd-merch-dev.gcp.homedepot.com/RespMatrix/rs
+projectId: localhost
+
+cors:
+  allowed:
+    origins: http://localhost:3000, http://localhost:3001
+
 
 
 

@@ -27,6 +27,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @SecurityRequirement(name = "PingFed")
 @RequestMapping(value = "/alert")
 @Validated
+@CrossOrigin
 public class AlertController {
 
     final AlertService alertService;
