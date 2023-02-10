@@ -3,7 +3,6 @@ package com.homedepot.mm.pc.merchantalerting.configuration;
 import com.homedepot.appsecurecommunity.resourceserver.THDIdentityConfig;
 import com.homedepot.appsecurecommunity.resourceserver.THDIdentityHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,10 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @Slf4j
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-
-@Autowired
     private final THDIdentityConfig thdIdentityConfig;
-
 
     public SecurityConfig(THDIdentityConfig config) {
         this.thdIdentityConfig = config;
@@ -35,7 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // This is only a helper method.  If you want to hand craft the HttpSecurity object
         // then no worries, just don't call this and copy the code inside of it, and adjust
         // exactly as you need it.
-        http.cors();
+        http = http.cors().and();
         THDIdentityHelper.defaultHTTPConfig(http, thdIdentityConfig);
 
     }
