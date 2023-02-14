@@ -95,7 +95,7 @@ public class AlertService {
             return alertRepository.findAlertsByLdap(ldap);
         }
         else {
-            return null;
+            return (List<Alert>) new Alert();
         }
     }
 
