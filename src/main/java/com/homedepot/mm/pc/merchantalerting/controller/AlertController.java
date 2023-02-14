@@ -118,6 +118,6 @@ public class AlertController {
                                  @RequestBody Map<UUID, Boolean> alertDismissalStates,
                                  @RequestHeader(name = "Authorization") String jwtToken) {
 
-        alertService.dismissAlert(ldap, JwtUtils.getSubjectClaim(jwtToken), alertDismissalStates);
+        alertService.dismissAlert(ldap.toUpperCase(), JwtUtils.getSubjectClaim(jwtToken), alertDismissalStates);
     }
 }
