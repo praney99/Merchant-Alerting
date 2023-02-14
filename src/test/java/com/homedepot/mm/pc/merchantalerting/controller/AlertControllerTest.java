@@ -24,6 +24,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
 
+import static com.homedepot.mm.pc.merchantalerting.TestUtils.getUserJwtToken;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -376,7 +377,7 @@ class AlertControllerTest extends PostgresContainerBaseTest {
         Alert persistedAlert_1 = alertRepository.save(alert_1);
         assertNotNull(persistedAlert_1);
 
-        String ldap = "foo42br";
+        String ldap = "mc62ye";
         UserAlert userAlert_0 = new UserAlert(ldap, persistedAlert_0.getId());
         userAlert_0.setAlert(persistedAlert_0);
         UserAlert userAlert_1 = new UserAlert(ldap, persistedAlert_1.getId());
@@ -391,9 +392,13 @@ class AlertControllerTest extends PostgresContainerBaseTest {
         alertDismissalStates.put(persistedAlert_0.getId(), true);
         alertDismissalStates.put(persistedAlert_1.getId(), false);
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", getUserJwtToken());
+        HttpEntity<Map<UUID, Boolean>> request = new HttpEntity<>(alertDismissalStates, headers);
+
         this.restTemplate.postForObject(
                 "http://localhost:" + port + "/alert/user/" + ldap + "/dismiss",
-                alertDismissalStates, Void.class);
+                request, Void.class);
 
         UserAlertId userAlertId_0 = new UserAlertId(
                 persistedUserAlert_0.getLdap(),
@@ -430,7 +435,7 @@ class AlertControllerTest extends PostgresContainerBaseTest {
         Alert persistedAlert_1 = alertRepository.save(alert_1);
         assertNotNull(persistedAlert_1);
 
-        String ldap = "foo42br";
+        String ldap = "mc62ye";
         UserAlert userAlert_0 = new UserAlert(ldap, persistedAlert_0.getId());
         userAlert_0.setAlert(persistedAlert_0);
         UserAlert userAlert_1 = new UserAlert(ldap, persistedAlert_1.getId());
@@ -448,9 +453,13 @@ class AlertControllerTest extends PostgresContainerBaseTest {
         UUID nonexistentAlertId = UUID.randomUUID();
         alertDismissalStates.put(nonexistentAlertId, true);
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", getUserJwtToken());
+        HttpEntity<Map<UUID, Boolean>> request = new HttpEntity<>(alertDismissalStates, headers);
+
         this.restTemplate.postForObject(
                 "http://localhost:" + port + "/alert/user/" + ldap + "/dismiss",
-                alertDismissalStates, Void.class);
+                request, Void.class);
 
         UserAlertId userAlertId_0 = new UserAlertId(
                 persistedUserAlert_0.getLdap(),
