@@ -90,7 +90,13 @@ public class AlertService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<Alert> getAlertsByLdap(String ldap) {
-        return alertRepository.findAlertsByLdap(ldap);
+
+        if(userAlertRepository.findDismissStatus(ldap).equals(false)) {
+            return alertRepository.findAlertsByLdap(ldap);
+        }
+        else {
+            return null;
+        }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
