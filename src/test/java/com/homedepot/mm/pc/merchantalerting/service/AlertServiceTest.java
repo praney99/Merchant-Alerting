@@ -143,7 +143,7 @@ public class AlertServiceTest {
                 .thenReturn(userAlerts);
         when(userAlertRepository.saveAll(any()))
                 .thenReturn(userAlerts);
-        alertService.dismissAlert(ldap, alertDismissalStates);
+        alertService.dismissAlert(ldap, "user0", alertDismissalStates);
 
     }
 }
