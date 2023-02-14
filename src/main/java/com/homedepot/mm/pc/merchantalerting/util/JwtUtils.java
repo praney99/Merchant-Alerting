@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 public final class JwtUtils {
-    private static final String HOME_DEPOT_LDAP_REGEXP = "^[a-z][a-z0-9]{3,6}$";
+    private static final String HOME_DEPOT_LDAP_REGEXP = "^[a-zA-Z][a-zA-Z0-9]{3,6}$";
     private static final Pattern HOME_DEPOT_LDAP_PATTERN = Pattern.compile(HOME_DEPOT_LDAP_REGEXP);
     private static final String UUID_REGEXP = "^[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}$";
     private static final Pattern UUID_PATTERN = Pattern.compile(UUID_REGEXP);
@@ -40,7 +40,7 @@ public final class JwtUtils {
                 Claim jwtSubject = decodedJWT.getClaim("sub");
 
                 if (!jwtSubject.isMissing()) {
-                    subjectValue = jwtSubject.asString().toLowerCase().trim();
+                    subjectValue = jwtSubject.asString().trim();
 
                     if (isLdap(subjectValue) || isUuid(subjectValue)) {
                         return subjectValue;
