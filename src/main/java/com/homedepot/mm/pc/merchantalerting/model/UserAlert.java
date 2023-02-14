@@ -34,7 +34,7 @@ public class UserAlert {
     private Alert alert;
 
     public UserAlert(String ldap, UUID alertId) {
-        this.ldap = ldap;
+        this.ldap = ldap.toUpperCase();
         this.alertId = alertId;
         this.isDismissed = false;
         this.lastUpdated = null;
