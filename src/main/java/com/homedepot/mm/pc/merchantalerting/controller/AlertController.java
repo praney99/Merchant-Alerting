@@ -46,7 +46,7 @@ public class AlertController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(alertService.createAlertByLdap(createAlertRequest, ldap));
+                .body(alertService.createAlertByLdap(createAlertRequest, ldap.toUpperCase()));
     }
 
     @ApiResponses(value = {
@@ -75,7 +75,7 @@ public class AlertController {
     public ResponseEntity<List<Alert>> retrieveAlertsByLdap(@PathVariable("ldap") String ldap) {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(alertService.getAlertsByLdap(ldap));
+                .body(alertService.getAlertsByLdap(ldap.toUpperCase()));
     }
 
     @ApiResponses(value = {
@@ -105,7 +105,7 @@ public class AlertController {
     @Operation(summary = "Dismiss user alert.")
     @PostMapping(value = "/user/{ldap}/dismiss", produces = APPLICATION_JSON_VALUE)
     public void dismissUserAlert(@PathVariable("ldap") String ldap, @RequestBody Map<UUID, Boolean> alertDismissalStates) {
-        alertService.dismissAlert(ldap, alertDismissalStates);
+        alertService.dismissAlert(ldap.toUpperCase(), alertDismissalStates);
     }
 
 }
