@@ -1,6 +1,23 @@
 package com.homedepot.mm.pc.merchantalerting;
 
+import java.util.Map;
+
 public final class TestUtils {
+
+    public static final Map<String, String> DEFAULT_TEMPLATE = Map.of(
+            "title", "title",
+            "titleDescription", "title description",
+            "primaryText1", "primary text 1",
+            "primaryText2", "primary text 2",
+            "tertiaryText", "tertiary text",
+            "primaryLinkText", "link",
+            "primaryLinkUri", "http://localhost:8080"
+    );
+
+    public static final Map<String, String> DEFAULT_KEY_IDENTIFIERS = Map.of(
+            "sku", "123456",
+            "cpi", "0.98"
+    );
 
     /**
      * Returns JWT (PingFed) token where `sub` is equal to `mc62ye` LDAP id.

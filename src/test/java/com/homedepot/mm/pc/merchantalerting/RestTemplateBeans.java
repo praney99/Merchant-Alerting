@@ -24,8 +24,10 @@ public class RestTemplateBeans {
             public boolean hasError(ClientHttpResponse response) throws IOException {
                 return false;
             }
+
             @Override
-            public void handleError(ClientHttpResponse response) throws IOException {}
+            public void handleError(ClientHttpResponse response) throws IOException {
+            }
         });
         return restTemplate;
     }

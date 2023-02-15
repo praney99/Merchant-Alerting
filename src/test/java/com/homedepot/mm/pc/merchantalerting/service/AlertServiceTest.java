@@ -7,34 +7,40 @@ import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
 import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
+import static com.homedepot.mm.pc.merchantalerting.TestUtils.DEFAULT_KEY_IDENTIFIERS;
+import static com.homedepot.mm.pc.merchantalerting.TestUtils.DEFAULT_TEMPLATE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AlertServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AlertServiceTest {
+
+    @Mock
+    private AlertRepository alertRepository;
+
+    @Mock
+    private UserAlertRepository userAlertRepository;
 
     @InjectMocks
-    AlertService alertService;
-
-    @Mock
-    AlertRepository alertRepository;
-
-    @Mock
-    UserAlertRepository userAlertRepository;
-
+    private AlertService alertService;
 
     @Test
-    public void testCreateAlertHappyPath() {
+    void testCreateAlertHappyPath() {
         String ldap = "fo42br";
 
         CreateAlertRequest request = new CreateAlertRequest();
@@ -44,15 +50,7 @@ public class AlertServiceTest {
         request.setKeyIdentifiers(null);
         request.setTemplateName(AlertTemplateType.DEFAULT);
 
-        Map<String, String> defaultTemplate = new HashMap<>();
-        defaultTemplate.put("title","title");
-        defaultTemplate.put("titleDescription","title description");
-        defaultTemplate.put("primaryText1","primary text 1");
-        defaultTemplate.put("primaryText2","primary text 2");
-        defaultTemplate.put("tertiaryText","tertiary text");
-        defaultTemplate.put("primaryLinkText","link");
-        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
-        request.setTemplateBody(defaultTemplate);
+        request.setTemplateBody(DEFAULT_TEMPLATE);
 
         when(alertRepository.save(any())).thenReturn(new Alert());
         when(userAlertRepository.saveAll(any())).thenReturn(new ArrayList<>());
@@ -63,30 +61,19 @@ public class AlertServiceTest {
     }
 
     @Test
-    public void testCreateAlertWithCompleteAlertMapping() {
+    void testCreateAlertWithCompleteAlertMapping() {
         String ldap = "fo42br";
         Calendar calendar = Calendar.getInstance();
 
-        Map<String, String> keyIdentifiers = new HashMap<>();
-        keyIdentifiers.put("cpi", "0.98");
-        keyIdentifiers.put("sku", "123456");
 
         CreateAlertRequest request = new CreateAlertRequest();
         request.setType("testType");
         request.setSystemSource("testSystemSource");
         request.setExpirationDate(LocalDate.parse("2030-12-30"));
-        request.setKeyIdentifiers(keyIdentifiers);
+        request.setKeyIdentifiers(DEFAULT_KEY_IDENTIFIERS);
         request.setTemplateName(AlertTemplateType.DEFAULT);
 
-        Map<String, String> defaultTemplate = new HashMap<>();
-        defaultTemplate.put("title","title");
-        defaultTemplate.put("titleDescription","title description");
-        defaultTemplate.put("primaryText1","primary text 1");
-        defaultTemplate.put("primaryText2","primary text 2");
-        defaultTemplate.put("tertiaryText","tertiary text");
-        defaultTemplate.put("primaryLinkText","link");
-        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
-        request.setTemplateBody(defaultTemplate);
+        request.setTemplateBody(DEFAULT_TEMPLATE);
 
         when(alertRepository.save(any())).thenReturn(new Alert());
         when(userAlertRepository.saveAll(any())).thenReturn(new ArrayList<>());
@@ -97,7 +84,7 @@ public class AlertServiceTest {
     }
 
     @Test
-    public void testGetUserAlerts() {
+    void testGetUserAlerts() {
         String ldap = "fo42br";
         UUID alertId = UUID.fromString("15da03aa-357d-4a58-8b7d-809a7455ef70");
 
@@ -116,20 +103,20 @@ public class AlertServiceTest {
     }
 
     @Test
-    public void testDeleteAlert() {
+    void testDeleteAlert() {
         UUID alertId = UUID.randomUUID();
         doNothing().when(alertRepository).deleteById(any());
         alertService.deleteAlert(alertId);
     }
 
     @Test
-    public void testExpireCronJob() {
+    void testExpireCronJob() {
         doNothing().when(alertRepository).deleteAlertsByExpirationDateBefore(any());
         alertService.cleanupExpiredAlerts();
-        }
+    }
 
     @Test
-    public void testDismissAlert() {
+    void testDismissAlert() {
         Map<UUID, Boolean> alertDismissalStates = new HashMap<>();
         UUID alertId_0 = UUID.randomUUID();
         UUID alertId_1 = UUID.randomUUID();

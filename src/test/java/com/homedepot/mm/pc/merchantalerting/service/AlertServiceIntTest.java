@@ -1,11 +1,10 @@
-package com.homedepot.mm.pc.merchantalerting.integration;
+package com.homedepot.mm.pc.merchantalerting.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homedepot.mm.pc.merchantalerting.PostgresContainerBaseTest;
 import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
-import com.homedepot.mm.pc.merchantalerting.service.AlertService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,18 +13,20 @@ import org.springframework.test.context.ActiveProfiles;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.homedepot.mm.pc.merchantalerting.TestUtils.DEFAULT_KEY_IDENTIFIERS;
+import static com.homedepot.mm.pc.merchantalerting.TestUtils.DEFAULT_TEMPLATE;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
 @SpringBootTest
-public class AlertServiceIntegrationTest extends PostgresContainerBaseTest {
+class AlertServiceIntTest extends PostgresContainerBaseTest {
 
     @Autowired
-    AlertService alertService;
+    private AlertService alertService;
 
     @Test
     void testExpireCronJob() {
@@ -70,19 +71,9 @@ public class AlertServiceIntegrationTest extends PostgresContainerBaseTest {
         alert.setExpirationDate(null);
 
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, String> keyIdentifiers = new HashMap<>();
-        keyIdentifiers.put("sku", "123456");
-        alert.setKeyIdentifiers(mapper.convertValue(keyIdentifiers, JsonNode.class));
 
-        Map<String, String> defaultTemplate = new HashMap<>();
-        defaultTemplate.put("title","title");
-        defaultTemplate.put("titleDescription","title description");
-        defaultTemplate.put("primaryText1","primary text 1");
-        defaultTemplate.put("primaryText2","primary text 2");
-        defaultTemplate.put("tertiaryText","tertiary text");
-        defaultTemplate.put("primaryLinkText","link");
-        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
-        alert.setTemplateBody(mapper.convertValue(defaultTemplate, JsonNode.class));
+        alert.setKeyIdentifiers(mapper.convertValue(DEFAULT_KEY_IDENTIFIERS, JsonNode.class));
+        alert.setTemplateBody(mapper.convertValue(DEFAULT_TEMPLATE, JsonNode.class));
         alert.setTemplateName("default");
 
         return alert;

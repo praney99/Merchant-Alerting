@@ -10,39 +10,55 @@ import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
+import static com.homedepot.mm.pc.merchantalerting.TestUtils.DEFAULT_KEY_IDENTIFIERS;
+import static com.homedepot.mm.pc.merchantalerting.TestUtils.DEFAULT_TEMPLATE;
 import static com.homedepot.mm.pc.merchantalerting.TestUtils.getUserJwtToken;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AlertControllerTest extends PostgresContainerBaseTest {
+class AlertControllerIntTest extends PostgresContainerBaseTest {
 
     @LocalServerPort
     private int port;
 
     @Autowired
     @Qualifier("noErrorRestTemplate")
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
     @MockBean
-    RespMatrixClient respMatrixClient;
+    private RespMatrixClient respMatrixClient;
 
     @Test
     void generateAlertByLdap() {
@@ -52,23 +68,9 @@ class AlertControllerTest extends PostgresContainerBaseTest {
         alertRequest.setSystemSource("My Assortment");
         alertRequest.setExpirationDate(null);
         alertRequest.setKeyIdentifiers(null);
-
-        Map<String, String> keyIdentifiers = new HashMap<>();
-        keyIdentifiers.put("sku", "123456");
-        keyIdentifiers.put("cpi", "0.98");
-
-        alertRequest.setKeyIdentifiers(keyIdentifiers);
+        alertRequest.setKeyIdentifiers(DEFAULT_KEY_IDENTIFIERS);
         alertRequest.setTemplateName(AlertTemplateType.DEFAULT);
-
-        Map<String, String> defaultTemplate = new HashMap<>();
-        defaultTemplate.put("title","title");
-        defaultTemplate.put("titleDescription","title description");
-        defaultTemplate.put("primaryText1","primary text 1");
-        defaultTemplate.put("primaryText2","primary text 2");
-        defaultTemplate.put("tertiaryText","tertiary text");
-        defaultTemplate.put("primaryLinkText","link");
-        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
-        alertRequest.setTemplateBody(defaultTemplate);
+        alertRequest.setTemplateBody(DEFAULT_TEMPLATE);
 
         ResponseEntity<Alert> responseEntity = this.restTemplate.postForEntity(
                 "http://localhost:" + port + "/alert/user/" + ldap,
@@ -76,7 +78,6 @@ class AlertControllerTest extends PostgresContainerBaseTest {
 
         assertNotNull(responseEntity);
     }
-
 
     @Test
     void retrieveAlertByLdap() {
@@ -90,20 +91,9 @@ class AlertControllerTest extends PostgresContainerBaseTest {
         alert.setExpirationDate(null);
 
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, String> keyIdentifiers = new HashMap<>();
-        keyIdentifiers.put("sku", "123456");
-        keyIdentifiers.put("cpi", "0.98");
-        alert.setKeyIdentifiers(mapper.convertValue(keyIdentifiers, JsonNode.class));
 
-        Map<String, String> defaultTemplate = new HashMap<>();
-        defaultTemplate.put("title","title");
-        defaultTemplate.put("titleDescription","title description");
-        defaultTemplate.put("primaryText1","primary text 1");
-        defaultTemplate.put("primaryText2","primary text 2");
-        defaultTemplate.put("tertiaryText","tertiary text");
-        defaultTemplate.put("primaryLinkText","link");
-        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
-        alert.setTemplateBody(mapper.convertValue(defaultTemplate, JsonNode.class));
+        alert.setKeyIdentifiers(mapper.convertValue(DEFAULT_KEY_IDENTIFIERS, JsonNode.class));
+        alert.setTemplateBody(mapper.convertValue(DEFAULT_TEMPLATE, JsonNode.class));
         alert.setTemplateName("default");
 
         Alert persistedAlert = alertRepository.save(alert);
@@ -136,20 +126,9 @@ class AlertControllerTest extends PostgresContainerBaseTest {
         alert.setExpirationDate(null);
 
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, String> keyIdentifiers = new HashMap<>();
-        keyIdentifiers.put("sku", "123456");
-        keyIdentifiers.put("cpi", "0.98");
-        alert.setKeyIdentifiers(mapper.convertValue(keyIdentifiers, JsonNode.class));
 
-        Map<String, String> defaultTemplate = new HashMap<>();
-        defaultTemplate.put("title","title");
-        defaultTemplate.put("titleDescription","title description");
-        defaultTemplate.put("primaryText1","primary text 1");
-        defaultTemplate.put("primaryText2","primary text 2");
-        defaultTemplate.put("tertiaryText","tertiary text");
-        defaultTemplate.put("primaryLinkText","link");
-        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
-        alert.setTemplateBody(mapper.convertValue(defaultTemplate, JsonNode.class));
+        alert.setKeyIdentifiers(mapper.convertValue(DEFAULT_KEY_IDENTIFIERS, JsonNode.class));
+        alert.setTemplateBody(mapper.convertValue(DEFAULT_TEMPLATE, JsonNode.class));
         alert.setTemplateName("default");
 
         Alert persistedAlert = alertRepository.save(alert);
@@ -175,20 +154,9 @@ class AlertControllerTest extends PostgresContainerBaseTest {
         alert.setExpirationDate(null);
 
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, String> keyIdentifiers = new HashMap<>();
-        keyIdentifiers.put("sku", "123456");
-        keyIdentifiers.put("cpi", "0.98");
-        alert.setKeyIdentifiers(mapper.convertValue(keyIdentifiers, JsonNode.class));
 
-        Map<String, String> defaultTemplate = new HashMap<>();
-        defaultTemplate.put("title","title");
-        defaultTemplate.put("titleDescription","title description");
-        defaultTemplate.put("primaryText1","primary text 1");
-        defaultTemplate.put("primaryText2","primary text 2");
-        defaultTemplate.put("tertiaryText","tertiary text");
-        defaultTemplate.put("primaryLinkText","link");
-        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
-        alert.setTemplateBody(mapper.convertValue(defaultTemplate, JsonNode.class));
+        alert.setKeyIdentifiers(mapper.convertValue(DEFAULT_KEY_IDENTIFIERS, JsonNode.class));
+        alert.setTemplateBody(mapper.convertValue(DEFAULT_TEMPLATE, JsonNode.class));
         alert.setTemplateName("default");
 
         Alert persistedAlert = alertRepository.save(alert);
@@ -226,19 +194,8 @@ class AlertControllerTest extends PostgresContainerBaseTest {
         alertRequest.setType("Regional Assortment");
         alertRequest.setSystemSource("My Assortment");
         alertRequest.setExpirationDate(null);
-        Map<String, String> keyIdentifiers = new HashMap<>();
-        keyIdentifiers.put("sku", "123456");
-        keyIdentifiers.put("store", "123");
-        alertRequest.setKeyIdentifiers(keyIdentifiers);
-        Map<String, String> defaultTemplate = new HashMap<>();
-        defaultTemplate.put("title", "title");
-        defaultTemplate.put("titleDescription", "title description");
-        defaultTemplate.put("primaryText1", "primary text 1");
-        defaultTemplate.put("primaryText2", "primary text 2");
-        defaultTemplate.put("tertiaryText", "tertiary text");
-        defaultTemplate.put("primaryLinkText", "link");
-        defaultTemplate.put("primaryLinkUri", "http://localhost:8080");
-        alertRequest.setTemplateBody(defaultTemplate);
+        alertRequest.setKeyIdentifiers(DEFAULT_KEY_IDENTIFIERS);
+        alertRequest.setTemplateBody(DEFAULT_TEMPLATE);
         alertRequest.setTemplateName(AlertTemplateType.DEFAULT);
 
         when(respMatrixClient.getUsersByDcs(any(), any(), any())).thenReturn(List.of("bcb44jc"));
@@ -321,8 +278,9 @@ class AlertControllerTest extends PostgresContainerBaseTest {
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
 
-    @Test
-    void testDcsValidations() {
+    @ParameterizedTest
+    @ValueSource(strings = {"cat", "12345-123-123", "123-abc-123", "003-001-123a"})
+    void testDcsValidations(String dcs) {
         CreateAlertRequest alertRequest = new CreateAlertRequest();
         alertRequest.setType("Regional Assortment");
         alertRequest.setSystemSource("test source");
@@ -331,22 +289,7 @@ class AlertControllerTest extends PostgresContainerBaseTest {
         when(respMatrixClient.getUsersByDcs(any(), any(), any())).thenReturn(List.of("bcb44jc"));
 
         ResponseEntity<Alert> responseEntity = this.restTemplate.postForEntity(
-                "http://localhost:" + port + "/alert/dcs/cat",
-                alertRequest, Alert.class);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-
-        responseEntity = this.restTemplate.postForEntity(
-                "http://localhost:" + port + "/alert/dcs/12345-123-123",
-                alertRequest, Alert.class);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-
-        responseEntity = this.restTemplate.postForEntity(
-                "http://localhost:" + port + "/alert/dcs/123-abc-123",
-                alertRequest, Alert.class);
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-
-        responseEntity = this.restTemplate.postForEntity(
-                "http://localhost:" + port + "/alert/dcs/003-001-123a",
+                "http://localhost:" + port + "/alert/dcs/" + dcs,
                 alertRequest, Alert.class);
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
@@ -487,20 +430,9 @@ class AlertControllerTest extends PostgresContainerBaseTest {
         alert.setExpirationDate(null);
 
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, String> keyIdentifiers = new HashMap<>();
-        keyIdentifiers.put("sku", "123456");
-        keyIdentifiers.put("cpi", "0.98");
-        alert.setKeyIdentifiers(mapper.convertValue(keyIdentifiers, JsonNode.class));
+        alert.setKeyIdentifiers(mapper.convertValue(DEFAULT_KEY_IDENTIFIERS, JsonNode.class));
 
-        Map<String, String> defaultTemplate = new HashMap<>();
-        defaultTemplate.put("title","title");
-        defaultTemplate.put("titleDescription","title description");
-        defaultTemplate.put("primaryText1","primary text 1");
-        defaultTemplate.put("primaryText2","primary text 2");
-        defaultTemplate.put("tertiaryText","tertiary text");
-        defaultTemplate.put("primaryLinkText","link");
-        defaultTemplate.put("primaryLinkUri","http://localhost:8080");
-        alert.setTemplateBody(mapper.convertValue(defaultTemplate, JsonNode.class));
+        alert.setTemplateBody(mapper.convertValue(DEFAULT_TEMPLATE, JsonNode.class));
         alert.setTemplateName("default");
 
         return alert;
