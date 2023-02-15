@@ -1,10 +1,17 @@
-package com.homedepot.mm.pc.merchantalerting.model;
+package com.homedepot.mm.pc.merchantalerting.entity;
 
+import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -32,7 +39,7 @@ public class UserAlert {
     private Boolean readStatus;
 
     @ManyToOne
-    @JoinColumn(name="alert_id", nullable=false, insertable=false, updatable=false)
+    @JoinColumn(name = "alert_id", nullable = false, insertable = false, updatable = false)
     private Alert alert;
 
     public UserAlert(String ldap, UUID alertId) {

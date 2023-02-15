@@ -3,8 +3,13 @@ package com.homedepot.mm.pc.merchantalerting.client;
 import com.homedepot.mm.pc.merchantalerting.configuration.ClientConfig;
 import com.homedepot.mm.pc.merchantalerting.model.RespMatrixResponse;
 import com.homedepot.mm.pc.merchantalerting.model.RespMatrixUser;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,17 +19,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-@Slf4j
+@AllArgsConstructor
 public class RespMatrixClient {
-
-    final RestTemplate restTemplate;
-    final ClientConfig clientConfig;
-
-
-    public RespMatrixClient(ClientConfig clientConfig, RestTemplate restTemplate) {
-        this.clientConfig = clientConfig;
-        this.restTemplate = restTemplate;
-    }
+    private final RestTemplate restTemplate;
+    private final ClientConfig clientConfig;
 
     public List<String> getUsersByDcs(String department, String hdClass, String subClass) {
         HttpHeaders headers = new HttpHeaders();

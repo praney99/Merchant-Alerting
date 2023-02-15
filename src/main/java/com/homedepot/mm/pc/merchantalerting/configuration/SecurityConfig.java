@@ -2,25 +2,17 @@ package com.homedepot.mm.pc.merchantalerting.configuration;
 
 import com.homedepot.appsecurecommunity.resourceserver.THDIdentityConfig;
 import com.homedepot.appsecurecommunity.resourceserver.THDIdentityHelper;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 @EnableWebSecurity
-@Slf4j
+@AllArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-
-@Autowired
     private final THDIdentityConfig thdIdentityConfig;
-
-
-    public SecurityConfig(THDIdentityConfig config) {
-        this.thdIdentityConfig = config;
-    }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -37,8 +29,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // exactly as you need it.
         http.cors();
         THDIdentityHelper.defaultHTTPConfig(http, thdIdentityConfig);
-
     }
-
-
 }

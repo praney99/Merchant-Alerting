@@ -1,4 +1,4 @@
-package com.homedepot.mm.pc.merchantalerting.model;
+package com.homedepot.mm.pc.merchantalerting.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;

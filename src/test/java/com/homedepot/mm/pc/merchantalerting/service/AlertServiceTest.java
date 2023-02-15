@@ -2,8 +2,8 @@ package com.homedepot.mm.pc.merchantalerting.service;
 
 import com.homedepot.mm.pc.merchantalerting.domain.AlertTemplateType;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
-import com.homedepot.mm.pc.merchantalerting.model.Alert;
-import com.homedepot.mm.pc.merchantalerting.model.UserAlert;
+import com.homedepot.mm.pc.merchantalerting.entity.Alert;
+import com.homedepot.mm.pc.merchantalerting.entity.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
 import org.junit.Assert;

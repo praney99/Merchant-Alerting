@@ -2,7 +2,7 @@ package com.homedepot.mm.pc.merchantalerting.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.homedepot.mm.pc.merchantalerting.model.Alert;
+import com.homedepot.mm.pc.merchantalerting.entity.Alert;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
