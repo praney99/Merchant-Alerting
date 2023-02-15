@@ -5,6 +5,7 @@ import com.homedepot.mm.pc.merchantalerting.model.Alert;
 import com.homedepot.mm.pc.merchantalerting.service.AlertService;
 import com.homedepot.mm.pc.merchantalerting.util.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -116,7 +117,7 @@ public class AlertController {
     @PostMapping(value = "/user/{ldap}/dismiss", produces = APPLICATION_JSON_VALUE)
     public void dismissUserAlert(@PathVariable("ldap") String ldap,
                                  @RequestBody Map<UUID, Boolean> alertDismissalStates,
-                                 @RequestHeader(name = "Authorization") String jwtToken) {
+                                 @Parameter(hidden = true) @RequestHeader(name = "Authorization") String jwtToken) {
 
         alertService.dismissAlert(ldap, JwtUtils.getSubjectClaim(jwtToken), alertDismissalStates);
     }
@@ -130,7 +131,7 @@ public class AlertController {
     @PostMapping("/user/{ldap}/read")
     public void updateUserAlertReadStatus(@PathVariable("ldap") String ldap,
                                           @RequestBody Map<UUID, Boolean> alertDismissalStates,
-                                          @RequestHeader(name = "Authorization") String jwtToken) {
+                                          @Parameter(hidden = true) @RequestHeader(name = "Authorization") String jwtToken) {
 
         alertService.updateAlertReadStatus(ldap, JwtUtils.getSubjectClaim(jwtToken), alertDismissalStates);
     }
