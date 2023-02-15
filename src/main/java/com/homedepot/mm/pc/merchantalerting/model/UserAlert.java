@@ -28,6 +28,8 @@ public class UserAlert {
     private Timestamp lastUpdated;
     @Column(name = "last_update_by")
     private String lastUpdateBy;
+    @Column(name = "read_status")
+    private Boolean readStatus;
 
     @ManyToOne
     @JoinColumn(name="alert_id", nullable=false, insertable=false, updatable=false)
@@ -37,6 +39,7 @@ public class UserAlert {
         this.ldap = ldap;
         this.alertId = alertId;
         this.isDismissed = false;
+        this.readStatus = false;
         this.lastUpdated = null;
         this.lastUpdateBy = null;
     }

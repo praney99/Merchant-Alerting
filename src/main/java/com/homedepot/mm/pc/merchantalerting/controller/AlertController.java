@@ -120,4 +120,18 @@ public class AlertController {
 
         alertService.dismissAlert(ldap, JwtUtils.getSubjectClaim(jwtToken), alertDismissalStates);
     }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Read successfully.",
+                    content = {@Content(mediaType = APPLICATION_JSON_VALUE)}),
+            @ApiResponse(responseCode = "400", description = "Invalid Input supplied or input parameters missing.",
+                    content = @Content)})
+    @Operation(summary = "Read user alert.")
+    @PostMapping("/user/{ldap}/read")
+    public void updateUserAlertReadStatus(@PathVariable("ldap") String ldap,
+                                          @RequestBody Map<UUID, Boolean> alertDismissalStates,
+                                          @RequestHeader(name = "Authorization") String jwtToken) {
+
+        alertService.updateAlertReadStatus(ldap, JwtUtils.getSubjectClaim(jwtToken), alertDismissalStates);
+    }
 }

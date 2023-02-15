@@ -105,9 +105,38 @@ public class AlertService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void dismissAlert(String ldap, String updatedBy, Map<UUID, Boolean> alertDismissalStates) {
+        List<UserAlert> userAlerts = getUserAlerts(ldap, alertDismissalStates);
+
+        for (UserAlert userAlert : userAlerts) {
+            Boolean isDismissed = alertDismissalStates.get(userAlert.getAlertId());
+            userAlert.setIsDismissed(isDismissed);
+
+            userAlert.setLastUpdated(new Timestamp(System.currentTimeMillis()));
+            userAlert.setLastUpdateBy(updatedBy);
+        }
+
+        userAlertRepository.saveAll(userAlerts);
+    }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void updateAlertReadStatus(String ldap, String updatedBy, Map<UUID, Boolean> alertReadStates) {
+        List<UserAlert> userAlerts = getUserAlerts(ldap, alertReadStates);
+
+        for(UserAlert userAlert : userAlerts) {
+            Boolean isRead = alertReadStates.get(userAlert.getAlertId());
+            userAlert.setReadStatus(isRead);
+
+            userAlert.setLastUpdated(new Timestamp(System.currentTimeMillis()));
+            userAlert.setLastUpdateBy(updatedBy);
+        }
+
+        userAlertRepository.saveAll(userAlerts);
+    }
+
+    private List<UserAlert> getUserAlerts(String ldap, Map<UUID, Boolean> alertDismissalStates) {
         List<UserAlertId> userAlertIds = new ArrayList<>();
 
-        alertDismissalStates.keySet().forEach(alertId ->  {
+        alertDismissalStates.keySet().forEach(alertId -> {
             UserAlertId id = new UserAlertId(ldap, alertId);
             userAlertIds.add(id);
         });
@@ -115,16 +144,9 @@ public class AlertService {
         List<UserAlert> userAlerts = userAlertRepository.findAllById(userAlertIds);
 
         if (userAlerts.size() != userAlertIds.size()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error dismissing alerts. One or more alert not found.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error while search alerts. One or more alert not found.");
         }
 
-        for (UserAlert userAlert : userAlerts) {
-            Boolean isDismissed = alertDismissalStates.get(userAlert.getAlertId());
-            userAlert.setIsDismissed(isDismissed);
-            userAlert.setLastUpdated(new Timestamp(System.currentTimeMillis()));
-            userAlert.setLastUpdateBy(updatedBy);
-        }
-
-        userAlertRepository.saveAll(userAlerts);
+        return userAlerts;
     }
 }
