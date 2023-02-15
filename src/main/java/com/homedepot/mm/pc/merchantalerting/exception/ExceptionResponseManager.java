@@ -13,13 +13,6 @@ import java.util.Map;
 @ControllerAdvice
 public class ExceptionResponseManager {
 
-    // Error 400
-
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Object> handleValidationException(Exception ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleValidationException(IllegalArgumentException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
