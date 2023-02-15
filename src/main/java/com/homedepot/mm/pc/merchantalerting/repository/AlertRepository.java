@@ -13,7 +13,7 @@ import java.util.UUID;
 @Repository
 public interface AlertRepository extends JpaRepository<Alert, UUID> {
 
-    @Query(value = "SELECT * FROM merch_alerts.alert a JOIN merch_alerts.user_alert u ON a.id = u.alert_id WHERE u.ldap = :ldap and u.is_dismissed = 'false'", nativeQuery = true)
+    @Query(value = "SELECT * FROM merch_alerts.alert a JOIN merch_alerts.user_alert u ON a.id = u.alert_id WHERE u.ldap = :ldap", nativeQuery = true)
     List<Alert> findAlertsByLdap(@Param("ldap") String ldap);
 
     List<Alert> deleteAlertsByExpirationDateBefore(Date expirationDate);
