@@ -134,7 +134,7 @@ public class AlertService {
         List<UserAlert> userAlerts = userAlertRepository.findAllById(userAlertIds);
 
         if (userAlerts.size() != userAlertIds.size()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error while search alerts. One or more alert not found.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more alert not found.");
         }
 
         return userAlerts;

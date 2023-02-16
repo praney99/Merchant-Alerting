@@ -6,13 +6,16 @@ import com.homedepot.mm.pc.merchantalerting.entity.Alert;
 import com.homedepot.mm.pc.merchantalerting.entity.UserAlert;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
-import org.junit.Assert;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -23,8 +26,13 @@ import java.util.UUID;
 
 import static com.homedepot.mm.pc.merchantalerting.TestUtils.DEFAULT_KEY_IDENTIFIERS;
 import static com.homedepot.mm.pc.merchantalerting.TestUtils.DEFAULT_TEMPLATE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +46,9 @@ class AlertServiceTest {
 
     @InjectMocks
     private AlertService alertService;
+
+    @Captor
+    private ArgumentCaptor<Date> dateCaptor;
 
     @Test
     void testCreateAlertHappyPath() {
@@ -57,7 +68,7 @@ class AlertServiceTest {
 
         Alert alert = alertService.createAlertByLdap(request, ldap);
 
-        Assert.assertNotNull(alert);
+        assertNotNull(alert);
     }
 
     @Test
@@ -80,7 +91,7 @@ class AlertServiceTest {
 
         Alert alert = alertService.createAlertByLdap(request, ldap);
 
-        Assert.assertNotNull(alert);
+        assertNotNull(alert);
     }
 
     @Test
@@ -99,7 +110,7 @@ class AlertServiceTest {
                 .thenReturn(alerts);
 
         List<Alert> response = alertService.getAlertsByLdap(ldap);
-        Assert.assertEquals(response.get(0).getId(), alertId);
+        assertEquals(response.get(0).getId(), alertId);
     }
 
     @Test
@@ -111,8 +122,19 @@ class AlertServiceTest {
 
     @Test
     void testExpireCronJob() {
-        doNothing().when(alertRepository).deleteAlertsByExpirationDateBefore(any());
+        Date expectedDate = Date.valueOf(LocalDate.now());
+
+        when(alertRepository.deleteAlertsByExpirationDateBefore(dateCaptor.capture()))
+                .thenReturn(Lists.emptyList());
+
         alertService.cleanupExpiredAlerts();
+
+        assertEquals(expectedDate, dateCaptor.getValue());
+
+        verify(alertRepository).deleteAlertsByExpirationDateBefore(any());
+
+        verifyNoMoreInteractions(alertRepository);
+        verifyNoInteractions(userAlertRepository);
     }
 
     @Test
