@@ -14,6 +14,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -28,6 +29,8 @@ import static com.homedepot.mm.pc.merchantalerting.TestUtils.DEFAULT_KEY_IDENTIF
 import static com.homedepot.mm.pc.merchantalerting.TestUtils.DEFAULT_TEMPLATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -49,6 +52,9 @@ class AlertServiceTest {
 
     @Captor
     private ArgumentCaptor<Date> dateCaptor;
+
+    @Captor
+    private ArgumentCaptor<List<UserAlert>> userAlertsCaptor;
 
     @Test
     void testCreateAlertHappyPath() {
@@ -154,5 +160,71 @@ class AlertServiceTest {
                 .thenReturn(userAlerts);
         alertService.dismissAlert(ldap, "user0", alertDismissalStates);
 
+    }
+
+    @Test
+    void updateAlertReadStatus_UserAlertIsExist_UpdateReadStatusAndLastUpdate() {
+        String expectedLdap = "dxb87mu";
+        String expectedUpdateBy = "mc62ye";
+        UUID expectedUserAlertId = UUID.fromString("15da03aa-357d-4a58-8b7d-809a7455ef70");
+
+        UserAlert expectedUserAlert = new UserAlert(expectedLdap, expectedUserAlertId);
+        expectedUserAlert.setReadStatus(false);
+
+        List<UserAlert> expectedUserAlerts = List.of(expectedUserAlert);
+
+        Map<UUID, Boolean> expectedReadStatus = Map.of(
+                expectedUserAlertId, true
+        );
+
+        when(userAlertRepository.findAllById(any()))
+                .thenReturn(expectedUserAlerts);
+
+        when(userAlertRepository.saveAll(userAlertsCaptor.capture()))
+                .thenReturn(expectedUserAlerts);
+
+        alertService.updateAlertReadStatus(expectedLdap, expectedUpdateBy, expectedReadStatus);
+
+        List<UserAlert> actualUserAlerts = userAlertsCaptor.getValue();
+
+        assertNotNull(actualUserAlerts);
+        assertEquals(expectedUserAlerts.size(), actualUserAlerts.size());
+
+        UserAlert actualUserAlert = actualUserAlerts.get(0);
+
+        assertEquals(expectedUserAlert.getLdap(), actualUserAlert.getLdap());
+        assertEquals(expectedUserAlert.getAlertId(), actualUserAlert.getAlertId());
+        assertEquals(expectedLdap, actualUserAlert.getLdap());
+        assertEquals(expectedUpdateBy, actualUserAlert.getLastUpdateBy());
+        assertTrue(actualUserAlert.getReadStatus());
+
+        verify(userAlertRepository).findAllById(any());
+        verify(userAlertRepository).saveAll(any());
+
+        verifyNoMoreInteractions(userAlertRepository);
+        verifyNoInteractions(alertRepository);
+    }
+
+    @Test
+    void updateAlertReadStatus_UserAlertIsNotExist_ThrowException() {
+        Map<UUID, Boolean> expectedReadStatus = Map.of(
+                UUID.fromString("15da03aa-357d-4a58-8b7d-809a7455ef70"), true
+        );
+
+        when(userAlertRepository.findAllById(any()))
+                .thenReturn(Lists.emptyList());
+
+        ResponseStatusException responseStatusException = assertThrows(ResponseStatusException.class,
+                () -> alertService.updateAlertReadStatus("dxb87mu", "mc62ye", expectedReadStatus));
+
+        String actualExceptionMessage = responseStatusException.getReason();
+
+        assertNotNull(actualExceptionMessage);
+        assertEquals("One or more alert not found.", actualExceptionMessage);
+
+        verify(userAlertRepository).findAllById(any());
+
+        verifyNoMoreInteractions(userAlertRepository);
+        verifyNoInteractions(alertRepository);
     }
 }

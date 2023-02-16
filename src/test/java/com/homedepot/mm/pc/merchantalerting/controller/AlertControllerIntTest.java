@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,6 +31,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -417,6 +419,77 @@ class AlertControllerIntTest extends PostgresContainerBaseTest {
         assertFalse(dismissedUserAlert_0.getIsDismissed());
         assertNull(dismissedUserAlert_0.getLastUpdated());
         assertNull(dismissedUserAlert_0.getLastUpdateBy());
+    }
+
+    @Test
+    void updateAlertReadStatus_UserAlertIsExist_ReturnOkStatusCodeAndUpdateReadStatusAndLastUpdate() {
+        Alert expectedAlert = populateNewTestAlert();
+        Alert persistedAlert = alertRepository.save(expectedAlert);
+
+        assertNotNull(persistedAlert);
+
+        UUID expectedUserAlertId = persistedAlert.getId();
+
+        Map<UUID, Boolean> expectedReadStatus = Map.of(
+                expectedUserAlertId, true
+        );
+
+        String expectedLdap = "dxb87mu";
+        UserAlert expectedUserAlert = new UserAlert(expectedLdap, expectedUserAlertId);
+        expectedUserAlert.setAlert(persistedAlert);
+        expectedUserAlert.setReadStatus(false);
+
+        UserAlert persistedUserAlert = userAlertRepository.save(expectedUserAlert);
+
+        assertNotNull(persistedUserAlert);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", getUserJwtToken());
+        HttpEntity<Map<UUID, Boolean>> request = new HttpEntity<>(expectedReadStatus, headers);
+
+        String updateReadStatusURL = String.format("http://localhost:%s/alert/user/%s/read", port, expectedLdap);
+
+        ResponseEntity<?> responseEntity = restTemplate
+                .exchange(updateReadStatusURL, HttpMethod.POST, request, ResponseEntity.class);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertNull(responseEntity.getBody());
+
+        Optional<UserAlert> retrievedUserAlert = userAlertRepository
+                .findById(new UserAlertId(expectedLdap, expectedUserAlertId));
+
+        assertTrue(retrievedUserAlert.isPresent());
+
+        UserAlert actualUserAlert = retrievedUserAlert.get();
+
+        assertEquals(expectedUserAlertId, actualUserAlert.getAlertId());
+        assertEquals(expectedLdap, actualUserAlert.getLdap());
+        assertEquals("mc62ye", actualUserAlert.getLastUpdateBy());
+        assertTrue(actualUserAlert.getReadStatus());
+    }
+
+    @Test
+    void updateAlertReadStatus_UserAlertIsNotExist_ReturnBadRequest() {
+        Map<UUID, Boolean> expectedReadStatus = Map.of(
+                UUID.fromString("15da03aa-357d-4a58-8b7d-809a7455ef70"), true
+        );
+
+        String updateReadStatusURL = String.format("http://localhost:%s/alert/user/%s/read", port, "dxb87mu");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", getUserJwtToken());
+        HttpEntity<Map<UUID, Boolean>> request = new HttpEntity<>(expectedReadStatus, headers);
+
+        ParameterizedTypeReference<LinkedHashMap<String, String>> linkedHashMapTypeReference
+                = new ParameterizedTypeReference<>() {
+        };
+
+        ResponseEntity<LinkedHashMap<String, String>> responseEntity = restTemplate
+                .exchange(updateReadStatusURL, HttpMethod.POST, request, linkedHashMapTypeReference);
+
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals("400 BAD_REQUEST \"One or more alert not found.\"", responseEntity.getBody().get("message"));
     }
 
     private Alert populateNewTestAlert() {
