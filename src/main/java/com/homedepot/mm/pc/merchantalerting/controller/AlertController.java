@@ -56,7 +56,7 @@ public class AlertController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(alertService.createAlertByLdap(createAlertRequest, ldap));
+                .body(alertService.createAlertByLdap(createAlertRequest, ldap.toUpperCase()));
     }
 
     @ApiResponses(value = {
@@ -85,7 +85,7 @@ public class AlertController {
     public ResponseEntity<List<Alert>> retrieveAlertsByLdap(@PathVariable("ldap") String ldap) {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(alertService.getAlertsByLdap(ldap));
+                .body(alertService.getAlertsByLdap(ldap.toUpperCase()));
     }
 
     @ApiResponses(value = {
@@ -118,6 +118,6 @@ public class AlertController {
                                  @RequestBody Map<UUID, Boolean> alertDismissalStates,
                                  @RequestHeader(name = "Authorization") String jwtToken) {
 
-        alertService.dismissAlert(ldap, JwtUtils.getSubjectClaim(jwtToken), alertDismissalStates);
+        alertService.dismissAlert(ldap.toUpperCase(), JwtUtils.getSubjectClaim(jwtToken), alertDismissalStates);
     }
 }
