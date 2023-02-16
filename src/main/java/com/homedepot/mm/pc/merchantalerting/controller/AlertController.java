@@ -143,9 +143,9 @@ public class AlertController {
     @Operation(summary = "Read user alert.")
     @PostMapping("/user/{ldap}/read")
     public void updateUserAlertReadStatus(@PathVariable("ldap") String ldap,
-                                          @RequestBody Map<UUID, Boolean> alertDismissalStates,
+                                          @RequestBody Map<UUID, Boolean> alertReadStates,
                                           @Parameter(hidden = true) @RequestHeader(name = "Authorization") String jwtToken) {
 
-        alertService.updateAlertReadStatus(ldap, JwtUtils.getSubjectClaim(jwtToken), alertDismissalStates);
+        alertService.updateAlertReadStatus(ldap, JwtUtils.getSubjectClaim(jwtToken), alertReadStates);
     }
 }
