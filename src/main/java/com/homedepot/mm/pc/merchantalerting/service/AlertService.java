@@ -67,7 +67,7 @@ public class AlertService {
     @Transactional
     public Alert createAlertByDCS(CreateAlertRequest request, String dcs) {
         List<String> userIds = userMatrixService.getUserLDAPForGivenDCS(dcs);
-
+        log.info("userId/s: "+userIds);
         if (userIds.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Input DCS does not have any associated users.");
         }

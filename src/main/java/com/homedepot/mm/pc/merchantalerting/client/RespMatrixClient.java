@@ -43,6 +43,7 @@ public class RespMatrixClient {
 
         if (respMatrixResp.getStatusCode() == HttpStatus.OK && response != null) {
             if (response.getUsers() != null) {
+                log.info("RespMatrix Api Call");
                 return response.getUsers().stream()
                         .map(RespMatrixUser::getUserId)
                         .collect(Collectors.toList());
