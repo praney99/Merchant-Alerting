@@ -164,7 +164,7 @@ class AlertServiceTest {
 
     @Test
     void updateAlertReadStatus_UserAlertIsExist_UpdateReadStatusAndLastUpdate() {
-        String expectedLdap = "dxb87mu";
+        String expectedLdap = "DXB87MU";
         String expectedUpdateBy = "mc62ye";
         UUID expectedUserAlertId = UUID.fromString("15da03aa-357d-4a58-8b7d-809a7455ef70");
 

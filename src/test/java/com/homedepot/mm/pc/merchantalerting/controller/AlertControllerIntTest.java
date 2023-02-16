@@ -434,7 +434,7 @@ class AlertControllerIntTest extends PostgresContainerBaseTest {
                 expectedUserAlertId, true
         );
 
-        String expectedLdap = "dxb87mu";
+        String expectedLdap = "DXB87MU";
         UserAlert expectedUserAlert = new UserAlert(expectedLdap, expectedUserAlertId);
         expectedUserAlert.setAlert(persistedAlert);
         expectedUserAlert.setReadStatus(false);

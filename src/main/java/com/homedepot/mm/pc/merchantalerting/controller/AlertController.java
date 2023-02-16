@@ -54,7 +54,7 @@ public class AlertController {
     public ResponseEntity<Alert> createAlertByLdap(@PathVariable("ldap") String ldap,
                                                    @RequestBody @Valid CreateAlertRequest createAlertRequest) {
 
-        Alert alertByLdap = alertService.createAlertByLdap(createAlertRequest, ldap);
+        Alert alertByLdap = alertService.createAlertByLdap(createAlertRequest, ldap.toUpperCase());
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -88,7 +88,7 @@ public class AlertController {
     @GetMapping(value = "/user/{ldap}", produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Alert>> retrieveAlertsByLdap(@PathVariable("ldap") String ldap) {
 
-        List<Alert> alertsByLdap = alertService.getAlertsByLdap(ldap);
+        List<Alert> alertsByLdap = alertService.getAlertsByLdap(ldap.toUpperCase());
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -132,7 +132,7 @@ public class AlertController {
                                  @RequestBody Map<UUID, Boolean> alertDismissalStates,
                                  @Parameter(hidden = true) @RequestHeader(name = "Authorization") String jwtToken) {
 
-        alertService.dismissAlert(ldap, JwtUtils.getSubjectClaim(jwtToken), alertDismissalStates);
+        alertService.dismissAlert(ldap.toUpperCase(), JwtUtils.getSubjectClaim(jwtToken), alertDismissalStates);
     }
 
     @ApiResponses(value = {
@@ -146,6 +146,6 @@ public class AlertController {
                                           @RequestBody Map<UUID, Boolean> alertReadStates,
                                           @Parameter(hidden = true) @RequestHeader(name = "Authorization") String jwtToken) {
 
-        alertService.updateAlertReadStatus(ldap, JwtUtils.getSubjectClaim(jwtToken), alertReadStates);
+        alertService.updateAlertReadStatus(ldap.toUpperCase(), JwtUtils.getSubjectClaim(jwtToken), alertReadStates);
     }
 }
