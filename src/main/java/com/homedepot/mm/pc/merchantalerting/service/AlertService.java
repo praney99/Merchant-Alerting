@@ -3,9 +3,11 @@ package com.homedepot.mm.pc.merchantalerting.service;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.entity.Alert;
 import com.homedepot.mm.pc.merchantalerting.entity.UserAlert;
+import com.homedepot.mm.pc.merchantalerting.model.CombinedAlertDTO;
 import com.homedepot.mm.pc.merchantalerting.model.UserAlertId;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
+import com.homedepot.mm.pc.merchantalerting.util.AlertDTOMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,11 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,6 +30,8 @@ public class AlertService {
     private final AlertRepository alertRepository;
     private final UserAlertRepository userAlertRepository;
     private final UserMatrixService userMatrixService;
+
+    private AlertDTOMapper mapper;
 
     /**
      * CRON JOB - Scheduled to run every day at midnight. Deletes from the database Alerts with expiration dates prior
@@ -79,8 +79,25 @@ public class AlertService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<Alert> getAlertsByLdap(String ldap) {
-        return alertRepository.findAlertsByLdap(ldap);
+    public List<CombinedAlertDTO> getAlertsByLdap(String ldap) {
+
+        List<Alert> alerts = alertRepository.findAlertsByLdap(ldap);
+
+        Map<UUID, CombinedAlertDTO> alertIDCombinationDTOMap = new HashMap<>();
+
+        alerts.forEach(alert -> {
+            alertIDCombinationDTOMap.put(alert.getId(), mapper.alertToCombinedAlertDTO(alert));
+        });
+        List<UserAlert> userAlerts = getUserAlerts(ldap, alertIDCombinationDTOMap.keySet());
+
+        userAlerts.forEach(userAlert -> {
+            alertIDCombinationDTOMap.get(userAlert.getAlertId()).setIsRead(userAlert.getReadStatus());
+            alertIDCombinationDTOMap.get(userAlert.getAlertId()).setIsDismissed(userAlert.getIsDismissed());
+        });
+
+//        Map<UUID, CombinedAlertDTO> foo = Maps.newHashMap();
+
+        return new ArrayList<>(alertIDCombinationDTOMap.values());
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -95,7 +112,7 @@ public class AlertService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void dismissAlert(String ldap, String updatedBy, Map<UUID, Boolean> alertDismissalStates) {
-        List<UserAlert> userAlerts = getUserAlerts(ldap, alertDismissalStates);
+        List<UserAlert> userAlerts = getUserAlerts(ldap, alertDismissalStates.keySet());
 
         for (UserAlert userAlert : userAlerts) {
             Boolean isDismissed = alertDismissalStates.get(userAlert.getAlertId());
@@ -110,7 +127,7 @@ public class AlertService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void updateAlertReadStatus(String ldap, String updatedBy, Map<UUID, Boolean> alertReadStates) {
-        List<UserAlert> userAlerts = getUserAlerts(ldap, alertReadStates);
+        List<UserAlert> userAlerts = getUserAlerts(ldap, alertReadStates.keySet());
 
         for (UserAlert userAlert : userAlerts) {
             Boolean isRead = alertReadStates.get(userAlert.getAlertId());
@@ -123,10 +140,10 @@ public class AlertService {
         userAlertRepository.saveAll(userAlerts);
     }
 
-    private List<UserAlert> getUserAlerts(String ldap, Map<UUID, Boolean> alertDismissalStates) {
+    private List<UserAlert> getUserAlerts(String ldap, Set<UUID> alertIDs) {
         List<UserAlertId> userAlertIds = new ArrayList<>();
 
-        alertDismissalStates.keySet().forEach(alertId -> {
+        alertIDs.forEach(alertId -> {
             UserAlertId id = new UserAlertId(ldap, alertId);
             userAlertIds.add(id);
         });

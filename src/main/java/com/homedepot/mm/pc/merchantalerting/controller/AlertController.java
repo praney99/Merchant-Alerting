@@ -2,6 +2,7 @@ package com.homedepot.mm.pc.merchantalerting.controller;
 
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.entity.Alert;
+import com.homedepot.mm.pc.merchantalerting.model.CombinedAlertDTO;
 import com.homedepot.mm.pc.merchantalerting.service.AlertService;
 import com.homedepot.mm.pc.merchantalerting.util.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,10 +38,14 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Validated
 @CrossOrigin
 @RestController
-@AllArgsConstructor
+//@AllArgsConstructor
 @RequestMapping(value = "/alert")
 @SecurityRequirement(name = "PingFed")
 public class AlertController {
+
+    public AlertController(AlertService alertService) {
+        this.alertService = alertService;
+    }
 
     private final AlertService alertService;
 
@@ -86,9 +91,9 @@ public class AlertController {
                     content = @Content)})
     @Operation(summary = "Retrieve alerts by LDAP.")
     @GetMapping(value = "/user/{ldap}", produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Alert>> retrieveAlertsByLdap(@PathVariable("ldap") String ldap) {
+    public ResponseEntity<List<CombinedAlertDTO>> retrieveAlertsByLdap(@PathVariable("ldap") String ldap) {
 
-        List<Alert> alertsByLdap = alertService.getAlertsByLdap(ldap);
+        List<CombinedAlertDTO> alertsByLdap = alertService.getAlertsByLdap(ldap);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
