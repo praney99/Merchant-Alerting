@@ -95,7 +95,6 @@ public class AlertService {
             alertIDCombinationDTOMap.get(userAlert.getAlertId()).setIsDismissed(userAlert.getIsDismissed());
         });
 
-//        Map<UUID, CombinedAlertDTO> foo = Maps.newHashMap();
 
         return new ArrayList<>(alertIDCombinationDTOMap.values());
     }

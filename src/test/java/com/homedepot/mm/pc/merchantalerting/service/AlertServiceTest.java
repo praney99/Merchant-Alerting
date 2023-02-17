@@ -1,11 +1,14 @@
 package com.homedepot.mm.pc.merchantalerting.service;
 
+import ch.qos.logback.core.util.COWArrayList;
 import com.homedepot.mm.pc.merchantalerting.domain.AlertTemplateType;
 import com.homedepot.mm.pc.merchantalerting.domain.CreateAlertRequest;
 import com.homedepot.mm.pc.merchantalerting.entity.Alert;
 import com.homedepot.mm.pc.merchantalerting.entity.UserAlert;
+import com.homedepot.mm.pc.merchantalerting.model.CombinedAlertDTO;
 import com.homedepot.mm.pc.merchantalerting.repository.AlertRepository;
 import com.homedepot.mm.pc.merchantalerting.repository.UserAlertRepository;
+import com.homedepot.mm.pc.merchantalerting.util.AlertDTOMapper;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -55,6 +59,10 @@ class AlertServiceTest {
 
     @Captor
     private ArgumentCaptor<List<UserAlert>> userAlertsCaptor;
+
+    @Mock
+    private AlertDTOMapper mapper;
+
 
     @Test
     void testCreateAlertHappyPath() {
@@ -112,11 +120,35 @@ class AlertServiceTest {
         List<Alert> alerts = new ArrayList<>();
         alerts.add(alert);
 
+        UserAlert userAlert = new UserAlert();
+        userAlert.setAlertId(alertId);
+        alert.setCreateBy("test-method");
+        userAlert.setIsDismissed(false);
+        userAlert.setReadStatus(true);
+
+        List<UserAlert> userAlerts = new ArrayList<>();
+        userAlerts.add(userAlert);
+
+        CombinedAlertDTO combinedAlertDTO = new CombinedAlertDTO();
+        combinedAlertDTO.setId(alertId);
+//        combinedAlertDTO.setIsDismissed(false);
+//        combinedAlertDTO.setIsRead(true);
+
+        List<CombinedAlertDTO> combinedAlertDTOS = new ArrayList<>();
+        combinedAlertDTOS.add(combinedAlertDTO);
+
         when(alertRepository.findAlertsByLdap(any()))
                 .thenReturn(alerts);
+        when(userAlertRepository.findAllById(any()))
+                .thenReturn(userAlerts);
 
-        List<Alert> response = alertService.getAlertsByLdap(ldap);
+        when(alertService.getAlertsByLdap(any()))
+                .thenReturn(combinedAlertDTOS);
+
+        List<CombinedAlertDTO> response = alertService.getAlertsByLdap(ldap);
         assertEquals(response.get(0).getId(), alertId);
+        assertTrue(response.get(0).getIsRead());
+        assertFalse(response.get(0).getIsDismissed());
     }
 
     @Test
