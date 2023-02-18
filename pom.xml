@@ -26,7 +26,7 @@
         <gogole-cloud-libs-bom.version>24.3.0</gogole-cloud-libs-bom.version>
         <!-- Security -->
         <java-jwt.version>4.2.2</java-jwt.version>
-        <spring-security-oauth2.version>2.5.0.RELEASE</spring-security-oauth2.version>
+        <spring-security-oauth2.version>2.5.2.RELEASE</spring-security-oauth2.version>
         <identity-middleware-springboot.version>v0.22.0</identity-middleware-springboot.version>
         <!-- Database -->
         <postgresql.version>42.5.1</postgresql.version>
