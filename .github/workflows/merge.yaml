@@ -1,8 +1,9 @@
 name: Merge Main into PR
 
 on:
-  pull_request:
-    types: [labeled]
+  push:
+    branches:
+      - Enhancement-Tests
 
 env:
   DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
