@@ -89,7 +89,7 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    beta.cloud.google.com/backend-config: '{"ports": {"http": "${repoName}"}}'
+    cloud.google.com/neg: '{"ports": {"http": "${repoName}-${major}-neg"}}'
   labels:
     app: ${repoName}-${major}
     version: '${major}'
