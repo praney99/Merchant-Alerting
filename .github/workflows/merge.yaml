@@ -3,7 +3,7 @@ name: Merge main into feature branch
 on:
   push:
     branches:
-      - feature
+      - Enhancement-Tests
 
 jobs:
   merge_main:
