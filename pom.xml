@@ -20,7 +20,7 @@
         <java.version>11</java.version>
         <!-- Spring Framework (common) -->
         <spring-boot-config-processor.version>2.7.5</spring-boot-config-processor.version>
-        <springdoc-openapi.version>1.6.12</springdoc-openapi.version>
+        <springdoc-openapi.version>1.7.0</springdoc-openapi.version>
         <springfox-swagger-ui.version>3.0.0</springfox-swagger-ui.version>
         <!-- Cloud -->
         <gogole-cloud-libs-bom.version>24.3.0</gogole-cloud-libs-bom.version>
